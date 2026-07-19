@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Borders · KCL BBSOC</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root{
+    --maroon-dark:#44090F;
+    --maroon:#4A0A14;
+    --maroon-mid:#6E0F1E;
+    --maroon-light:#8B1628;
+    --cream:#F5EDE3;
+    --gold:#D4A017;
+    --gold-light:#F0C040;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html,body{height:100%;}
+
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--maroon-dark);
+    color:var(--cream);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* ============ INTRO ============ */
+  #intro-screen{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(ellipse at 50% 40%, var(--maroon-mid) 0%, var(--maroon-dark) 70%);
+    cursor:pointer;
+  }
+
+  #intro-screen::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg width='240' height='240' viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='120' cy='120' r='95' fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.08'/%3E%3Ccircle cx='120' cy='120' r='65' fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.06'/%3E%3C/svg%3E");
+    background-size:240px 240px;
+    opacity:.6;
+  }
+
+  #intro-screen.fade-out{ animation:introFade 1.1s cubic-bezier(.4,0,.2,1) forwards; }
+  @keyframes introFade{ to{ opacity:0; visibility:hidden; } }
+
+  .logo-stage{
+    position:relative;
+    width:66vmin;
+    height:66vmin;
+    max-width:560px;
+    max-height:560px;
+  }
+
+  .orbit-icon{
+    position:absolute;
+    width:var(--bw, 9.7vmin);
+    height:var(--bh, 9.7vmin);
+    transform:translate(-50%,-50%);
+    opacity:0;
+    will-change:transform,opacity;
+    animation-name: flyIn, iconFade;
+    animation-duration: 1.3s, 1.3s;
+    animation-timing-function: cubic-bezier(.16,1,.3,1), ease;
+    animation-fill-mode: forwards, forwards;
+    /* animation-delay set per-icon inline as "flyDelay, 1.95s" */
+  }
+  .orbit-icon img{ width:100%; height:100%; object-fit:contain; display:block; }
+
+  @keyframes flyIn{
+    0%{
+      transform:translate(-50%,-50%) translate(var(--sx),var(--sy)) scale(.35) rotate(var(--srot));
+      opacity:0;
+    }
+    35%{ opacity:1; }
+    100%{
+      transform:translate(-50%,-50%) translate(0,0) scale(1) rotate(0deg);
+      opacity:1;
+    }
+  }
+  @keyframes iconFade{ to{ opacity:0; } }
+
+  .final-logo{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    opacity:0;
+    will-change:opacity;
+    animation:logoIn 1.5s ease forwards 1.95s;
+  }
+  @keyframes logoIn{
+    0%{ opacity:0; }
+    100%{ opacity:1; }
+  }
+
+  /* soft light bloom that peaks right as the icons hand off to the real logo,
+     smoothing over the seam between the two images */
+  .assembly-flash{
+    position:absolute;
+    inset:-15%;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.25) 35%, rgba(255,255,255,0) 68%);
+    mix-blend-mode:screen;
+    opacity:0;
+    pointer-events:none;
+    animation:flashPulse 1.1s ease forwards 1.85s;
+  }
+  @keyframes flashPulse{
+    0%{ opacity:0; }
+    38%{ opacity:.9; }
+    100%{ opacity:0; }
+  }
+
+  #skip-intro{
+    position:fixed;
+    bottom:28px; right:28px;
+    z-index:1001;
+    background:rgba(245,237,227,0.1);
+    border:1px solid rgba(245,237,227,0.35);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding:9px 18px;
+    border-radius:24px;
+    cursor:pointer;
+    transition:background .2s;
+  }
+  #skip-intro:hover{ background:rgba(245,237,227,0.2); }
+
+  @media (prefers-reduced-motion: reduce){
+    #intro-screen{ display:none !important; }
+  }
+
+  /* ============ HOME ============ */
+  #home{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 15% 10%, rgba(212,160,23,0.07) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 90%, rgba(212,160,23,0.05) 0%, transparent 50%),
+      var(--maroon-dark);
+  }
+
+  /* ── TOP NAV ── */
+  .top-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    max-width:1080px;
+    margin:0 auto;
+    padding:20px 24px 0;
+    font-size:13px;
+    letter-spacing:1px;
+  }
+
+  .nav-links{
+    display:flex;
+    align-items:center;
+    gap:22px;
+  }
+
+  .nav-links a, .nav-links button{
+    color:rgba(245,237,227,0.7);
+    text-decoration:none;
+    background:none;
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    letter-spacing:1px;
+    cursor:pointer;
+    transition:color .2s;
+    padding:0;
+  }
+  .nav-links a:hover, .nav-links button:hover{ color:var(--gold-light); }
+
+  .nav-signin-btn{
+    border:1px solid rgba(212,160,23,0.4) !important;
+    padding:7px 16px !important;
+    border-radius:18px;
+    color:var(--gold-light) !important;
+  }
+  .nav-signin-btn:hover{ background:rgba(212,160,23,0.12); }
+
+  .nav-user{
+    display:none;
+    align-items:center;
+    gap:10px;
+    color:var(--gold-light);
+    font-size:12.5px;
+  }
+  .nav-user.visible{ display:flex; }
+  .nav-user .nav-passport-no{
+    background:rgba(212,160,23,0.14);
+    border-radius:12px;
+    padding:4px 10px;
+    font-weight:600;
+  }
+
+  .home-header{
+    text-align:center;
+    padding:36px 24px 40px;
+  }
+
+  .home-logo{
+    width:96px;
+    height:96px;
+    margin:0 auto 20px;
+    filter:drop-shadow(0 6px 18px rgba(0,0,0,0.4));
+  }
+
+  .home-header h1{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:700;
+    font-style:italic;
+    font-size:clamp(2.4rem,6vw,3.6rem);
+    color:var(--cream);
+  }
+
+  .home-header h1 span{ color:var(--gold-light); font-style:normal; }
+
+  .home-tagline{
+    margin-top:10px;
+    font-family:'Cormorant Garamond',serif;
+    font-size:16px;
+    letter-spacing:5px;
+    text-transform:uppercase;
+    color:rgba(245,237,227,0.55);
+  }
+
+  .home-quote{
+    margin-top:18px;
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-size:16px;
+    color:rgba(245,237,227,0.7);
+  }
+
+  .tabs{
+    max-width:1080px;
+    margin:0 auto;
+    padding:20px 24px 90px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:26px;
+  }
+
+  .tab-card{
+    background:linear-gradient(160deg, rgba(245,237,227,0.06), rgba(245,237,227,0.02));
+    border:1px solid rgba(212,160,23,0.25);
+    border-radius:18px;
+    padding:34px 28px;
+    text-decoration:none;
+    color:var(--cream);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .tab-card::after{
+    content:'';
+    position:absolute;
+    right:-30px; top:-30px;
+    width:110px; height:110px;
+    border-radius:50%;
+    background:rgba(212,160,23,0.08);
+  }
+
+  .tab-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 16px 40px rgba(0,0,0,0.35);
+    border-color:var(--gold);
+  }
+
+  .tab-icon{
+    width:50px; height:50px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(212,160,23,0.14);
+    border-radius:12px;
+  }
+  .tab-icon svg{ width:26px; height:26px; }
+
+  .tab-card h2{
+    font-family:'Cormorant Garamond',serif;
+    font-size:24px;
+    font-weight:700;
+  }
+
+  .tab-card p{
+    font-size:14px;
+    line-height:1.6;
+    color:rgba(245,237,227,0.65);
+    flex:1;
+  }
+
+  .tab-enter{
+    font-size:12px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--gold-light);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  footer{
+    text-align:center;
+    padding:24px;
+    font-size:12px;
+    color:rgba(245,237,227,0.35);
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(20,3,6,0.72);
+    backdrop-filter:blur(3px);
+    z-index:500;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+
+  .modal-box{
+    background:linear-gradient(160deg, #55111a, #3c0a0f);
+    border:1px solid rgba(212,160,23,0.3);
+    border-radius:18px;
+    padding:32px 30px;
+    max-width:400px;
+    width:100%;
+    position:relative;
+    box-shadow:0 24px 60px rgba(0,0,0,0.45);
+  }
+
+  .modal-close{
+    position:absolute;
+    top:14px; right:16px;
+    background:none;
+    border:none;
+    color:rgba(245,237,227,0.5);
+    font-size:20px;
+    cursor:pointer;
+    line-height:1;
+  }
+  .modal-close:hover{ color:var(--cream); }
+
+  .modal-box h3{
+    font-family:'Cormorant Garamond',serif;
+    font-size:24px;
+    font-weight:700;
+    margin-bottom:8px;
+    color:var(--cream);
+  }
+  .modal-box p.modal-sub{
+    font-size:13px;
+    color:rgba(245,237,227,0.6);
+    margin-bottom:20px;
+    line-height:1.5;
+  }
+
+  .modal-box label{
+    display:block;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--sand,#D4B896);
+    margin-bottom:6px;
+  }
+
+  .modal-box input[type=email], .modal-box textarea{
+    width:100%;
+    background:rgba(245,237,227,0.06);
+    border:1px solid rgba(245,237,227,0.2);
+    border-radius:10px;
+    padding:11px 14px;
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    margin-bottom:6px;
+  }
+  .modal-box textarea{ min-height:100px; resize:vertical; }
+  .modal-box input::placeholder, .modal-box textarea::placeholder{ color:rgba(245,237,227,0.35); }
+  .modal-box input:focus, .modal-box textarea:focus{ outline:none; border-color:var(--gold); }
+
+  .modal-hint{
+    font-size:11.5px;
+    color:rgba(245,237,227,0.45);
+    margin-bottom:18px;
+  }
+  .modal-error{
+    font-size:12.5px;
+    color:#e8a3a3;
+    margin-bottom:12px;
+    display:none;
+  }
+  .modal-error.show{ display:block; }
+
+  .modal-success{
+    font-size:13.5px;
+    color:#a8d6b5;
+    line-height:1.6;
+    display:none;
+  }
+  .modal-success.show{ display:block; }
+
+  .modal-btn{
+    width:100%;
+    background:linear-gradient(135deg, var(--gold), #b8860b);
+    color:#2C1810;
+    border:none;
+    border-radius:24px;
+    padding:12px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:.5px;
+    cursor:pointer;
+    transition:opacity .2s;
+  }
+  .modal-btn:hover{ opacity:.9; }
+  .modal-btn:disabled{ opacity:.5; cursor:default; }
+
+  .modal-passport-display{
+    text-align:center;
+    padding:18px 0 6px;
+  }
+  .modal-passport-display .big-no{
+    font-family:'Cormorant Garamond',serif;
+    font-size:34px;
+    font-weight:700;
+    color:var(--gold-light);
+    margin:6px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== INTRO ANIMATION ===== -->
+<div id="intro-screen" title="Click to skip">
+  <div class="logo-stage">
+
+    <!-- N: caduceus -->
+    <div class="orbit-icon" style="left:45.89%; top:14.32%; --bw:13.81vmin; --bh:13.46vmin; --sx:0vmin; --sy:-38vmin; --srot:-25deg; animation-delay:0s, 1.95s;">
+      <img src="icon-caduceus.png" alt="">
+    </div>
+
+    <!-- NE: scales -->
+    <div class="orbit-icon" style="left:71.23%; top:22.28%; --bw:12.75vmin; --bh:13.27vmin; --sx:27vmin; --sy:-27vmin; --srot:22deg; animation-delay:.09s, 1.95s;">
+      <img src="icon-scales.png" alt="">
+    </div>
+
+    <!-- E: globe -->
+    <div class="orbit-icon" style="left:82.01%; top:45.04%; --bw:8.28vmin; --bh:13.83vmin; --sx:38vmin; --sy:0vmin; --srot:-18deg; animation-delay:.18s, 1.95s;">
+      <img src="icon-globe.png" alt="">
+    </div>
+
+    <!-- SE: palette -->
+    <div class="orbit-icon" style="left:71.62%; top:67.25%; --bw:11.50vmin; --bh:10.78vmin; --sx:27vmin; --sy:27vmin; --srot:25deg; animation-delay:.27s, 1.95s;">
+      <img src="icon-palette.png" alt="">
+    </div>
+
+    <!-- S: chip -->
+    <div class="orbit-icon" style="left:49.65%; top:75.98%; --bw:13.81vmin; --bh:9.49vmin; --sx:0vmin; --sy:38vmin; --srot:-22deg; animation-delay:.36s, 1.95s;">
+      <img src="icon-chip.png" alt="">
+    </div>
+
+    <!-- SW: growth chart -->
+    <div class="orbit-icon" style="left:25.49%; top:64.25%; --bw:11.73vmin; --bh:13.83vmin; --sx:-27vmin; --sy:27vmin; --srot:18deg; animation-delay:.45s, 1.95s;">
+      <img src="icon-chart.png" alt="">
+    </div>
+
+    <!-- W: translate -->
+    <div class="orbit-icon" style="left:19.87%; top:48.04%; --bw:10.31vmin; --bh:13.83vmin; --sx:-38vmin; --sy:0vmin; --srot:-25deg; animation-delay:.54s, 1.95s;">
+      <img src="icon-translate.png" alt="">
+    </div>
+
+    <!-- NW: DNA -->
+    <div class="orbit-icon" style="left:28.80%; top:21.33%; --bw:11.97vmin; --bh:12.12vmin; --sx:-27vmin; --sy:-27vmin; --srot:25deg; animation-delay:.63s, 1.95s;">
+      <img src="icon-dna.png" alt="">
+    </div>
+
+    <!-- soft bloom that masks the handoff between the flown-in icons and the real logo -->
+    <div class="assembly-flash"></div>
+
+    <!-- real logo fades in once the icons have assembled -->
+    <img class="final-logo" src="logo.png" alt="KCL BBSOC logo">
+  </div>
+</div>
+
+<button id="skip-intro">Skip ›</button>
+
+<!-- ===== HOME SCREEN ===== -->
+<div id="home">
+  <nav class="top-nav">
+    <div class="nav-links">
+      <a href="about.html">About Us</a>
+    </div>
+    <div class="nav-links">
+      <button id="feedbackNavBtn" style="display:none;">Feedback</button>
+      <div class="nav-user" id="navUser">
+        <span id="navGreeting"></span>
+        <span class="nav-passport-no" id="navPassportNo"></span>
+        <button id="signOutBtn">Sign out</button>
+      </div>
+      <button class="nav-signin-btn" id="signInNavBtn">Sign In</button>
+    </div>
+  </nav>
+
+  <div class="home-header">
+    <img src="logo.png" alt="KCL BBSOC logo" class="home-logo">
+    <h1>Beyond <span>Borders</span></h1>
+    <div class="home-tagline">KCL BBSOC</div>
+    <p class="home-quote">"Collect experiences, not expectations."</p>
+  </div>
+
+  <div class="tabs">
+    <a class="tab-card" href="beyond-borders-passport.html" target="_blank" rel="noopener">
+      <div class="tab-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#F0C040" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 8v8M8 12h8" stroke="#F0C040"/></svg>
+      </div>
+      <h2>Beyond Borders Passport</h2>
+      <p>Collect stamps across career, growth, skills, community and comfort-zone challenges — track your journey and unlock rewards.</p>
+      <span class="tab-enter">Open Passport &rarr;</span>
+    </a>
+
+    <a class="tab-card" href="https://adoreleanor.github.io/bbsoc-wellbeing/" target="_blank" rel="noopener">
+      <div class="tab-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#F0C040" stroke-width="1.8"><path d="M12 21s-7.5-4.6-10-9.3C.5 8.2 2.6 5 6 5c2 0 3.5 1.2 4.5 2.7C11.5 6.2 13 5 15 5c3.4 0 5.5 3.2 4 6.7C19.5 16.4 12 21 12 21z"/></svg>
+      </div>
+      <h2>Wellbeing</h2>
+      <p>Resources, reflections and support for looking after yourself while you study — visit the BBSOC Wellbeing space.</p>
+      <span class="tab-enter">Open Wellbeing &rarr;</span>
+    </a>
+
+    <a class="tab-card" href="events.html" target="_blank" rel="noopener">
+      <div class="tab-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#F0C040" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      </div>
+      <h2>Upcoming Events</h2>
+      <p>See what's next on the society calendar — socials, workshops, networking and more.</p>
+      <span class="tab-enter">View Events &rarr;</span>
+    </a>
+  </div>
+
+  <footer>KCL Beyond Borders Society</footer>
+</div>
+
+<!-- ===== SIGN IN MODAL ===== -->
+<div class="modal-overlay" id="signInModal">
+  <div class="modal-box">
+    <button class="modal-close" data-close>&times;</button>
+
+    <div id="signInStep1">
+      <h3>Sign in to Beyond Borders</h3>
+      <p class="modal-sub">Use your KCL email to get your unique BB Passport number and access member features.</p>
+      <label for="kclEmail">KCL Email</label>
+      <input type="email" id="kclEmail" placeholder="firstname.surname@kcl.ac.uk" autocomplete="email">
+      <p class="modal-hint">Format: firstname.surname@kcl.ac.uk</p>
+      <p class="modal-error" id="signInError"></p>
+      <button class="modal-btn" id="sendLinkBtn">Send sign-in link</button>
+    </div>
+
+    <div id="signInStep2" style="display:none;">
+      <h3>Check your inbox</h3>
+      <p class="modal-sub modal-success show">We've sent a sign-in link to <strong id="sentToEmail"></strong>. Open it on this device to finish signing in — you'll get your BB Passport number right after.</p>
+      <button class="modal-btn" data-close>Got it</button>
+    </div>
+
+    <div id="signInStep3" style="display:none;">
+      <h3>Welcome to Beyond Borders</h3>
+      <div class="modal-passport-display">
+        <p class="modal-sub" style="margin-bottom:0;">Your BB Passport number</p>
+        <div class="big-no" id="assignedPassportNo">BB-0000</div>
+        <p class="modal-hint" id="welcomeEmailLine"></p>
+      </div>
+      <button class="modal-btn" data-close>Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FEEDBACK MODAL ===== -->
+<div class="modal-overlay" id="feedbackModal">
+  <div class="modal-box">
+    <button class="modal-close" data-close>&times;</button>
+    <h3>Share feedback</h3>
+    <p class="modal-sub">Tell the committee what's working, what's not, or what you'd like to see. This goes straight to the team.</p>
+    <label for="feedbackText">Your feedback</label>
+    <textarea id="feedbackText" placeholder="Type your thoughts here..."></textarea>
+    <p class="modal-error" id="feedbackError"></p>
+    <p class="modal-success" id="feedbackSuccess">Thanks — your feedback has been sent to the committee.</p>
+    <button class="modal-btn" id="submitFeedbackBtn">Submit feedback</button>
+  </div>
+</div>
+
+<!-- Firebase (compat SDK) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="auth.js"></script>
+
+<script>
+  const intro = document.getElementById('intro-screen');
+  const skipBtn = document.getElementById('skip-intro');
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let dismissed = false;
+  let autoTimer;
+
+  function dismissIntro(){
+    if (dismissed) return;
+    dismissed = true;
+    clearTimeout(autoTimer);
+    intro.classList.add('fade-out');
+    skipBtn.style.display = 'none';
+    intro.addEventListener('animationend', () => { intro.style.display = 'none'; }, { once:true });
+  }
+
+  if (prefersReduced) {
+    intro.style.display = 'none';
+    skipBtn.style.display = 'none';
+  } else {
+    autoTimer = setTimeout(dismissIntro, 4000);
+    intro.addEventListener('click', dismissIntro);
+    skipBtn.addEventListener('click', (e) => { e.stopPropagation(); dismissIntro(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' || e.key === 'Enter') dismissIntro(); });
+  }
+</script>
+
+</body>
+</html>

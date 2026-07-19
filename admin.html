@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · Beyond Borders</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root{
+    --maroon-dark:#44090F;
+    --maroon-mid:#6E0F1E;
+    --cream:#F5EDE3;
+    --gold:#D4A017;
+    --gold-light:#F0C040;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--maroon-dark);
+    color:var(--cream);
+    min-height:100vh;
+  }
+  .back-home{
+    position:fixed; top:18px; left:18px; z-index:200;
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(74,10,20,0.75); color:var(--gold-light);
+    text-decoration:none; font-size:13px; letter-spacing:1px;
+    padding:8px 16px; border-radius:20px;
+    border:1px solid rgba(212,160,23,0.4);
+  }
+  .wrap{ max-width:1000px; margin:0 auto; padding:90px 24px 80px; }
+  .header{ text-align:center; margin-bottom:36px; }
+  .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(212,160,23,0.2); border:1px solid rgba(212,160,23,0.4);
+    border-radius:20px; padding:6px 16px; font-size:12px; letter-spacing:2px;
+    text-transform:uppercase; color:var(--gold-light); margin-bottom:16px;
+  }
+  .header h1{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:clamp(2rem,5vw,3rem); }
+
+  /* sign-in box */
+  .auth-box{
+    max-width:400px; margin:40px auto;
+    background:linear-gradient(160deg, rgba(245,237,227,0.06), rgba(245,237,227,0.02));
+    border:1px solid rgba(212,160,23,0.25); border-radius:16px; padding:30px 28px;
+  }
+  .auth-box label{ display:block; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#D4B896; margin-bottom:6px; }
+  .auth-box input{
+    width:100%; background:rgba(245,237,227,0.06); border:1px solid rgba(245,237,227,0.2);
+    border-radius:10px; padding:11px 14px; color:var(--cream); font-size:14px; margin-bottom:14px;
+  }
+  .auth-box input::placeholder{ color:rgba(245,237,227,0.35); }
+  .auth-btn{
+    width:100%; background:linear-gradient(135deg, var(--gold), #b8860b); color:#2C1810;
+    border:none; border-radius:24px; padding:12px; font-weight:600; font-size:14px; cursor:pointer;
+  }
+  .auth-msg{ font-size:13px; color:rgba(245,237,227,0.65); margin-top:14px; line-height:1.6; }
+  .auth-error{ font-size:12.5px; color:#e8a3a3; margin-top:10px; display:none; }
+  .auth-error.show{ display:block; }
+
+  .denied{
+    max-width:440px; margin:60px auto; text-align:center;
+    background:rgba(245,237,227,0.04); border:1px solid rgba(212,160,23,0.2);
+    border-radius:16px; padding:36px 28px;
+  }
+  .denied h2{ font-family:'Cormorant Garamond',serif; color:var(--gold-light); margin-bottom:10px; }
+  .denied p{ font-size:14px; color:rgba(245,237,227,0.7); line-height:1.6; }
+
+  .stats-row{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:32px; }
+  .stat-box{
+    flex:1; min-width:140px; background:rgba(245,237,227,0.05);
+    border:1px solid rgba(212,160,23,0.2); border-radius:14px; padding:18px 20px; text-align:center;
+  }
+  .stat-box .num{ font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:700; color:var(--gold-light); }
+  .stat-box .lbl{ font-size:12px; color:rgba(245,237,227,0.55); margin-top:4px; }
+
+  .panel{
+    background:rgba(245,237,227,0.04); border:1px solid rgba(212,160,23,0.2);
+    border-radius:16px; padding:24px; margin-bottom:28px; overflow-x:auto;
+  }
+  .panel h2{ font-family:'Cormorant Garamond',serif; font-size:20px; color:var(--gold-light); margin-bottom:14px; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th{ text-align:left; padding:9px 10px; color:rgba(245,237,227,0.5); font-weight:600; letter-spacing:.5px; text-transform:uppercase; font-size:11px; border-bottom:1px solid rgba(245,237,227,0.15); }
+  td{ padding:10px; border-bottom:1px solid rgba(245,237,227,0.08); color:rgba(245,237,227,0.85); vertical-align:top; }
+  tr:last-child td{ border-bottom:none; }
+  .pill{ background:rgba(212,160,23,0.16); color:var(--gold-light); border-radius:10px; padding:2px 8px; font-size:11.5px; font-weight:600; white-space:nowrap; }
+  .empty-row td{ text-align:center; color:rgba(245,237,227,0.4); padding:20px; }
+  .top-bar{ display:flex; justify-content:flex-end; margin-bottom:16px; }
+  .signout-link{ background:none; border:1px solid rgba(212,160,23,0.35); color:var(--gold-light); border-radius:18px; padding:7px 16px; font-size:12.5px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<a class="back-home" href="index.html">&larr; Beyond Borders Home</a>
+
+<div class="wrap">
+  <div class="header">
+    <div class="badge">🔐 Admin</div>
+    <h1>Beyond Borders Dashboard</h1>
+  </div>
+
+  <!-- Sign-in (shown when logged out) -->
+  <div class="auth-box" id="authBox">
+    <label for="adminEmail">Admin KCL Email</label>
+    <input type="email" id="adminEmail" placeholder="firstname.surname@kcl.ac.uk">
+    <button class="auth-btn" id="adminSendLinkBtn">Send sign-in link</button>
+    <p class="auth-error" id="adminAuthError"></p>
+    <p class="auth-msg" id="adminAuthMsg"></p>
+  </div>
+
+  <!-- Access denied (shown when logged in but not an admin) -->
+  <div class="denied" id="deniedBox" style="display:none;">
+    <h2>Access restricted</h2>
+    <p>This account isn't on the admin list for Beyond Borders. If you think this is a mistake, ask the committee to add your email in the site settings.</p>
+    <br>
+    <button class="signout-link" id="deniedSignOutBtn">Sign out</button>
+  </div>
+
+  <!-- Dashboard (shown when logged in as admin) -->
+  <div id="dashboard" style="display:none;">
+    <div class="top-bar">
+      <button class="signout-link" id="dashSignOutBtn">Sign out</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box"><div class="num" id="statMembers">0</div><div class="lbl">Registered Members</div></div>
+      <div class="stat-box"><div class="num" id="statFeedback">0</div><div class="lbl">Feedback Entries</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>Members</h2>
+      <table>
+        <thead><tr><th>Passport No.</th><th>Name</th><th>Email</th><th>Joined</th></tr></thead>
+        <tbody id="membersBody"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>Feedback</h2>
+      <table>
+        <thead><tr><th>Passport No.</th><th>Email</th><th>Message</th><th>Submitted</th></tr></thead>
+        <tbody id="feedbackBody"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase (compat SDK) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+  const KCL_EMAIL_RE = /^[a-z]+(?:-[a-z]+)*\.[a-z]+(?:-[a-z]+)*@kcl\.ac\.uk$/i;
+
+  const authBox = document.getElementById('authBox');
+  const deniedBox = document.getElementById('deniedBox');
+  const dashboard = document.getElementById('dashboard');
+  const adminEmailInput = document.getElementById('adminEmail');
+  const adminSendLinkBtn = document.getElementById('adminSendLinkBtn');
+  const adminAuthError = document.getElementById('adminAuthError');
+  const adminAuthMsg = document.getElementById('adminAuthMsg');
+
+  function fmtDate(ts) {
+    if (!ts || !ts.toDate) return '—';
+    return ts.toDate().toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+  }
+
+  adminSendLinkBtn.addEventListener('click', async () => {
+    const email = adminEmailInput.value.trim().toLowerCase();
+    adminAuthError.classList.remove('show');
+    if (!KCL_EMAIL_RE.test(email)) {
+      adminAuthError.textContent = 'Please use your KCL email in the form firstname.surname@kcl.ac.uk';
+      adminAuthError.classList.add('show');
+      return;
+    }
+    const actionCodeSettings = {
+      url: window.location.origin + window.location.pathname,
+      handleCodeInApp: true,
+    };
+    try {
+      await auth.sendSignInLinkToEmail(email, actionCodeSettings);
+      window.localStorage.setItem('bbAdminEmailForSignIn', email);
+      adminAuthMsg.textContent = 'Sign-in link sent to ' + email + ' — open it on this device.';
+    } catch (err) {
+      adminAuthError.textContent = 'Could not send link: ' + err.message;
+      adminAuthError.classList.add('show');
+    }
+  });
+
+  async function completeEmailLinkSignInIfPresent() {
+    if (!auth.isSignInWithEmailLink(window.location.href)) return;
+    let email = window.localStorage.getItem('bbAdminEmailForSignIn');
+    if (!email) email = window.prompt('Confirm your admin email to finish signing in:');
+    if (!email) return;
+    email = email.trim().toLowerCase();
+    try {
+      await auth.signInWithEmailLink(email, window.location.href);
+      window.localStorage.removeItem('bbAdminEmailForSignIn');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch (err) {
+      alert('Sign-in failed: ' + err.message);
+    }
+  }
+
+  document.getElementById('deniedSignOutBtn').addEventListener('click', () => auth.signOut());
+  document.getElementById('dashSignOutBtn').addEventListener('click', () => auth.signOut());
+
+  async function loadDashboard() {
+    const membersBody = document.getElementById('membersBody');
+    const feedbackBody = document.getElementById('feedbackBody');
+
+    try {
+      const usersSnap = await db.collection('users').orderBy('createdAt', 'desc').get();
+      document.getElementById('statMembers').textContent = usersSnap.size;
+      if (usersSnap.empty) {
+        membersBody.innerHTML = '<tr class="empty-row"><td colspan="4">No members yet.</td></tr>';
+      } else {
+        membersBody.innerHTML = usersSnap.docs.map(d => {
+          const u = d.data();
+          return `<tr>
+            <td><span class="pill">${u.passportNo || '—'}</span></td>
+            <td>${(u.firstName||'')} ${(u.lastName||'')}</td>
+            <td>${u.email || ''}</td>
+            <td>${fmtDate(u.createdAt)}</td>
+          </tr>`;
+        }).join('');
+      }
+    } catch (err) {
+      membersBody.innerHTML = `<tr class="empty-row"><td colspan="4">Could not load members: ${err.message}</td></tr>`;
+    }
+
+    try {
+      const fbSnap = await db.collection('feedback').orderBy('createdAt', 'desc').get();
+      document.getElementById('statFeedback').textContent = fbSnap.size;
+      if (fbSnap.empty) {
+        feedbackBody.innerHTML = '<tr class="empty-row"><td colspan="4">No feedback yet.</td></tr>';
+      } else {
+        feedbackBody.innerHTML = fbSnap.docs.map(d => {
+          const f = d.data();
+          return `<tr>
+            <td><span class="pill">${f.passportNo || '—'}</span></td>
+            <td>${f.email || ''}</td>
+            <td>${(f.message||'').replace(/</g,'&lt;')}</td>
+            <td>${fmtDate(f.createdAt)}</td>
+          </tr>`;
+        }).join('');
+      }
+    } catch (err) {
+      feedbackBody.innerHTML = `<tr class="empty-row"><td colspan="4">Could not load feedback: ${err.message}</td></tr>`;
+    }
+  }
+
+  auth.onAuthStateChanged((user) => {
+    if (!user) {
+      authBox.style.display = '';
+      deniedBox.style.display = 'none';
+      dashboard.style.display = 'none';
+      return;
+    }
+    const isAdmin = (typeof ADMIN_EMAILS !== 'undefined') &&
+      ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email.toLowerCase());
+
+    if (!isAdmin) {
+      authBox.style.display = 'none';
+      deniedBox.style.display = '';
+      dashboard.style.display = 'none';
+      return;
+    }
+
+    authBox.style.display = 'none';
+    deniedBox.style.display = 'none';
+    dashboard.style.display = '';
+    loadDashboard();
+  });
+
+  (async function init() {
+    if (auth.isSignInWithEmailLink(window.location.href)) {
+      await completeEmailLinkSignInIfPresent();
+    }
+  })();
+</script>
+
+</body>
+</html>

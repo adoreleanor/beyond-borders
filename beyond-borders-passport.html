@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond Borders Passport</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --cream: #F5F0E8;
+    --parchment: #EDE4D0;
+    --brown-light: #C9A96E;
+    --brown: #8B6914;
+    --brown-dark: #5C0F1A;
+    --terracotta: #6E0F1E;
+    --terracotta-light: #8B1628;
+    --forest: #3A6B4A;
+    --forest-light: #4E8C62;
+    --navy: #6E0F1E;
+    --gold: #D4A017;
+    --gold-light: #F0C040;
+    --ink: #2C1810;
+    --sage: #7A9E7E;
+    --rust: #A0522D;
+    --sand: #D4B896;
+    --maroon: #6E0F1E;
+    --maroon-mid: #8B1628;
+    --maroon-dark: #4A0A14;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--cream);
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(196,98,45,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(58,107,74,0.06) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A96E' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── BACK LINK ── */
+  .back-home {
+    position: fixed;
+    top: 18px; left: 18px;
+    z-index: 200;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(74,10,20,0.75);
+    color: var(--gold-light);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(212,160,23,0.4);
+    backdrop-filter: blur(6px);
+    transition: background 0.2s;
+  }
+  .back-home:hover { background: rgba(74,10,20,0.95); }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #4A0A14 0%, #6E0F1E 50%, #4A0A14 100%);
+    padding: 40px 24px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='100' cy='100' r='80' fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.15'/%3E%3Ccircle cx='100' cy='100' r='60' fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.1'/%3E%3Ccircle cx='100' cy='100' r='40' fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.08'/%3E%3Cline x1='100' y1='0' x2='100' y2='200' stroke='%23ffffff' stroke-width='0.2' opacity='0.1'/%3E%3Cline x1='0' y1='100' x2='200' y2='100' stroke='%23ffffff' stroke-width='0.2' opacity='0.1'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    opacity: 0.5;
+  }
+
+  .header-content { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
+
+  .passport-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(212,160,23,0.2);
+    border: 1px solid rgba(212,160,23,0.4);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 20px;
+  }
+
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 900;
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  .header h1 span { color: var(--gold-light); }
+
+  .header-tagline {
+    font-size: 16px;
+    color: rgba(255,255,255,0.7);
+    font-style: italic;
+    margin-bottom: 32px;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  /* ── MEMBER CARD ── */
+  .member-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(212,160,23,0.3);
+    border-radius: 12px;
+    padding: 16px 24px;
+    backdrop-filter: blur(10px);
+  }
+
+  .avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--terracotta));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; color: white;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .member-info { text-align: left; }
+  .member-name { color: white; font-weight: 600; font-size: 15px; }
+  .member-since { color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 2px; }
+
+  /* ── LEVEL BANNER ── */
+  .level-banner {
+    background: linear-gradient(90deg, var(--brown-dark), var(--brown), var(--brown-dark));
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    border-bottom: 3px solid var(--gold);
+  }
+
+  .level-item { text-align: center; }
+  .level-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--sand); }
+  .level-value { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--gold-light); }
+
+  .level-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(212,160,23,0.15);
+    border: 2px solid var(--gold);
+    border-radius: 30px;
+    padding: 8px 20px;
+  }
+
+  .badge-icon { font-size: 24px; }
+  .badge-text { }
+  .badge-title { color: var(--gold-light); font-weight: 700; font-size: 16px; }
+  .badge-sub { color: var(--sand); font-size: 11px; }
+
+  .progress-bar-wrap {
+    width: 200px;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--sand);
+    margin-bottom: 6px;
+  }
+
+  .progress-track {
+    height: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── MAIN ── */
+  .main { max-width: 1100px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .section-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    color: var(--brown-dark);
+    margin-bottom: 8px;
+  }
+
+  .section-header p { color: #7A6A5A; font-size: 15px; }
+
+  /* ── CATEGORY CARDS ── */
+  .categories { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-bottom: 60px; }
+
+  .category-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 20px rgba(92,64,8,0.08);
+    border: 1px solid rgba(201,169,110,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(92,64,8,0.14);
+  }
+
+  .card-header {
+    padding: 20px 22px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-header::after {
+    content: '';
+    position: absolute;
+    right: -20px; top: -20px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .card-icon { font-size: 32px; flex-shrink: 0; }
+
+  .card-title { flex: 1; }
+  .card-title h3 { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: white; font-weight: 700; }
+  .card-title p { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+
+  .card-count {
+    background: rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+  }
+
+  .card-body { padding: 16px 22px 20px; }
+
+  .stamp-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+  .stamp-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+    background: var(--cream);
+  }
+
+  .stamp-item:hover { background: var(--parchment); border-color: var(--sand); }
+
+  .stamp-item.earned {
+    background: #f0faf3;
+    border-color: var(--forest-light);
+  }
+
+  .stamp-checkbox {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--sand);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.25s;
+    font-size: 14px;
+    background: white;
+  }
+
+  .stamp-item.earned .stamp-checkbox {
+    background: var(--forest);
+    border-color: var(--forest);
+    color: white;
+  }
+
+  .stamp-text {
+    flex: 1;
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+
+  .stamp-item.earned .stamp-text {
+    color: var(--forest);
+    font-weight: 500;
+  }
+
+  .stamp-earned-badge {
+    font-size: 11px;
+    background: var(--forest);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+
+  .stamp-item.earned .stamp-earned-badge { opacity: 1; }
+
+  /* Card colours */
+  .cat-career .card-header { background: linear-gradient(135deg, #4A0A14, #6E0F1E); }
+  .cat-growth .card-header { background: linear-gradient(135deg, #3A6B4A, #5A9A6A); }
+  .cat-skill .card-header { background: linear-gradient(135deg, #7B3F00, #B05A20); }
+  .cat-community .card-header { background: linear-gradient(135deg, #1A5F6B, #2A8B9B); }
+  .cat-comfort .card-header { background: linear-gradient(135deg, #B8860B, #D4A82A); }
+
+  .cat-career .card-count { background: rgba(255,255,255,0.2); }
+
+  /* ── LEVELS SECTION ── */
+  .levels-section { margin-bottom: 60px; }
+
+  .levels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .level-card {
+    background: white;
+    border-radius: 14px;
+    padding: 22px 20px;
+    text-align: center;
+    border: 2px solid var(--parchment);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .level-card.unlocked {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, #fffbf0, white);
+    box-shadow: 0 4px 20px rgba(212,160,23,0.2);
+  }
+
+  .level-card.unlocked::before {
+    content: '✓ UNLOCKED';
+    position: absolute;
+    top: 10px; right: -22px;
+    background: var(--gold);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 4px 30px;
+    transform: rotate(45deg);
+  }
+
+  .level-emoji { font-size: 36px; margin-bottom: 8px; }
+  .level-name { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 700; color: var(--brown-dark); margin-bottom: 4px; }
+  .level-req { font-size: 13px; color: #8B7355; margin-bottom: 12px; }
+
+  .level-reward {
+    font-size: 12px;
+    background: var(--parchment);
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: var(--brown);
+    font-style: italic;
+  }
+
+  .level-card.unlocked .level-reward {
+    background: rgba(212,160,23,0.1);
+    color: var(--brown-dark);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  /* ── LEADERBOARD ── */
+  .stats-section { margin-bottom: 60px; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    border: 1px solid rgba(201,169,110,0.25);
+    box-shadow: 0 2px 12px rgba(92,64,8,0.06);
+  }
+
+  .stat-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--terracotta);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label { font-size: 13px; color: #7A6A5A; line-height: 1.4; }
+
+  /* ── MONTHLY THEMES ── */
+  .themes-section { margin-bottom: 60px; }
+
+  .themes-scroll {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .theme-card {
+    background: white;
+    border-radius: 12px;
+    padding: 18px 16px;
+    text-align: center;
+    border: 1px solid rgba(201,169,110,0.25);
+    transition: transform 0.2s;
+    position: relative;
+  }
+
+  .theme-card:hover { transform: translateY(-2px); }
+
+  .theme-card.current {
+    border-color: var(--terracotta);
+    background: linear-gradient(135deg, #fff8f5, white);
+  }
+
+  .theme-card.current::after {
+    content: 'NOW';
+    position: absolute;
+    top: -8px; left: 50%; transform: translateX(-50%);
+    background: var(--terracotta);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .theme-month { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--sand); margin-bottom: 4px; }
+  .theme-name { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 700; color: var(--brown-dark); margin-bottom: 6px; }
+  .theme-action { font-size: 12px; color: #7A6A5A; line-height: 1.4; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--forest-dark, #2A5A3A);
+    background: linear-gradient(135deg, var(--forest), var(--forest-light));
+    color: white;
+    padding: 14px 24px;
+    border-radius: 40px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 100;
+    white-space: nowrap;
+    max-width: 90vw;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.gold { background: linear-gradient(135deg, var(--brown), var(--gold)); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--brown-dark);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 24px;
+    font-size: 13px;
+  }
+
+  footer strong { color: var(--gold-light); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes stamp-in {
+    0% { transform: scale(1.4) rotate(-8deg); opacity: 0; }
+    60% { transform: scale(0.9) rotate(2deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .stamp-item.just-earned .stamp-checkbox {
+    animation: stamp-in 0.5s ease forwards;
+  }
+
+  @keyframes levelup {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+
+  .level-card.just-unlocked { animation: levelup 0.6s ease; }
+
+  /* divider */
+  .ornament-divider {
+    text-align: center;
+    margin: 48px 0 36px;
+    position: relative;
+  }
+
+  .ornament-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--sand), transparent);
+  }
+
+  .ornament-divider span {
+    position: relative;
+    background: var(--cream);
+    padding: 0 20px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    color: var(--brown-light);
+  }
+  /* ── INTRO ANIMATION ── */
+  #intro-overlay {
+    position: fixed;
+    inset: 0;
+    background: #4A0A14;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  #intro-overlay.fade-out {
+    animation: overlayFade 0.7s ease forwards;
+  }
+
+  @keyframes overlayFade {
+    0% { opacity: 1; }
+    100% { opacity: 0; pointer-events: none; }
+  }
+
+  /* dashed flight path SVG line */
+  #flight-path-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    overflow: visible;
+  }
+
+  #flight-path-line {
+    stroke: rgba(255,255,255,0.25);
+    stroke-width: 2;
+    stroke-dasharray: 10 8;
+    fill: none;
+    stroke-dashoffset: 1000;
+    animation: drawPath 1.8s ease forwards 0.3s;
+  }
+
+  @keyframes drawPath {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* plane */
+  #intro-plane {
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    offset-path: path('M -80 420 Q 300 380 500 260 Q 700 140 1120 -60');
+    offset-distance: 0%;
+    offset-rotate: auto;
+    animation: flyPlane 2s cubic-bezier(0.4, 0, 0.6, 1) forwards 0.2s;
+    filter: drop-shadow(0 6px 24px rgba(0,0,0,0.5));
+  }
+
+  @keyframes flyPlane {
+    0%   { offset-distance: 0%;   opacity: 1; }
+    85%  { opacity: 1; }
+    100% { offset-distance: 100%; opacity: 0; }
+  }
+
+  /* intro text */
+  #intro-text {
+    position: absolute;
+    bottom: 38%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    animation: introTextAnim 2.2s ease forwards 0.1s;
+    opacity: 0;
+    white-space: nowrap;
+  }
+
+  @keyframes introTextAnim {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(12px); }
+    20%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+    75%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  #intro-text .intro-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 6vw, 3.6rem);
+    font-weight: 700;
+    color: white;
+    letter-spacing: 4px;
+    display: block;
+  }
+
+  #intro-text .intro-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 6px;
+  }
+
+  /* small dots that trail behind the plane */
+  .trail-dot {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    animation: dotPop 0.4s ease forwards;
+    transform: scale(0);
+  }
+
+  @keyframes dotPop {
+    0%   { transform: scale(0); opacity: 0.8; }
+    50%  { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(0.6); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back-home" href="index.html">&larr; Beyond Borders Home</a>
+
+<!-- INTRO OVERLAY -->
+<div id="intro-overlay">
+  <svg id="flight-path-svg" viewBox="0 0 1100 600" preserveAspectRatio="xMidYMid slice">
+    <path id="flight-path-line" d="M -80 520 Q 300 480 500 320 Q 700 160 1180 -60"/>
+  </svg>
+
+  <div id="intro-plane">
+    <svg viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- top wing: nose → back-left tip, bright white -->
+      <path d="M96 30 L4 4 L32 30 Z" fill="white"/>
+      <!-- bottom wing: nose → back-left tip, slightly muted -->
+      <path d="M96 30 L4 56 L32 30 Z" fill="rgba(255,255,255,0.72)"/>
+      <!-- inner body fold (the tucked-under belly crease) -->
+      <path d="M4 4 L4 30 L32 30 Z" fill="rgba(255,255,255,0.45)"/>
+      <!-- centre spine crease -->
+      <line x1="4" y1="30" x2="96" y2="30" stroke="rgba(110,15,30,0.35)" stroke-width="1.2"/>
+      <!-- top fold crease line -->
+      <line x1="4" y1="4" x2="32" y2="30" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
+    </svg>
+  </div>
+
+  <div id="intro-text">
+    <span class="intro-title">Beyond Borders</span>
+    <span class="intro-sub">KCL · Digital Passport</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-content">
+    <div class="passport-badge">🌍 Digital Passport · KCL Beyond Borders Society</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;">
+      <img src="logo.png" alt="KCL BBSOC Logo" style="width:90px;height:90px;object-fit:contain;flex-shrink:0;filter:brightness(1.08);">
+      <h1 style="text-align:left;">Beyond <span>Borders</span></h1>
+    </div>
+    <p class="header-tagline">"Collect experiences, not expectations."</p>
+    <div class="member-card">
+      <div class="avatar" id="avatarInitial">E</div>
+      <div class="member-info">
+        <div class="member-name" id="memberName">Explorer Member</div>
+        <div class="member-since">Member since 2024 · Passport #BB-0042</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- LEVEL BANNER -->
+<div class="level-banner">
+  <div class="level-item">
+    <div class="level-label">Total Stamps</div>
+    <div class="level-value" id="totalStamps">0</div>
+  </div>
+  <div class="level-badge">
+    <div class="badge-icon" id="badgeIcon">🌱</div>
+    <div class="badge-text">
+      <div class="badge-title" id="badgeTitle">Explorer</div>
+      <div class="badge-sub" id="badgeSub">Earn 5 stamps to advance</div>
+    </div>
+  </div>
+  <div class="level-item progress-bar-wrap">
+    <div class="progress-label">
+      <span id="progressLabel">Progress to Adventurer</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- CATEGORIES -->
+  <div class="section-header">
+    <h2>Your Passport Countries</h2>
+    <p>Click any stamp to mark it earned — every experience counts</p>
+  </div>
+
+  <div class="categories" id="categoriesGrid"></div>
+
+  <div class="ornament-divider"><span>✦</span></div>
+
+  <!-- LEVELS -->
+  <div class="levels-section">
+    <div class="section-header">
+      <h2>Levels & Rewards</h2>
+      <p>Each milestone unlocks recognition and rewards</p>
+    </div>
+    <div class="levels-grid" id="levelsGrid"></div>
+  </div>
+
+  <div class="ornament-divider"><span>✦</span></div>
+
+  <!-- COLLECTIVE STATS -->
+  <div class="stats-section">
+    <div class="section-header">
+      <h2>Society Collective</h2>
+      <p>Celebrating what we've achieved together — not who's ahead</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="statTotal">0</div>
+        <div class="stat-label">experiences completed this semester</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">46</div>
+        <div class="stat-label">members attended their first networking event</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">30</div>
+        <div class="stat-label">members volunteered in the community</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">128</div>
+        <div class="stat-label">total society members on their journey</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ornament-divider"><span>✦</span></div>
+
+  <!-- MONTHLY THEMES -->
+  <div class="themes-section">
+    <div class="section-header">
+      <h2>Monthly Themes</h2>
+      <p>Each month brings a new focus for your journey</p>
+    </div>
+    <div class="themes-scroll" id="themesGrid"></div>
+  </div>
+
+</main>
+
+<footer>
+  <strong>KCL Beyond Borders Society</strong> · Digital Passport · Built for explorers, dreamers & doers
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CATEGORIES = [
+  {
+    id: 'career',
+    cls: 'cat-career',
+    icon: '💼',
+    title: 'Career Explorer',
+    sub: 'Professional development',
+    stamps: [
+      'Attend a careers fair',
+      'Visit an employer insight day',
+      'Speak to a recruiter',
+      'Attend a Beyond Borders networking event',
+      'Apply for your first internship',
+    ]
+  },
+  {
+    id: 'growth',
+    cls: 'cat-growth',
+    icon: '🧠',
+    title: 'Personal Growth',
+    sub: 'Wellbeing & reflection',
+    stamps: [
+      'Attend a wellbeing event',
+      'Complete a mindfulness session',
+      'Join a wellbeing walk',
+      'Write a reflection on the Wellbeing Board',
+      'Support another member by replying to a post',
+    ]
+  },
+  {
+    id: 'skill',
+    cls: 'cat-skill',
+    icon: '🚀',
+    title: 'Skill Builder',
+    sub: 'Knowledge & capability',
+    stamps: [
+      'Learn a new software',
+      'Complete a LinkedIn Learning course',
+      'Improve your CV',
+      'Attend an interview workshop',
+      'Give a presentation',
+      'Learn basic Excel or Canva',
+    ]
+  },
+  {
+    id: 'community',
+    cls: 'cat-community',
+    icon: '🌍',
+    title: 'Community',
+    sub: 'Give back & connect',
+    stamps: [
+      'Volunteer',
+      'Attend three society socials',
+      'Bring a friend to an event',
+      'Become a Beyond Buddy',
+      'Mentor a new member',
+    ]
+  },
+  {
+    id: 'comfort',
+    cls: 'cat-comfort',
+    icon: '🎯',
+    title: 'Comfort Zone',
+    sub: 'Small steps, big growth',
+    stamps: [
+      'Introduce yourself to someone new',
+      'Go to an event alone',
+      'Ask a question during a talk',
+      'Message an alumnus',
+      'Apply for a role you\'re unsure about',
+    ]
+  },
+];
+
+const LEVELS = [
+  { emoji: '🌱', name: 'Explorer',          req: 5,  reward: 'LinkedIn shout-out from the society' },
+  { emoji: '🧭', name: 'Adventurer',        req: 10, reward: 'Official Beyond Borders certificate' },
+  { emoji: '🚀', name: 'Trailblazer',       req: 20, reward: 'Society merchandise (hoodie or tote)' },
+  { emoji: '🌟', name: 'BB Ambassador',     req: 30, reward: 'Priority networking event + end-of-year award' },
+];
+
+const MONTHS = [
+  { month: 'October',  name: 'Explore',   action: 'Attend one new event', current: false },
+  { month: 'November', name: 'Connect',   action: 'Speak to someone new', current: false },
+  { month: 'December', name: 'Reflect',   action: 'Complete a journal prompt', current: false },
+  { month: 'January',  name: 'Challenge', action: 'Apply for one opportunity', current: false },
+  { month: 'February', name: 'Give Back', action: 'Volunteer or help a member', current: false },
+  { month: 'March',    name: 'Grow',      action: 'Learn a new skill', current: true },
+];
+
+// State
+let earned = {};
+CATEGORIES.forEach(c => { earned[c.id] = new Set(); });
+
+function totalEarned() {
+  return Object.values(earned).reduce((s, set) => s + set.size, 0);
+}
+
+function getLevelInfo(total) {
+  let current = { emoji: '🌱', name: 'Explorer', req: 5 };
+  for (const l of LEVELS) {
+    if (total >= l.req) current = l;
+  }
+  const idx = LEVELS.indexOf(current);
+  const next = LEVELS[idx + 1] || null;
+  return { current, next, idx };
+}
+
+function updateBanner() {
+  const total = totalEarned();
+  document.getElementById('totalStamps').textContent = total;
+  document.getElementById('statTotal').textContent = total + 128; // collective
+
+  const { current, next, idx } = getLevelInfo(total);
+  document.getElementById('badgeIcon').textContent = current.emoji;
+  document.getElementById('badgeTitle').textContent = current.name;
+
+  if (next) {
+    const pct = Math.round((total / next.req) * 100);
+    document.getElementById('progressFill').style.width = Math.min(pct, 100) + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressLabel').textContent = `Progress to ${next.name}`;
+    document.getElementById('badgeSub').textContent = `Earn ${next.req - total} more stamp${next.req - total !== 1 ? 's' : ''} to advance`;
+  } else {
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('progressPct').textContent = '100%';
+    document.getElementById('progressLabel').textContent = 'Max level reached!';
+    document.getElementById('badgeSub').textContent = 'You\'ve reached Ambassador status!';
+  }
+
+  // Update level cards
+  document.querySelectorAll('.level-card').forEach((card, i) => {
+    const unlocked = total >= LEVELS[i].req;
+    const wasUnlocked = card.classList.contains('unlocked');
+    if (unlocked && !wasUnlocked) {
+      card.classList.add('unlocked', 'just-unlocked');
+      setTimeout(() => card.classList.remove('just-unlocked'), 700);
+    } else if (!unlocked) {
+      card.classList.remove('unlocked');
+    }
+  });
+}
+
+// Toast
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Build categories
+function buildCategories() {
+  const grid = document.getElementById('categoriesGrid');
+  grid.innerHTML = '';
+
+  CATEGORIES.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = `category-card ${cat.cls}`;
+    card.id = `cat-${cat.id}`;
+
+    const countId = `count-${cat.id}`;
+
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-icon">${cat.icon}</div>
+        <div class="card-title">
+          <h3>${cat.title}</h3>
+          <p>${cat.sub}</p>
+        </div>
+        <div class="card-count" id="${countId}">0 / ${cat.stamps.length}</div>
+      </div>
+      <div class="card-body">
+        <ul class="stamp-list" id="stamps-${cat.id}"></ul>
+      </div>
+    `;
+
+    grid.appendChild(card);
+
+    const list = document.getElementById(`stamps-${cat.id}`);
+    cat.stamps.forEach((stamp, idx) => {
+      const li = document.createElement('li');
+      li.className = 'stamp-item';
+      li.dataset.cat = cat.id;
+      li.dataset.idx = idx;
+      li.innerHTML = `
+        <div class="stamp-checkbox">✓</div>
+        <span class="stamp-text">${stamp}</span>
+        <span class="stamp-earned-badge">Stamped ✦</span>
+      `;
+      li.addEventListener('click', () => toggleStamp(cat.id, idx, li));
+      list.appendChild(li);
+    });
+  });
+}
+
+function toggleStamp(catId, idx, li) {
+  const cat = CATEGORIES.find(c => c.id === catId);
+  const prevTotal = totalEarned();
+  const { current: prevLevel } = getLevelInfo(prevTotal);
+
+  if (earned[catId].has(idx)) {
+    earned[catId].delete(idx);
+    li.classList.remove('earned', 'just-earned');
+  } else {
+    earned[catId].add(idx);
+    li.classList.add('earned', 'just-earned');
+    setTimeout(() => li.classList.remove('just-earned'), 500);
+  }
+
+  // Update count badge
+  const count = earned[catId].size;
+  document.getElementById(`count-${catId}`).textContent = `${count} / ${cat.stamps.length}`;
+
+  const newTotal = totalEarned();
+  const { current: newLevel } = getLevelInfo(newTotal);
+
+  updateBanner();
+
+  if (earned[catId].has(idx)) {
+    if (newLevel.name !== prevLevel.name) {
+      showToast(`🎉 Level up! You're now a ${newLevel.name} ${newLevel.emoji}`, 'gold');
+    } else {
+      showToast(`✦ Stamp earned: ${cat.stamps[idx]}`);
+    }
+  }
+}
+
+function buildLevels() {
+  const grid = document.getElementById('levelsGrid');
+  LEVELS.forEach(l => {
+    const card = document.createElement('div');
+    card.className = 'level-card';
+    card.innerHTML = `
+      <div class="level-emoji">${l.emoji}</div>
+      <div class="level-name">${l.name}</div>
+      <div class="level-req">${l.req} stamps required</div>
+      <div class="level-reward">${l.reward}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function buildThemes() {
+  const grid = document.getElementById('themesGrid');
+  MONTHS.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'theme-card' + (m.current ? ' current' : '');
+    card.innerHTML = `
+      <div class="theme-month">${m.month}</div>
+      <div class="theme-name">${m.name}</div>
+      <div class="theme-action">${m.action}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// Init
+buildCategories();
+buildLevels();
+buildThemes();
+updateBanner();
+
+// ── INTRO ANIMATION ──
+(function() {
+  const overlay = document.getElementById('intro-overlay');
+  const plane = document.getElementById('intro-plane');
+
+  // Dismiss overlay after plane animation completes (~2.4s total)
+  setTimeout(() => {
+    overlay.classList.add('fade-out');
+    overlay.addEventListener('animationend', () => {
+      overlay.style.display = 'none';
+    }, { once: true });
+  }, 2300);
+
+  // Spawn small trailing dots along the path as the plane moves
+  const pathEl = document.querySelector('#flight-path-line');
+  let dotCount = 0;
+  const maxDots = 18;
+
+  function spawnDot() {
+    if (dotCount >= maxDots || !pathEl) return;
+    const t = dotCount / maxDots;
+    // Approximate path points matching the SVG quadratic bezier
+    // M -80 520 Q 300 480 500 320 Q 700 160 1180 -60
+    // Split into two segments
+    let x, y;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    // Scale from viewBox (1100x600) to screen
+    const sx = vw / 1100;
+    const sy = vh / 600;
+
+    if (t < 0.5) {
+      const u = t * 2;
+      x = (1-u)*(1-u)*(-80) + 2*(1-u)*u*(300) + u*u*(500);
+      y = (1-u)*(1-u)*(520) + 2*(1-u)*u*(480) + u*u*(320);
+    } else {
+      const u = (t - 0.5) * 2;
+      x = (1-u)*(1-u)*(500) + 2*(1-u)*u*(700) + u*u*(1180);
+      y = (1-u)*(1-u)*(320) + 2*(1-u)*u*(160) + u*u*(-60);
+    }
+
+    const dot = document.createElement('div');
+    dot.className = 'trail-dot';
+    dot.style.left = (x * sx) + 'px';
+    dot.style.top  = (y * sy) + 'px';
+    overlay.appendChild(dot);
+    dotCount++;
+    setTimeout(() => dot.remove(), 800);
+  }
+
+  // Spawn dots over the 1.8s flight duration
+  for (let i = 0; i < maxDots; i++) {
+    setTimeout(spawnDot, 250 + i * 90);
+  }
+})();
+</script>
+</body>
+</html>
