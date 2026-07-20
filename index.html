@@ -69,7 +69,10 @@
     transform:translate(-50%,-50%);
     opacity:0;
     will-change:transform,opacity;
-    animation: flyIn 1.3s cubic-bezier(.16,1,.3,1) forwards;
+    animation-name: flyIn, iconFade;
+    animation-duration: 1.3s, 1.3s;
+    animation-timing-function: cubic-bezier(.16,1,.3,1), ease;
+    animation-fill-mode: forwards, forwards;
   }
   .orbit-icon img{ width:100%; height:100%; object-fit:contain; display:block; }
 
@@ -84,47 +87,8 @@
       opacity:1;
     }
   }
+  @keyframes iconFade{ to{ opacity:0; } }
 
-  /* connecting lines between icons, drawn in after the icons have landed */
-  .connector-svg{
-    position:absolute; inset:0; width:100%; height:100%;
-  }
-  .connector-path{
-    fill:none;
-    stroke:rgba(245,237,227,0.55);
-    stroke-width:.35;
-    stroke-linejoin:round;
-    stroke-dasharray:400;
-    stroke-dashoffset:400;
-    opacity:0;
-    animation-name: connectorDraw, connectorFadeIn;
-    animation-duration: 1.1s, .3s;
-    animation-timing-function: ease, ease;
-    animation-fill-mode: forwards, forwards;
-    animation-delay: 2.05s, 2.05s;
-  }
-  @keyframes connectorDraw{ to{ stroke-dashoffset:0; } }
-  @keyframes connectorFadeIn{ to{ opacity:1; } }
-  .connector-dot{
-    fill:rgba(245,237,227,0.75);
-    opacity:0;
-    animation:dotFadeIn .4s ease forwards;
-  }
-  @keyframes dotFadeIn{
-    0%{ opacity:0; transform:scale(0); }
-    100%{ opacity:1; transform:scale(1); }
-  }
-
-  /* B monogram + KCL BBSOC wordmark, revealed after the connecting lines */
-  .logo-text-layer{
-    position:absolute; inset:0; width:100%; height:100%;
-    object-fit:contain; opacity:0; will-change:opacity;
-    animation:textLayerIn 1s ease forwards 3.05s;
-  }
-  @keyframes textLayerIn{ 0%{ opacity:0; } 100%{ opacity:1; } }
-
-  /* final crisp full-logo image, briefly cross-fades in at the very end to
-     guarantee pixel-perfect sharpness after the staged reveal */
   .final-logo{
     position:absolute;
     inset:0;
@@ -133,7 +97,7 @@
     object-fit:contain;
     opacity:0;
     will-change:opacity;
-    animation:logoIn .7s ease forwards 4.05s;
+    animation:logoIn 1.5s ease forwards 1.95s;
   }
   @keyframes logoIn{
     0%{ opacity:0; }
@@ -148,7 +112,7 @@
     mix-blend-mode:screen;
     opacity:0;
     pointer-events:none;
-    animation:flashPulse 1s ease forwards 3.95s;
+    animation:flashPulse 1.1s ease forwards 1.85s;
   }
   @keyframes flashPulse{
     0%{ opacity:0; }
@@ -492,65 +456,49 @@
   <div class="logo-stage">
 
     <!-- N: caduceus -->
-    <div class="orbit-icon" style="left:45.89%; top:14.32%; --bw:13.81vmin; --bh:13.46vmin; --sx:0vmin; --sy:-38vmin; --srot:-25deg; animation-delay:0s;">
+    <div class="orbit-icon" style="left:45.89%; top:14.32%; --bw:13.81vmin; --bh:13.46vmin; --sx:0vmin; --sy:-38vmin; --srot:-25deg; animation-delay:0s, 1.95s;">
       <img src="icon-caduceus.png" alt="">
     </div>
 
     <!-- NE: scales -->
-    <div class="orbit-icon" style="left:71.23%; top:22.28%; --bw:12.75vmin; --bh:13.27vmin; --sx:27vmin; --sy:-27vmin; --srot:22deg; animation-delay:.09s;">
+    <div class="orbit-icon" style="left:71.23%; top:22.28%; --bw:12.75vmin; --bh:13.27vmin; --sx:27vmin; --sy:-27vmin; --srot:22deg; animation-delay:.09s, 1.95s;">
       <img src="icon-scales.png" alt="">
     </div>
 
     <!-- E: globe -->
-    <div class="orbit-icon" style="left:82.01%; top:45.04%; --bw:8.28vmin; --bh:13.83vmin; --sx:38vmin; --sy:0vmin; --srot:-18deg; animation-delay:.18s;">
+    <div class="orbit-icon" style="left:82.01%; top:45.04%; --bw:8.28vmin; --bh:13.83vmin; --sx:38vmin; --sy:0vmin; --srot:-18deg; animation-delay:.18s, 1.95s;">
       <img src="icon-globe.png" alt="">
     </div>
 
     <!-- SE: palette -->
-    <div class="orbit-icon" style="left:71.62%; top:67.25%; --bw:11.50vmin; --bh:10.78vmin; --sx:27vmin; --sy:27vmin; --srot:25deg; animation-delay:.27s;">
+    <div class="orbit-icon" style="left:71.62%; top:67.25%; --bw:11.50vmin; --bh:10.78vmin; --sx:27vmin; --sy:27vmin; --srot:25deg; animation-delay:.27s, 1.95s;">
       <img src="icon-palette.png" alt="">
     </div>
 
     <!-- S: chip -->
-    <div class="orbit-icon" style="left:49.65%; top:75.98%; --bw:13.81vmin; --bh:9.49vmin; --sx:0vmin; --sy:38vmin; --srot:-22deg; animation-delay:.36s;">
+    <div class="orbit-icon" style="left:49.65%; top:75.98%; --bw:13.81vmin; --bh:9.49vmin; --sx:0vmin; --sy:38vmin; --srot:-22deg; animation-delay:.36s, 1.95s;">
       <img src="icon-chip.png" alt="">
     </div>
 
     <!-- SW: growth chart -->
-    <div class="orbit-icon" style="left:25.49%; top:64.25%; --bw:11.73vmin; --bh:13.83vmin; --sx:-27vmin; --sy:27vmin; --srot:18deg; animation-delay:.45s;">
+    <div class="orbit-icon" style="left:25.49%; top:64.25%; --bw:11.73vmin; --bh:13.83vmin; --sx:-27vmin; --sy:27vmin; --srot:18deg; animation-delay:.45s, 1.95s;">
       <img src="icon-chart.png" alt="">
     </div>
 
     <!-- W: translate -->
-    <div class="orbit-icon" style="left:19.87%; top:48.04%; --bw:10.31vmin; --bh:13.83vmin; --sx:-38vmin; --sy:0vmin; --srot:-25deg; animation-delay:.54s;">
+    <div class="orbit-icon" style="left:19.87%; top:48.04%; --bw:10.31vmin; --bh:13.83vmin; --sx:-38vmin; --sy:0vmin; --srot:-25deg; animation-delay:.54s, 1.95s;">
       <img src="icon-translate.png" alt="">
     </div>
 
     <!-- NW: DNA -->
-    <div class="orbit-icon" style="left:28.80%; top:21.33%; --bw:11.97vmin; --bh:12.12vmin; --sx:-27vmin; --sy:-27vmin; --srot:25deg; animation-delay:.63s;">
+    <div class="orbit-icon" style="left:28.80%; top:21.33%; --bw:11.97vmin; --bh:12.12vmin; --sx:-27vmin; --sy:-27vmin; --srot:25deg; animation-delay:.63s, 1.95s;">
       <img src="icon-dna.png" alt="">
     </div>
 
-    <!-- connecting lines + beads, drawn in once the icons have landed -->
-    <svg class="connector-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-      <path class="connector-path" d="M 45.89 14.32 L 71.23 22.28 L 82.01 45.04 L 71.62 67.25 L 49.65 75.98 L 25.49 64.25 L 19.87 48.04 L 28.80 21.33 Z"/>
-      <circle class="connector-dot" cx="58.56" cy="18.30" r="1.1" style="animation-delay:2.15s"/>
-      <circle class="connector-dot" cx="76.62" cy="33.66" r="1.1" style="animation-delay:2.30s"/>
-      <circle class="connector-dot" cx="76.81" cy="56.14" r="1.1" style="animation-delay:2.45s"/>
-      <circle class="connector-dot" cx="60.64" cy="71.62" r="1.1" style="animation-delay:2.60s"/>
-      <circle class="connector-dot" cx="37.57" cy="70.12" r="1.1" style="animation-delay:2.75s"/>
-      <circle class="connector-dot" cx="22.68" cy="56.14" r="1.1" style="animation-delay:2.90s"/>
-      <circle class="connector-dot" cx="24.34" cy="34.69" r="1.1" style="animation-delay:3.05s"/>
-      <circle class="connector-dot" cx="37.34" cy="17.82" r="1.1" style="animation-delay:3.20s"/>
-    </svg>
-
-    <!-- B monogram + KCL BBSOC wordmark, revealed after the connecting lines -->
-    <img class="logo-text-layer" src="logo-text.png" alt="">
-
-    <!-- soft bloom that smooths the final handoff into the crisp real logo -->
+    <!-- soft bloom that masks the handoff between the flown-in icons and the real logo -->
     <div class="assembly-flash"></div>
 
-    <!-- real logo briefly crossfades in at the very end for pixel-perfect sharpness -->
+    <!-- real logo fades in once the icons have assembled -->
     <img class="final-logo" src="logo.png" alt="KCL BBSOC logo">
   </div>
 </div>
@@ -697,7 +645,7 @@
     skipBtn.style.display = 'none';
   } else {
     sessionStorage.setItem('bbIntroShown', '1');
-    autoTimer = setTimeout(dismissIntro, 5200);
+    autoTimer = setTimeout(dismissIntro, 4000);
     intro.addEventListener('click', dismissIntro);
     skipBtn.addEventListener('click', (e) => { e.stopPropagation(); dismissIntro(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' || e.key === 'Enter') dismissIntro(); });
