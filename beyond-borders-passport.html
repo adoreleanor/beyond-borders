@@ -332,6 +332,65 @@
 
   .stamp-item.earned .stamp-earned-badge { opacity: 1; }
 
+  .stamp-event-link {
+    display: block;
+    font-size: 10.5px;
+    color: var(--forest);
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  /* ── EVENT PICKER MODAL ── */
+  .event-pick-overlay {
+    position: fixed; inset: 0;
+    background: rgba(44,24,16,0.55);
+    backdrop-filter: blur(2px);
+    z-index: 600;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .event-pick-overlay.open { display: flex; }
+  .event-pick-box {
+    background: white;
+    border-radius: 16px;
+    padding: 28px 26px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+    position: relative;
+  }
+  .event-pick-close {
+    position: absolute; top: 12px; right: 14px;
+    background: none; border: none; font-size: 20px;
+    color: #8B7355; cursor: pointer; line-height: 1;
+  }
+  .event-pick-box h3 { font-family: 'Cormorant Garamond', serif; font-size: 21px; color: var(--brown-dark); margin-bottom: 6px; }
+  .event-pick-sub { font-size: 13px; color: #7A6A5A; margin-bottom: 16px; line-height: 1.5; }
+  .event-pick-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 260px; overflow-y: auto; }
+  .event-pick-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    border: 1px solid var(--parchment); background: var(--cream);
+    cursor: pointer; text-align: left; width: 100%;
+    font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--ink);
+    transition: all 0.15s;
+  }
+  .event-pick-item:hover { border-color: var(--gold); background: white; }
+  .event-pick-item .ev-date-chip {
+    flex-shrink: 0; width: 38px; height: 38px; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: white; font-size: 10px; font-weight: 700; line-height: 1.1;
+  }
+  .event-pick-empty { font-size: 13px; color: #8B7355; font-style: italic; padding: 8px 0 14px; }
+  .event-pick-skip {
+    width: 100%; background: var(--parchment); border: none; border-radius: 20px;
+    padding: 10px; font-family: 'Inter', sans-serif; font-size: 12.5px;
+    color: var(--brown-dark); cursor: pointer;
+  }
+  .event-pick-skip:hover { background: var(--sand); }
+
   /* Card colours */
   .cat-career .card-header { background: linear-gradient(135deg, #4A0A14, #6E0F1E); }
   .cat-growth .card-header { background: linear-gradient(135deg, #3A6B4A, #5A9A6A); }
@@ -340,6 +399,105 @@
   .cat-comfort .card-header { background: linear-gradient(135deg, #B8860B, #D4A82A); }
 
   .cat-career .card-count { background: rgba(255,255,255,0.2); }
+
+  /* ── UPCOMING TRIPS (calendar) ── */
+  .trips-section { margin-bottom: 60px; }
+
+  .trips-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(201,169,110,0.3);
+    box-shadow: 0 2px 20px rgba(92,64,8,0.08);
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .trips-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .trips-nav button {
+    background: var(--parchment);
+    border: none;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--brown-dark);
+    transition: background 0.2s;
+  }
+  .trips-nav button:hover { background: var(--sand); }
+
+  .trips-month-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--brown-dark);
+  }
+
+  .trips-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 10.5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #8B7355;
+    margin-bottom: 6px;
+  }
+
+  .trips-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .trips-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    border-radius: 8px;
+    color: var(--ink);
+    background: var(--cream);
+    position: relative;
+  }
+  .trips-day.empty { visibility: hidden; }
+  .trips-day.has-event {
+    cursor: pointer;
+    font-weight: 700;
+    color: white;
+    transition: transform 0.15s ease;
+  }
+  .trips-day.has-event:hover { transform: scale(1.08); }
+  .trips-day.has-event::after {
+    content: '';
+    position: absolute;
+    bottom: 3px; left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: white;
+    opacity: 0.85;
+  }
+
+  .trips-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--parchment);
+    font-size: 11.5px;
+    color: #7A6A5A;
+  }
+  .trips-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .trips-legend .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 
   /* ── LEVELS SECTION ── */
   .levels-section { margin-bottom: 60px; }
@@ -702,10 +860,12 @@
     </div>
     <p class="header-tagline">"Collect experiences, not expectations."</p>
     <div class="member-card">
-      <div class="avatar" id="avatarInitial">E</div>
+      <div class="avatar" id="avatarInitial">?</div>
       <div class="member-info">
-        <div class="member-name" id="memberName">Explorer Member</div>
-        <div class="member-since">Member since 2024 · Passport #BB-0042</div>
+        <div class="member-name" id="memberName">Not signed in</div>
+        <div class="member-since" id="memberSince">
+          <a href="index.html" style="color:var(--gold-light);text-decoration:underline;">Sign in from the Beyond Borders home page</a> to get your passport number
+        </div>
       </div>
     </div>
   </div>
@@ -745,6 +905,31 @@
   </div>
 
   <div class="categories" id="categoriesGrid"></div>
+
+  <div class="ornament-divider"><span>✦</span></div>
+
+  <!-- UPCOMING TRIPS -->
+  <div class="trips-section">
+    <div class="section-header">
+      <h2>Upcoming Trips</h2>
+      <p>Your society calendar — click a marked day for the full details</p>
+    </div>
+    <div class="trips-card">
+      <div class="trips-nav">
+        <button id="tripsPrev" aria-label="Previous month">‹</button>
+        <div class="trips-month-label" id="tripsMonthLabel"></div>
+        <button id="tripsNext" aria-label="Next month">›</button>
+      </div>
+      <div class="trips-weekdays"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+      <div class="trips-grid" id="tripsGrid"></div>
+      <div class="trips-legend">
+        <span><span class="dot" style="background:#6E0F1E"></span>Social</span>
+        <span><span class="dot" style="background:#B8860B"></span>Careers</span>
+        <span><span class="dot" style="background:#3A6B4A"></span>Wellbeing</span>
+        <span><span class="dot" style="background:#1A5F6B"></span>Formal</span>
+      </div>
+    </div>
+  </div>
 
   <div class="ornament-divider"><span>✦</span></div>
 
@@ -804,6 +989,18 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- EVENT PICKER MODAL -->
+<div class="event-pick-overlay" id="eventPickOverlay">
+  <div class="event-pick-box">
+    <button class="event-pick-close" id="eventPickClose">&times;</button>
+    <h3>Which trip was this?</h3>
+    <p class="event-pick-sub">Link this stamp to the event you attended — totally optional.</p>
+    <div class="event-pick-list" id="eventPickList"></div>
+    <button class="event-pick-skip" id="eventPickSkip">Mark earned without linking an event</button>
+  </div>
+</div>
+
+<script src="events-data.js"></script>
 <script>
 const CATEGORIES = [
   {
@@ -899,6 +1096,23 @@ const MONTHS = [
 let earned = {};
 CATEGORIES.forEach(c => { earned[c.id] = new Set(); });
 
+// Stamps that are literally about attending something get an optional
+// "which trip was this?" picker when you mark them earned. Value is the
+// event tag to filter by, or null to show every upcoming trip.
+const EVENT_LINKABLE_STAMPS = {
+  'career-0': 'Careers',   // Attend a careers fair
+  'career-3': 'Careers',   // Attend a Beyond Borders networking event
+  'growth-0': 'Wellbeing', // Attend a wellbeing event
+  'growth-2': 'Wellbeing', // Join a wellbeing walk
+  'skill-3': 'Careers',    // Attend an interview workshop
+  'community-1': 'Social', // Attend three society socials
+  'community-2': null,     // Bring a friend to an event
+  'comfort-1': null,       // Go to an event alone
+  'comfort-2': 'Careers',  // Ask a question during a talk
+};
+let stampEventLinks = {}; // { 'career-0': 'meet-greet', ... }
+let pendingStampPick = null;
+
 function totalEarned() {
   return Object.values(earned).reduce((s, set) => s + set.size, 0);
 }
@@ -977,7 +1191,7 @@ function buildCategories() {
           <h3>${cat.title}</h3>
           <p>${cat.sub}</p>
         </div>
-        <div class="card-count" id="${countId}">0 / ${cat.stamps.length}</div>
+        <div class="card-count" id="${countId}">${earned[cat.id].size} / ${cat.stamps.length}</div>
       </div>
       <div class="card-body">
         <ul class="stamp-list" id="stamps-${cat.id}"></ul>
@@ -989,7 +1203,7 @@ function buildCategories() {
     const list = document.getElementById(`stamps-${cat.id}`);
     cat.stamps.forEach((stamp, idx) => {
       const li = document.createElement('li');
-      li.className = 'stamp-item';
+      li.className = 'stamp-item' + (earned[cat.id].has(idx) ? ' earned' : '');
       li.dataset.cat = cat.id;
       li.dataset.idx = idx;
       li.innerHTML = `
@@ -999,22 +1213,45 @@ function buildCategories() {
       `;
       li.addEventListener('click', () => toggleStamp(cat.id, idx, li));
       list.appendChild(li);
+      updateStampLinkDisplay(li, `${cat.id}-${idx}`);
     });
   });
 }
 
 function toggleStamp(catId, idx, li) {
+  const key = `${catId}-${idx}`;
+  const aboutToEarn = !earned[catId].has(idx);
+
+  if (aboutToEarn && key in EVENT_LINKABLE_STAMPS) {
+    openEventPicker(catId, idx, li);
+    return;
+  }
+  completeStampToggle(catId, idx, li, null);
+}
+
+function completeStampToggle(catId, idx, li, linkedEventId) {
   const cat = CATEGORIES.find(c => c.id === catId);
+  const key = `${catId}-${idx}`;
   const prevTotal = totalEarned();
   const { current: prevLevel } = getLevelInfo(prevTotal);
 
+  let nowEarned;
   if (earned[catId].has(idx)) {
     earned[catId].delete(idx);
     li.classList.remove('earned', 'just-earned');
+    nowEarned = false;
+    delete stampEventLinks[key];
   } else {
     earned[catId].add(idx);
     li.classList.add('earned', 'just-earned');
     setTimeout(() => li.classList.remove('just-earned'), 500);
+    nowEarned = true;
+    if (linkedEventId) stampEventLinks[key] = linkedEventId;
+  }
+  updateStampLinkDisplay(li, key);
+
+  if (typeof saveStampToggle === 'function') {
+    saveStampToggle(catId, idx, nowEarned, nowEarned ? (linkedEventId || null) : null);
   }
 
   // Update count badge
@@ -1029,11 +1266,79 @@ function toggleStamp(catId, idx, li) {
   if (earned[catId].has(idx)) {
     if (newLevel.name !== prevLevel.name) {
       showToast(`🎉 Level up! You're now a ${newLevel.name} ${newLevel.emoji}`, 'gold');
+    } else if (linkedEventId && typeof EVENTS !== 'undefined') {
+      const ev = EVENTS.find(e => e.id === linkedEventId);
+      showToast(`✦ Stamp earned: ${cat.stamps[idx]}${ev ? ' — ' + ev.title : ''}`);
     } else {
       showToast(`✦ Stamp earned: ${cat.stamps[idx]}`);
     }
   }
 }
+
+function updateStampLinkDisplay(li, key) {
+  let linkEl = li.querySelector('.stamp-event-link');
+  const eventId = stampEventLinks[key];
+  if (eventId && typeof EVENTS !== 'undefined') {
+    const ev = EVENTS.find(e => e.id === eventId);
+    if (ev) {
+      if (!linkEl) {
+        linkEl = document.createElement('span');
+        linkEl.className = 'stamp-event-link';
+        li.querySelector('.stamp-text').insertAdjacentElement('afterend', linkEl);
+      }
+      linkEl.textContent = '🎫 ' + ev.title;
+      return;
+    }
+  }
+  if (linkEl) linkEl.remove();
+}
+
+function openEventPicker(catId, idx, li) {
+  pendingStampPick = { catId, idx, li };
+  const key = `${catId}-${idx}`;
+  const tagFilter = EVENT_LINKABLE_STAMPS[key];
+  const listEl = document.getElementById('eventPickList');
+  listEl.innerHTML = '';
+
+  const events = typeof EVENTS !== 'undefined' ? EVENTS : [];
+  const matches = tagFilter ? events.filter(e => e.tag === tagFilter) : events;
+
+  if (!matches.length) {
+    listEl.innerHTML = '<p class="event-pick-empty">No matching events on the calendar yet — you can still mark this earned below.</p>';
+  } else {
+    matches.forEach(ev => {
+      const btn = document.createElement('button');
+      btn.className = 'event-pick-item';
+      btn.innerHTML = `
+        <span class="ev-date-chip" style="background:${TRIP_TAG_COLORS[ev.tag] || '#6E0F1E'}">${ev.monthLabel}<br>${String(ev.day).padStart(2,'0')}</span>
+        <span>${ev.title}</span>
+      `;
+      btn.addEventListener('click', () => {
+        closeEventPicker();
+        completeStampToggle(pendingStampPick.catId, pendingStampPick.idx, pendingStampPick.li, ev.id);
+      });
+      listEl.appendChild(btn);
+    });
+  }
+
+  document.getElementById('eventPickOverlay').classList.add('open');
+}
+
+function closeEventPicker() {
+  document.getElementById('eventPickOverlay').classList.remove('open');
+  pendingStampPick = null;
+}
+
+document.getElementById('eventPickClose').addEventListener('click', closeEventPicker);
+document.getElementById('eventPickSkip').addEventListener('click', () => {
+  if (pendingStampPick) {
+    completeStampToggle(pendingStampPick.catId, pendingStampPick.idx, pendingStampPick.li, null);
+  }
+  closeEventPicker();
+});
+document.getElementById('eventPickOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'eventPickOverlay') closeEventPicker();
+});
 
 function buildLevels() {
   const grid = document.getElementById('levelsGrid');
@@ -1064,11 +1369,68 @@ function buildThemes() {
   });
 }
 
+// ── UPCOMING TRIPS CALENDAR ──
+const TRIP_TAG_COLORS = { Social:'#6E0F1E', Careers:'#B8860B', Wellbeing:'#3A6B4A', Formal:'#1A5F6B' };
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// default to the earliest month that actually has an event
+let tripsViewYear = (typeof EVENTS !== 'undefined' && EVENTS.length) ? EVENTS[0].year : new Date().getFullYear();
+let tripsViewMonth = (typeof EVENTS !== 'undefined' && EVENTS.length) ? EVENTS[0].month : (new Date().getMonth() + 1);
+
+function renderTripsCalendar() {
+  const label = document.getElementById('tripsMonthLabel');
+  const grid = document.getElementById('tripsGrid');
+  if (!label || !grid) return;
+
+  label.textContent = `${MONTH_NAMES[tripsViewMonth - 1]} ${tripsViewYear}`;
+  grid.innerHTML = '';
+
+  const firstDay = new Date(tripsViewYear, tripsViewMonth - 1, 1);
+  const daysInMonth = new Date(tripsViewYear, tripsViewMonth, 0).getDate();
+  let startOffset = firstDay.getDay() - 1; // convert Sun(0)-Sat(6) to Mon-first
+  if (startOffset < 0) startOffset = 6;
+
+  for (let i = 0; i < startOffset; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'trips-day empty';
+    grid.appendChild(cell);
+  }
+
+  const events = typeof EVENTS !== 'undefined' ? EVENTS : [];
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cell = document.createElement('div');
+    cell.className = 'trips-day';
+    cell.textContent = d;
+
+    const ev = events.find(e => e.year === tripsViewYear && e.month === tripsViewMonth && e.day === d);
+    if (ev) {
+      cell.classList.add('has-event');
+      cell.style.background = TRIP_TAG_COLORS[ev.tag] || 'var(--terracotta)';
+      cell.title = `${ev.title} — click for details`;
+      cell.addEventListener('click', () => window.open(`events.html#ev-${ev.id}`, '_blank'));
+    }
+    grid.appendChild(cell);
+  }
+}
+
+document.getElementById('tripsPrev').addEventListener('click', () => {
+  tripsViewMonth--;
+  if (tripsViewMonth < 1) { tripsViewMonth = 12; tripsViewYear--; }
+  renderTripsCalendar();
+});
+document.getElementById('tripsNext').addEventListener('click', () => {
+  tripsViewMonth++;
+  if (tripsViewMonth > 12) { tripsViewMonth = 1; tripsViewYear++; }
+  renderTripsCalendar();
+});
+
 // Init
 buildCategories();
 buildLevels();
 buildThemes();
 updateBanner();
+renderTripsCalendar();
 
 // ── INTRO ANIMATION ──
 (function() {
@@ -1125,6 +1487,103 @@ updateBanner();
     setTimeout(spawnDot, 250 + i * 90);
   }
 })();
+</script>
+
+<!-- Firebase (compat SDK) — links this page to the same account signed in on the home page -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  // Firebase Auth persists sign-in across tabs/pages on the same site, so if the
+  // member already signed in on the home page, this fires automatically here too.
+  let currentPassportUser = null;
+
+  function splitNameFromEmail(email) {
+    const local = email.split('@')[0];
+    const [first, last] = local.split('.');
+    const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+    return { first: cap(first), last: cap(last) };
+  }
+
+  async function getOrAssignPassportNumber(user) {
+    const userRef = db.collection('users').doc(user.uid);
+    const counterRef = db.collection('meta').doc('passportCounter');
+    const { first, last } = splitNameFromEmail(user.email);
+    return db.runTransaction(async (tx) => {
+      const userSnap = await tx.get(userRef);
+      if (userSnap.exists && userSnap.data().passportNo) {
+        return userSnap.data().passportNo;
+      }
+      const counterSnap = await tx.get(counterRef);
+      const next = counterSnap.exists ? (counterSnap.data().next || 1) : 1;
+      const passportNo = 'BB-' + String(next).padStart(4, '0');
+      tx.set(counterRef, { next: next + 1 }, { merge: true });
+      tx.set(userRef, {
+        email: user.email, firstName: first, lastName: last, passportNo,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+      return passportNo;
+    });
+  }
+
+  async function loadSavedStamps(uid) {
+    const snap = await db.collection('users').doc(uid).get();
+    const data = snap.data() || {};
+    const savedStamps = data.stamps || {};
+    const savedStampEvents = data.stampEvents || {};
+
+    CATEGORIES.forEach(c => { earned[c.id] = new Set(savedStamps[c.id] || []); });
+
+    stampEventLinks = {};
+    Object.keys(savedStampEvents).forEach(catId => {
+      const catMap = savedStampEvents[catId] || {};
+      Object.keys(catMap).forEach(idx => {
+        stampEventLinks[`${catId}-${idx}`] = catMap[idx];
+      });
+    });
+  }
+
+  function saveStampToggle(catId, idx, isEarned, linkedEventId) {
+    if (!currentPassportUser) return; // not signed in here — progress stays local-only for this session
+    const update = {};
+    update['stamps.' + catId] = isEarned
+      ? firebase.firestore.FieldValue.arrayUnion(idx)
+      : firebase.firestore.FieldValue.arrayRemove(idx);
+
+    const eventField = `stampEvents.${catId}.${idx}`;
+    update[eventField] = (isEarned && linkedEventId)
+      ? linkedEventId
+      : firebase.firestore.FieldValue.delete();
+
+    db.collection('users').doc(currentPassportUser.uid).update(update).catch(err => {
+      console.error('Could not save stamp:', err);
+    });
+  }
+
+  auth.onAuthStateChanged(async (user) => {
+    currentPassportUser = user;
+    const avatarEl = document.getElementById('avatarInitial');
+    const nameEl = document.getElementById('memberName');
+    const sinceEl = document.getElementById('memberSince');
+
+    if (!user) {
+      avatarEl.textContent = '?';
+      nameEl.textContent = 'Not signed in';
+      sinceEl.innerHTML = '<a href="index.html" style="color:var(--gold-light);text-decoration:underline;">Sign in from the Beyond Borders home page</a> to get your passport number';
+      return;
+    }
+
+    const { first, last } = splitNameFromEmail(user.email);
+    const passportNo = await getOrAssignPassportNumber(user);
+    avatarEl.textContent = first.charAt(0) || 'E';
+    nameEl.textContent = `${first} ${last}`.trim();
+    sinceEl.textContent = `Passport #${passportNo}`;
+
+    await loadSavedStamps(user.uid);
+    buildCategories();
+    updateBanner();
+  });
 </script>
 </body>
 </html>
