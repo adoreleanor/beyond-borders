@@ -15,31 +15,31 @@ const EVENTS = [
     year: 2026, month: 10, day: 5, monthLabel: 'Oct',
     tag: 'Social',
     title: 'Meet & Greet',
-    meta: ['🕕 6:00 – 8:30 PM (approx.)', '📍 Big classroom (room TBC)'],
+    meta: ['🕕 6:00 – 8:00 PM', '📍 Big classroom (room TBC)'],
     desc: "Kick off the semester with speed-networking bingo, quick introductions, a murder mystery / mafia game, and informal networking over snacks and drinks. Exact room to be confirmed."
   },
   {
     id: 'family-intro',
-    year: 2026, month: 10, day: 13, monthLabel: 'Oct',
+    year: 2026, month: 10, day: 14, monthLabel: 'Oct',
     tag: 'Social',
-    title: 'Family Introduction Event',
-    meta: ['🕕 Time TBC', '📍 Room TBC (depends on turnout)'],
-    desc: "Meet your BBSOC family through icebreakers and team challenges. Time and room will be confirmed closer to the date."
+    title: 'Family Introduction Picnic',
+    meta: ['🕑 2:00 – 4:00 PM', '📍 Room TBC (depends on turnout)'],
+    desc: "Meet your BBSOC family through icebreakers, team challenges, and a picnic. Room will be confirmed closer to the date."
   },
   {
     id: 'recruitment-workshop',
-    year: 2026, month: 10, day: 19, monthLabel: 'Oct',
+    year: 2026, month: 10, day: 21, monthLabel: 'Oct',
     tag: 'Careers',
     title: 'Application & Recruitment Workshop',
-    meta: ['🕕 Time TBC', '📍 Room TBC'],
+    meta: ['🕓 4:00 – 6:00 PM', '📍 Room TBC'],
     desc: "An HR / recruiter-led session covering CV tips, cover letters, online assessments, and virtual and in-person interviews. Speaker to be confirmed."
   },
   {
     id: 'panel-failure',
-    year: 2026, month: 10, day: 26, monthLabel: 'Oct',
+    year: 2026, month: 10, day: 29, monthLabel: 'Oct',
     tag: 'Careers',
     title: 'Panel: Learning from Failure',
-    meta: ['🕕 Time TBC', '📍 Room TBC'],
+    meta: ['🕕 6:00 – 8:00 PM', '📍 Room TBC'],
     desc: "Speakers who changed career direction, recent graduates and young professionals talk rejections, career mistakes, and the parts of the journey that don't make it onto LinkedIn. Panellists to be confirmed."
   },
   {
@@ -52,10 +52,10 @@ const EVENTS = [
   },
   {
     id: 'networking-roundtables',
-    year: 2026, month: 11, day: 9, monthLabel: 'Nov',
+    year: 2026, month: 11, day: 12, monthLabel: 'Nov',
     tag: 'Careers',
     title: 'Networking Event: Industry Roundtables',
-    meta: ['🕕 Time TBC', '📍 Room TBC', '👔 Smart casual'],
+    meta: ['🕕 6:00 – 8:00 PM', '📍 Room TBC', '👔 Smart casual'],
     desc: "Rotate between roundtables on consulting, law, finance, healthcare, tech and marketing, spending 10–15 minutes at each table with industry guests. Guests to be confirmed."
   },
   {
