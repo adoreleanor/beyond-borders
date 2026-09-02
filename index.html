@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Beyond Borders · KCL BBSOC</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap');
 
   :root{
     --maroon-dark:#44090F;
@@ -143,7 +143,7 @@
   }
 
   /* ============ HOME ============ */
-  #home{
+  #home-view{
     min-height:100vh;
     background:
       radial-gradient(ellipse at 15% 10%, rgba(212,160,23,0.07) 0%, transparent 45%),
@@ -267,6 +267,7 @@
     transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
     position:relative;
     overflow:hidden;
+    cursor:pointer;
   }
 
   .tab-card::after{
@@ -447,11 +448,847 @@
     color:var(--gold-light);
     margin:6px 0;
   }
+
+  /* ── shared back-home pill (used by passport + events sections) ── */
+  .back-home{
+    position:fixed;
+    top:18px; left:18px;
+    z-index:200;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(74,10,20,0.75);
+    color:var(--gold-light);
+    text-decoration:none;
+    font-size:13px;
+    letter-spacing:1px;
+    padding:8px 16px;
+    border-radius:20px;
+    border:1px solid rgba(212,160,23,0.4);
+    backdrop-filter:blur(6px);
+    transition:background 0.2s;
+    cursor:pointer;
+  }
+  .back-home:hover{ background:rgba(74,10,20,0.95); }
+
+  /* ============ EVENTS VIEW ============ */
+  #events-view{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 15% 10%, rgba(212,160,23,0.07) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 90%, rgba(212,160,23,0.05) 0%, transparent 50%),
+      var(--maroon-dark);
+  }
+
+  #events-view .header{
+    text-align:center;
+    padding:80px 24px 40px;
+  }
+
+  #events-view .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(212,160,23,0.2);
+    border:1px solid rgba(212,160,23,0.4);
+    border-radius:20px;
+    padding:6px 16px;
+    font-size:12px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--gold-light);
+    margin-bottom:18px;
+  }
+
+  #events-view .header h1{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:700;
+    font-size:clamp(2.2rem,5.5vw,3.4rem);
+    color:var(--cream);
+  }
+  #events-view .header h1 span{ color:var(--gold-light); }
+
+  #events-view .header p{
+    margin-top:12px;
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-size:16px;
+    color:rgba(245,237,227,0.65);
+  }
+
+  #events-view .events-list{
+    max-width:820px;
+    margin:0 auto;
+    padding:20px 24px 100px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+
+  #events-view .placeholder-note{
+    max-width:820px;
+    margin:0 auto 8px;
+    padding:0 24px;
+    text-align:center;
+    font-size:13px;
+    color:rgba(245,237,227,0.5);
+    letter-spacing:0.5px;
+  }
+
+  #events-view .event-card{
+    display:flex;
+    gap:22px;
+    background:var(--cream);
+    border:1px solid rgba(212,160,23,0.3);
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 6px 24px rgba(0,0,0,0.25);
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  #events-view .event-card:hover{ transform:translateY(-3px); box-shadow:0 10px 30px rgba(0,0,0,0.32); }
+
+  #events-view .event-date{
+    flex-shrink:0;
+    width:74px;
+    height:74px;
+    border-radius:12px;
+    background:linear-gradient(135deg, var(--maroon-mid), var(--maroon));
+    border:1px solid rgba(212,160,23,0.35);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+  #events-view .event-date .month{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-light); }
+  #events-view .event-date .day{ font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:700; color:var(--cream); line-height:1.1; }
+
+  #events-view .event-body{ flex:1; }
+
+  #events-view .event-tag{
+    display:inline-block;
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:#8B6914;
+    background:rgba(212,160,23,0.18);
+    border-radius:10px;
+    padding:3px 10px;
+    margin-bottom:8px;
+  }
+
+  #events-view .event-body h2{
+    font-family:'Cormorant Garamond',serif;
+    font-size:21px;
+    font-weight:700;
+    margin-bottom:6px;
+    color:#3A0810;
+  }
+
+  #events-view .event-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    font-size:12.5px;
+    color:#6b5a4e;
+    margin-bottom:10px;
+  }
+  #events-view .event-meta span{ display:inline-flex; align-items:center; gap:5px; }
+
+  #events-view .event-body p.desc{
+    font-size:14px;
+    line-height:1.6;
+    color:#4a3d34;
+  }
+
+  /* ============ PASSPORT VIEW ============ */
+  #passport-view{
+    --pp-cream:#F5F0E8;
+    --pp-parchment:#EDE4D0;
+    --pp-brown-light:#C9A96E;
+    --pp-brown:#8B6914;
+    --pp-brown-dark:#5C0F1A;
+    --pp-terracotta:#6E0F1E;
+    --pp-terracotta-light:#8B1628;
+    --pp-forest:#3A6B4A;
+    --pp-forest-light:#4E8C62;
+    --pp-navy:#6E0F1E;
+    --pp-gold:#D4A017;
+    --pp-gold-light:#F0C040;
+    --pp-ink:#2C1810;
+    --pp-sage:#7A9E7E;
+    --pp-rust:#A0522D;
+    --pp-sand:#D4B896;
+    --pp-maroon:#6E0F1E;
+    --pp-maroon-mid:#8B1628;
+    --pp-maroon-dark:#4A0A14;
+
+    font-family:'Inter',sans-serif;
+    background-color:var(--pp-cream);
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(196,98,45,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(58,107,74,0.06) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A96E' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    color:var(--pp-ink);
+    min-height:100vh;
+  }
+
+  /* ── HEADER ── */
+  #passport-view .header{
+    background:linear-gradient(135deg, #4A0A14 0%, #6E0F1E 50%, #4A0A14 100%);
+    padding:40px 24px 60px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+
+  #passport-view .header::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='100' cy='100' r='80' fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.15'/%3E%3Ccircle cx='100' cy='100' r='60' fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.1'/%3E%3Ccircle cx='100' cy='100' r='40' fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.08'/%3E%3Cline x1='100' y1='0' x2='100' y2='200' stroke='%23ffffff' stroke-width='0.2' opacity='0.1'/%3E%3Cline x1='0' y1='100' x2='200' y2='100' stroke='%23ffffff' stroke-width='0.2' opacity='0.1'/%3E%3C/svg%3E");
+    background-size:200px 200px;
+    opacity:0.5;
+  }
+
+  #passport-view .header-content{ position:relative; z-index:1; max-width:700px; margin:0 auto; }
+
+  #passport-view .passport-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(212,160,23,0.2);
+    border:1px solid rgba(212,160,23,0.4);
+    border-radius:20px;
+    padding:6px 16px;
+    font-size:12px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--pp-gold-light);
+    margin-bottom:20px;
+  }
+
+  #passport-view .header h1{
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(2.4rem, 6vw, 4rem);
+    font-weight:900;
+    color:white;
+    line-height:1.1;
+    margin-bottom:12px;
+  }
+  #passport-view .header h1 span{ color:var(--pp-gold-light); }
+
+  #passport-view .header-tagline{
+    font-size:16px;
+    color:rgba(255,255,255,0.7);
+    font-style:italic;
+    margin-bottom:32px;
+    font-family:'Cormorant Garamond',serif;
+  }
+
+  /* ── MEMBER CARD ── */
+  #passport-view .member-card{
+    display:inline-flex;
+    align-items:center;
+    gap:16px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(212,160,23,0.3);
+    border-radius:12px;
+    padding:16px 24px;
+    backdrop-filter:blur(10px);
+  }
+
+  #passport-view .avatar{
+    width:52px; height:52px;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--pp-gold), var(--pp-terracotta));
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; font-weight:700; color:white;
+    font-family:'Cormorant Garamond',serif;
+  }
+
+  #passport-view .member-info{ text-align:left; }
+  #passport-view .member-name{ color:white; font-weight:600; font-size:15px; }
+  #passport-view .member-since{ color:rgba(255,255,255,0.5); font-size:12px; margin-top:2px; }
+
+  /* ── LEVEL BANNER ── */
+  #passport-view .level-banner{
+    background:linear-gradient(90deg, var(--pp-brown-dark), var(--pp-brown), var(--pp-brown-dark));
+    padding:20px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:40px;
+    flex-wrap:wrap;
+    border-bottom:3px solid var(--pp-gold);
+  }
+
+  #passport-view .level-item{ text-align:center; }
+  #passport-view .level-label{ font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--pp-sand); }
+  #passport-view .level-value{ font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:700; color:var(--pp-gold-light); }
+
+  #passport-view .level-badge{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(212,160,23,0.15);
+    border:2px solid var(--pp-gold);
+    border-radius:30px;
+    padding:8px 20px;
+  }
+
+  #passport-view .badge-icon{ font-size:24px; }
+  #passport-view .badge-title{ color:var(--pp-gold-light); font-weight:700; font-size:16px; }
+  #passport-view .badge-sub{ color:var(--pp-sand); font-size:11px; }
+
+  #passport-view .progress-bar-wrap{ width:200px; }
+
+  #passport-view .progress-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--pp-sand);
+    margin-bottom:6px;
+  }
+
+  #passport-view .progress-track{
+    height:8px;
+    background:rgba(255,255,255,0.1);
+    border-radius:4px;
+    overflow:hidden;
+  }
+
+  #passport-view .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--pp-gold), var(--pp-gold-light));
+    border-radius:4px;
+    transition:width 0.5s ease;
+  }
+
+  /* ── MAIN ── */
+  #passport-view .main{ max-width:1100px; margin:0 auto; padding:40px 20px 80px; }
+
+  #passport-view .section-header{ text-align:center; margin-bottom:36px; }
+  #passport-view .section-header h2{
+    font-family:'Cormorant Garamond',serif;
+    font-size:28px;
+    color:var(--pp-brown-dark);
+    margin-bottom:8px;
+  }
+  #passport-view .section-header p{ color:#7A6A5A; font-size:15px; }
+
+  /* ── CATEGORY CARDS ── */
+  #passport-view .categories{ display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:24px; margin-bottom:60px; }
+
+  #passport-view .category-card{
+    background:white;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 2px 20px rgba(92,64,8,0.08);
+    border:1px solid rgba(201,169,110,0.3);
+    transition:transform 0.2s, box-shadow 0.2s;
+  }
+  #passport-view .category-card:hover{ transform:translateY(-3px); box-shadow:0 8px 32px rgba(92,64,8,0.14); }
+
+  #passport-view .card-header{
+    padding:20px 22px 16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    position:relative;
+    overflow:hidden;
+  }
+  #passport-view .card-header::after{
+    content:'';
+    position:absolute;
+    right:-20px; top:-20px;
+    width:80px; height:80px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.15);
+  }
+
+  #passport-view .card-icon{ font-size:32px; flex-shrink:0; }
+
+  #passport-view .card-title{ flex:1; }
+  #passport-view .card-title h3{ font-family:'Cormorant Garamond',serif; font-size:18px; color:white; font-weight:700; }
+  #passport-view .card-title p{ font-size:12px; color:rgba(255,255,255,0.75); margin-top:2px; }
+
+  #passport-view .card-count{
+    background:rgba(255,255,255,0.25);
+    border-radius:20px;
+    padding:4px 12px;
+    font-size:13px;
+    font-weight:600;
+    color:white;
+    white-space:nowrap;
+  }
+
+  #passport-view .card-body{ padding:16px 22px 20px; }
+
+  #passport-view .stamp-list{ list-style:none; display:flex; flex-direction:column; gap:8px; }
+
+  #passport-view .stamp-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:all 0.2s;
+    border:2px solid transparent;
+    background:var(--pp-cream);
+  }
+  #passport-view .stamp-item:hover{ background:var(--pp-parchment); border-color:var(--pp-sand); }
+  #passport-view .stamp-item.earned{ background:#f0faf3; border-color:var(--pp-forest-light); }
+
+  #passport-view .stamp-checkbox{
+    width:28px; height:28px;
+    border-radius:50%;
+    border:2px solid var(--pp-sand);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+    transition:all 0.25s;
+    font-size:14px;
+    background:white;
+  }
+  #passport-view .stamp-item.earned .stamp-checkbox{ background:var(--pp-forest); border-color:var(--pp-forest); color:white; }
+
+  #passport-view .stamp-text{ flex:1; font-size:13.5px; color:var(--pp-ink); line-height:1.3; }
+  #passport-view .stamp-item.earned .stamp-text{ color:var(--pp-forest); font-weight:500; }
+
+  #passport-view .stamp-earned-badge{
+    font-size:11px;
+    background:var(--pp-forest);
+    color:white;
+    padding:2px 8px;
+    border-radius:10px;
+    opacity:0;
+    transition:opacity 0.3s;
+    white-space:nowrap;
+  }
+  #passport-view .stamp-item.earned .stamp-earned-badge{ opacity:1; }
+
+  #passport-view .stamp-event-link{
+    display:block;
+    font-size:10.5px;
+    color:var(--pp-forest);
+    margin-top:2px;
+    font-style:italic;
+  }
+
+  /* ── EVENT PICKER MODAL ── */
+  #passport-view .event-pick-overlay{
+    position:fixed; inset:0;
+    background:rgba(44,24,16,0.55);
+    backdrop-filter:blur(2px);
+    z-index:600;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  #passport-view .event-pick-overlay.open{ display:flex; }
+  #passport-view .event-pick-box{
+    background:white;
+    border-radius:16px;
+    padding:28px 26px;
+    max-width:380px;
+    width:100%;
+    box-shadow:0 24px 60px rgba(0,0,0,0.3);
+    position:relative;
+  }
+  #passport-view .event-pick-close{
+    position:absolute; top:12px; right:14px;
+    background:none; border:none; font-size:20px;
+    color:#8B7355; cursor:pointer; line-height:1;
+  }
+  #passport-view .event-pick-box h3{ font-family:'Cormorant Garamond',serif; font-size:21px; color:var(--pp-brown-dark); margin-bottom:6px; }
+  #passport-view .event-pick-sub{ font-size:13px; color:#7A6A5A; margin-bottom:16px; line-height:1.5; }
+  #passport-view .event-pick-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; max-height:260px; overflow-y:auto; }
+  #passport-view .event-pick-item{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; border-radius:10px;
+    border:1px solid var(--pp-parchment); background:var(--pp-cream);
+    cursor:pointer; text-align:left; width:100%;
+    font-family:'Inter', sans-serif; font-size:13.5px; color:var(--pp-ink);
+    transition:all 0.15s;
+  }
+  #passport-view .event-pick-item:hover{ border-color:var(--pp-gold); background:white; }
+  #passport-view .event-pick-item .ev-date-chip{
+    flex-shrink:0; width:38px; height:38px; border-radius:8px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:white; font-size:10px; font-weight:700; line-height:1.1;
+  }
+  #passport-view .event-pick-empty{ font-size:13px; color:#8B7355; font-style:italic; padding:8px 0 14px; }
+  #passport-view .event-pick-skip{
+    width:100%; background:var(--pp-parchment); border:none; border-radius:20px;
+    padding:10px; font-family:'Inter', sans-serif; font-size:12.5px;
+    color:var(--pp-brown-dark); cursor:pointer;
+  }
+  #passport-view .event-pick-skip:hover{ background:var(--pp-sand); }
+
+  /* Card colours */
+  #passport-view .cat-career .card-header{ background:linear-gradient(135deg, #4A0A14, #6E0F1E); }
+  #passport-view .cat-growth .card-header{ background:linear-gradient(135deg, #3A6B4A, #5A9A6A); }
+  #passport-view .cat-skill .card-header{ background:linear-gradient(135deg, #7B3F00, #B05A20); }
+  #passport-view .cat-community .card-header{ background:linear-gradient(135deg, #1A5F6B, #2A8B9B); }
+  #passport-view .cat-comfort .card-header{ background:linear-gradient(135deg, #B8860B, #D4A82A); }
+  #passport-view .cat-career .card-count{ background:rgba(255,255,255,0.2); }
+
+  /* ── UPCOMING TRIPS (calendar) ── */
+  #passport-view .trips-section{ margin-bottom:60px; }
+
+  #passport-view .trips-card{
+    background:white;
+    border-radius:16px;
+    padding:24px;
+    border:1px solid rgba(201,169,110,0.3);
+    box-shadow:0 2px 20px rgba(92,64,8,0.08);
+    max-width:520px;
+    margin:0 auto;
+  }
+
+  #passport-view .trips-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+  }
+  #passport-view .trips-nav button{
+    background:var(--pp-parchment);
+    border:none;
+    width:32px; height:32px;
+    border-radius:50%;
+    font-size:16px;
+    cursor:pointer;
+    color:var(--pp-brown-dark);
+    transition:background 0.2s;
+  }
+  #passport-view .trips-nav button:hover{ background:var(--pp-sand); }
+
+  #passport-view .trips-month-label{
+    font-family:'Cormorant Garamond',serif;
+    font-size:19px;
+    font-weight:700;
+    color:var(--pp-brown-dark);
+  }
+
+  #passport-view .trips-weekdays{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    text-align:center;
+    font-size:10.5px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#8B7355;
+    margin-bottom:6px;
+  }
+
+  #passport-view .trips-grid{ display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; }
+
+  #passport-view .trips-day{
+    aspect-ratio:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    border-radius:8px;
+    color:var(--pp-ink);
+    background:var(--pp-cream);
+    position:relative;
+  }
+  #passport-view .trips-day.empty{ visibility:hidden; }
+  #passport-view .trips-day.has-event{
+    cursor:pointer;
+    font-weight:700;
+    color:white;
+    transition:transform 0.15s ease;
+  }
+  #passport-view .trips-day.has-event:hover{ transform:scale(1.08); }
+  #passport-view .trips-day.has-event::after{
+    content:'';
+    position:absolute;
+    bottom:3px; left:50%;
+    transform:translateX(-50%);
+    width:4px; height:4px;
+    border-radius:50%;
+    background:white;
+    opacity:0.85;
+  }
+
+  #passport-view .trips-legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:16px;
+    padding-top:14px;
+    border-top:1px solid var(--pp-parchment);
+    font-size:11.5px;
+    color:#7A6A5A;
+  }
+  #passport-view .trips-legend span{ display:inline-flex; align-items:center; gap:5px; }
+  #passport-view .trips-legend .dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+
+  /* ── LEVELS SECTION ── */
+  #passport-view .levels-section{ margin-bottom:60px; }
+  #passport-view .levels-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; }
+
+  #passport-view .level-card{
+    background:white;
+    border-radius:14px;
+    padding:22px 20px;
+    text-align:center;
+    border:2px solid var(--pp-parchment);
+    transition:all 0.3s;
+    position:relative;
+    overflow:hidden;
+  }
+  #passport-view .level-card.unlocked{
+    border-color:var(--pp-gold);
+    background:linear-gradient(135deg, #fffbf0, white);
+    box-shadow:0 4px 20px rgba(212,160,23,0.2);
+  }
+  #passport-view .level-card.unlocked::before{
+    content:'✓ UNLOCKED';
+    position:absolute;
+    top:10px; right:-22px;
+    background:var(--pp-gold);
+    color:white;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:1px;
+    padding:4px 30px;
+    transform:rotate(45deg);
+  }
+
+  #passport-view .level-emoji{ font-size:36px; margin-bottom:8px; }
+  #passport-view .level-name{ font-family:'Cormorant Garamond',serif; font-size:17px; font-weight:700; color:var(--pp-brown-dark); margin-bottom:4px; }
+  #passport-view .level-req{ font-size:13px; color:#8B7355; margin-bottom:12px; }
+
+  #passport-view .level-reward{
+    font-size:12px;
+    background:var(--pp-parchment);
+    border-radius:8px;
+    padding:6px 10px;
+    color:var(--pp-brown);
+    font-style:italic;
+  }
+  #passport-view .level-card.unlocked .level-reward{
+    background:rgba(212,160,23,0.1);
+    color:var(--pp-brown-dark);
+    font-style:normal;
+    font-weight:500;
+  }
+
+  /* ── LEADERBOARD ── */
+  #passport-view .stats-section{ margin-bottom:60px; }
+  #passport-view .stats-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:16px; }
+
+  #passport-view .stat-card{
+    background:white;
+    border-radius:14px;
+    padding:24px 20px;
+    text-align:center;
+    border:1px solid rgba(201,169,110,0.25);
+    box-shadow:0 2px 12px rgba(92,64,8,0.06);
+  }
+  #passport-view .stat-number{
+    font-family:'Cormorant Garamond',serif;
+    font-size:36px;
+    font-weight:900;
+    color:var(--pp-terracotta);
+    line-height:1;
+    margin-bottom:6px;
+  }
+  #passport-view .stat-label{ font-size:13px; color:#7A6A5A; line-height:1.4; }
+
+  /* ── MONTHLY THEMES ── */
+  #passport-view .themes-section{ margin-bottom:60px; }
+  #passport-view .themes-scroll{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; }
+
+  #passport-view .theme-card{
+    background:white;
+    border-radius:12px;
+    padding:18px 16px;
+    text-align:center;
+    border:1px solid rgba(201,169,110,0.25);
+    transition:transform 0.2s;
+    position:relative;
+  }
+  #passport-view .theme-card:hover{ transform:translateY(-2px); }
+  #passport-view .theme-card.current{
+    border-color:var(--pp-terracotta);
+    background:linear-gradient(135deg, #fff8f5, white);
+  }
+  #passport-view .theme-card.current::after{
+    content:'NOW';
+    position:absolute;
+    top:-8px; left:50%; transform:translateX(-50%);
+    background:var(--pp-terracotta);
+    color:white;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:1px;
+    padding:2px 8px;
+    border-radius:10px;
+  }
+  #passport-view .theme-month{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--pp-sand); margin-bottom:4px; }
+  #passport-view .theme-name{ font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:700; color:var(--pp-brown-dark); margin-bottom:6px; }
+  #passport-view .theme-action{ font-size:12px; color:#7A6A5A; line-height:1.4; }
+
+  /* ── TOAST ── */
+  #passport-view .toast{
+    position:fixed;
+    bottom:32px; left:50%; transform:translateX(-50%) translateY(100px);
+    background:linear-gradient(135deg, var(--pp-forest), var(--pp-forest-light));
+    color:white;
+    padding:14px 24px;
+    border-radius:40px;
+    font-size:14px;
+    font-weight:500;
+    box-shadow:0 8px 32px rgba(0,0,0,0.2);
+    transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    z-index:100;
+    white-space:nowrap;
+    max-width:90vw;
+  }
+  #passport-view .toast.show{ transform:translateX(-50%) translateY(0); }
+  #passport-view .toast.gold{ background:linear-gradient(135deg, var(--pp-brown), var(--pp-gold)); }
+
+  /* ── FOOTER (passport-specific) ── */
+  #passport-view footer{
+    background:var(--pp-brown-dark);
+    color:rgba(255,255,255,0.5);
+    text-align:center;
+    padding:24px;
+    font-size:13px;
+  }
+  #passport-view footer strong{ color:var(--pp-gold-light); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes stamp-in{
+    0% { transform:scale(1.4) rotate(-8deg); opacity:0; }
+    60% { transform:scale(0.9) rotate(2deg); }
+    100% { transform:scale(1) rotate(0deg); opacity:1; }
+  }
+  #passport-view .stamp-item.just-earned .stamp-checkbox{ animation:stamp-in 0.5s ease forwards; }
+
+  @keyframes levelup{
+    0%, 100% { transform:scale(1); }
+    50% { transform:scale(1.08); }
+  }
+  #passport-view .level-card.just-unlocked{ animation:levelup 0.6s ease; }
+
+  #passport-view .ornament-divider{ text-align:center; margin:48px 0 36px; position:relative; }
+  #passport-view .ornament-divider::before{
+    content:'';
+    position:absolute;
+    top:50%; left:0; right:0;
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--pp-sand), transparent);
+  }
+  #passport-view .ornament-divider span{
+    position:relative;
+    background:var(--pp-cream);
+    padding:0 20px;
+    font-family:'Cormorant Garamond',serif;
+    font-size:22px;
+    color:var(--pp-brown-light);
+  }
+
+  /* ── PASSPORT INTRO ANIMATION (plane) ── */
+  #intro-overlay{
+    position:fixed;
+    inset:0;
+    background:#4A0A14;
+    z-index:1000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  #intro-overlay.fade-out{ animation:overlayFade 0.7s ease forwards; }
+  @keyframes overlayFade{ 0% { opacity:1; } 100% { opacity:0; pointer-events:none; } }
+
+  #flight-path-svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+  #flight-path-line{
+    stroke:rgba(255,255,255,0.25);
+    stroke-width:2;
+    stroke-dasharray:10 8;
+    fill:none;
+    stroke-dashoffset:1000;
+    animation:drawPath 1.8s ease forwards 0.3s;
+  }
+  @keyframes drawPath{ to { stroke-dashoffset:0; } }
+
+  #intro-plane{
+    position:absolute;
+    width:160px;
+    height:160px;
+    offset-path:path('M -80 420 Q 300 380 500 260 Q 700 140 1120 -60');
+    offset-distance:0%;
+    offset-rotate:auto;
+    animation:flyPlane 2s cubic-bezier(0.4, 0, 0.6, 1) forwards 0.2s;
+    filter:drop-shadow(0 6px 24px rgba(0,0,0,0.5));
+  }
+  @keyframes flyPlane{
+    0%   { offset-distance:0%;   opacity:1; }
+    85%  { opacity:1; }
+    100% { offset-distance:100%; opacity:0; }
+  }
+
+  #intro-text{
+    position:absolute;
+    bottom:38%;
+    left:50%;
+    transform:translateX(-50%);
+    text-align:center;
+    animation:introTextAnim 2.2s ease forwards 0.1s;
+    opacity:0;
+    white-space:nowrap;
+  }
+  @keyframes introTextAnim{
+    0%   { opacity:0; transform:translateX(-50%) translateY(12px); }
+    20%  { opacity:1; transform:translateX(-50%) translateY(0); }
+    75%  { opacity:1; }
+    100% { opacity:0; }
+  }
+  #intro-text .intro-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(2rem, 6vw, 3.6rem);
+    font-weight:700;
+    color:white;
+    letter-spacing:4px;
+    display:block;
+  }
+  #intro-text .intro-sub{
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(0.9rem, 2vw, 1.2rem);
+    color:rgba(255,255,255,0.55);
+    letter-spacing:6px;
+    text-transform:uppercase;
+    display:block;
+    margin-top:6px;
+  }
+
+  .trail-dot{
+    position:absolute;
+    width:8px; height:8px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.5);
+    animation:dotPop 0.4s ease forwards;
+    transform:scale(0);
+  }
+  @keyframes dotPop{
+    0%   { transform:scale(0); opacity:0.8; }
+    50%  { transform:scale(1); opacity:0.6; }
+    100% { transform:scale(0.6); opacity:0; }
+  }
 </style>
 </head>
 <body>
 
-<!-- ===== INTRO ANIMATION ===== -->
+<!-- ===== INTRO ANIMATION (icon assembly, home) ===== -->
 <div id="intro-screen" title="Click to skip">
   <div class="logo-stage">
 
@@ -505,8 +1342,8 @@
 
 <button id="skip-intro">Skip ›</button>
 
-<!-- ===== HOME SCREEN ===== -->
-<div id="home">
+<!-- ===== HOME VIEW ===== -->
+<div id="home-view">
   <nav class="top-nav">
     <div class="nav-links">
       <a href="about.html">About Us</a>
@@ -530,7 +1367,7 @@
   </div>
 
   <div class="tabs">
-    <a class="tab-card" href="beyond-borders-passport.html" target="_blank" rel="noopener">
+    <a class="tab-card" href="#passport">
       <div class="tab-icon">🌍</div>
       <h2>Beyond Borders Passport</h2>
       <p>Collect stamps across career, growth, skills, community and comfort-zone challenges — track your journey and unlock rewards.</p>
@@ -544,13 +1381,210 @@
       <span class="tab-enter">Open Wellbeing Board &rarr;</span>
     </a>
 
-    <a class="tab-card" href="events.html" target="_blank" rel="noopener">
+    <a class="tab-card" href="#events">
       <div class="tab-icon">📅</div>
       <h2>Upcoming Events</h2>
       <p>See what's next on the society calendar — socials, workshops, networking and more.</p>
       <span class="tab-enter">View Events &rarr;</span>
     </a>
   </div>
+
+  <footer>KCL Beyond Borders Society</footer>
+</div>
+
+<!-- ===== PASSPORT VIEW ===== -->
+<div id="passport-view" style="display:none;">
+
+  <a class="back-home" href="#">&larr; Beyond Borders Home</a>
+
+  <!-- PASSPORT INTRO OVERLAY (plane) -->
+  <div id="intro-overlay">
+    <svg id="flight-path-svg" viewBox="0 0 1100 600" preserveAspectRatio="xMidYMid slice">
+      <path id="flight-path-line" d="M -80 520 Q 300 480 500 320 Q 700 160 1180 -60"/>
+    </svg>
+
+    <div id="intro-plane">
+      <svg viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M96 30 L4 4 L32 30 Z" fill="white"/>
+        <path d="M96 30 L4 56 L32 30 Z" fill="rgba(255,255,255,0.72)"/>
+        <path d="M4 4 L4 30 L32 30 Z" fill="rgba(255,255,255,0.45)"/>
+        <line x1="4" y1="30" x2="96" y2="30" stroke="rgba(110,15,30,0.35)" stroke-width="1.2"/>
+        <line x1="4" y1="4" x2="32" y2="30" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
+      </svg>
+    </div>
+
+    <div id="intro-text">
+      <span class="intro-title">Beyond Borders</span>
+      <span class="intro-sub">KCL · Digital Passport</span>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-content">
+      <div class="passport-badge">🌍 Digital Passport · KCL Beyond Borders Society</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;">
+        <img src="logo.png" alt="KCL BBSOC Logo" style="width:90px;height:90px;object-fit:contain;flex-shrink:0;filter:brightness(1.08);">
+        <h1 style="text-align:left;">Beyond <span>Borders</span></h1>
+      </div>
+      <p class="header-tagline">"Collect experiences, not expectations."</p>
+      <div class="member-card">
+        <div class="avatar" id="avatarInitial">?</div>
+        <div class="member-info">
+          <div class="member-name" id="memberName">Not signed in</div>
+          <div class="member-since" id="memberSince">
+            <a href="#" onclick="document.getElementById('signInNavBtn').click(); return false;" style="color:var(--pp-gold-light);text-decoration:underline;">Sign in</a> to get your passport number
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- LEVEL BANNER -->
+  <div class="level-banner">
+    <div class="level-item">
+      <div class="level-label">Total Stamps</div>
+      <div class="level-value" id="totalStamps">0</div>
+    </div>
+    <div class="level-badge">
+      <div class="badge-icon" id="badgeIcon">🌱</div>
+      <div class="badge-text">
+        <div class="badge-title" id="badgeTitle">Explorer</div>
+        <div class="badge-sub" id="badgeSub">Earn 5 stamps to advance</div>
+      </div>
+    </div>
+    <div class="level-item progress-bar-wrap">
+      <div class="progress-label">
+        <span id="progressLabel">Progress to Adventurer</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- CATEGORIES -->
+    <div class="section-header">
+      <h2>Your Passport Countries</h2>
+      <p>Click any stamp to mark it earned — every experience counts</p>
+    </div>
+
+    <div class="categories" id="categoriesGrid"></div>
+
+    <div class="ornament-divider"><span>✦</span></div>
+
+    <!-- UPCOMING TRIPS -->
+    <div class="trips-section">
+      <div class="section-header">
+        <h2>Upcoming Trips</h2>
+        <p>Your society calendar — click a marked day for the full details</p>
+      </div>
+      <div class="trips-card">
+        <div class="trips-nav">
+          <button id="tripsPrev" aria-label="Previous month">‹</button>
+          <div class="trips-month-label" id="tripsMonthLabel"></div>
+          <button id="tripsNext" aria-label="Next month">›</button>
+        </div>
+        <div class="trips-weekdays"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+        <div class="trips-grid" id="tripsGrid"></div>
+        <div class="trips-legend">
+          <span><span class="dot" style="background:#6E0F1E"></span>Social</span>
+          <span><span class="dot" style="background:#B8860B"></span>Careers</span>
+          <span><span class="dot" style="background:#3A6B4A"></span>Wellbeing</span>
+          <span><span class="dot" style="background:#1A5F6B"></span>Formal</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ornament-divider"><span>✦</span></div>
+
+    <!-- LEVELS -->
+    <div class="levels-section">
+      <div class="section-header">
+        <h2>Levels & Rewards</h2>
+        <p>Each milestone unlocks recognition and rewards</p>
+      </div>
+      <div class="levels-grid" id="levelsGrid"></div>
+    </div>
+
+    <div class="ornament-divider"><span>✦</span></div>
+
+    <!-- COLLECTIVE STATS -->
+    <div class="stats-section">
+      <div class="section-header">
+        <h2>Society Collective</h2>
+        <p>Celebrating what we've achieved together — not who's ahead</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="statTotal">0</div>
+          <div class="stat-label">experiences completed this semester</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">46</div>
+          <div class="stat-label">members attended their first networking event</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">30</div>
+          <div class="stat-label">members volunteered in the community</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">128</div>
+          <div class="stat-label">total society members on their journey</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ornament-divider"><span>✦</span></div>
+
+    <!-- MONTHLY THEMES -->
+    <div class="themes-section">
+      <div class="section-header">
+        <h2>Monthly Themes</h2>
+        <p>Each month brings a new focus for your journey</p>
+      </div>
+      <div class="themes-scroll" id="themesGrid"></div>
+    </div>
+
+  </main>
+
+  <footer>
+    <strong>KCL Beyond Borders Society</strong> · Digital Passport · Built for explorers, dreamers & doers
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- EVENT PICKER MODAL -->
+  <div class="event-pick-overlay" id="eventPickOverlay">
+    <div class="event-pick-box">
+      <button class="event-pick-close" id="eventPickClose">&times;</button>
+      <h3>Which trip was this?</h3>
+      <p class="event-pick-sub">Link this stamp to the event you attended — totally optional.</p>
+      <div class="event-pick-list" id="eventPickList"></div>
+      <button class="event-pick-skip" id="eventPickSkip">Mark earned without linking an event</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== EVENTS VIEW ===== -->
+<div id="events-view" style="display:none;">
+
+  <a class="back-home" href="#">&larr; Beyond Borders Home</a>
+
+  <div class="header">
+    <div class="badge">🗓️ Society Calendar</div>
+    <h1>Upcoming <span>Events</span></h1>
+    <p>"Collect experiences, not expectations."</p>
+  </div>
+
+  <p class="placeholder-note">Semester 1 line-up below — some times, rooms and speakers are still being finalised and will be updated closer to each event.</p>
+
+  <div class="events-list" id="eventsList"></div>
 
   <footer>KCL Beyond Borders Society</footer>
 </div>
@@ -603,6 +1637,533 @@
   </div>
 </div>
 
+<!-- Shared event data (used by both Passport trips calendar and Events view) -->
+<script src="events-data.js"></script>
+
+<!-- ===== PASSPORT LOGIC ===== -->
+<script>
+const CATEGORIES = [
+  {
+    id: 'career', cls: 'cat-career', icon: '💼', title: 'Career Explorer', sub: 'Professional development',
+    stamps: [
+      'Attend a careers fair',
+      'Visit an employer insight day',
+      'Speak to a recruiter',
+      'Attend a Beyond Borders networking event',
+      'Apply for your first internship',
+    ]
+  },
+  {
+    id: 'growth', cls: 'cat-growth', icon: '🧠', title: 'Personal Growth', sub: 'Wellbeing & reflection',
+    stamps: [
+      'Attend a wellbeing event',
+      'Complete a mindfulness session',
+      'Join a wellbeing walk',
+      'Write a reflection on the Wellbeing Board',
+      'Support another member by replying to a post',
+    ]
+  },
+  {
+    id: 'skill', cls: 'cat-skill', icon: '🚀', title: 'Skill Builder', sub: 'Knowledge & capability',
+    stamps: [
+      'Learn a new software',
+      'Complete a LinkedIn Learning course',
+      'Improve your CV',
+      'Attend an interview workshop',
+      'Give a presentation',
+      'Learn basic Excel or Canva',
+    ]
+  },
+  {
+    id: 'community', cls: 'cat-community', icon: '🌍', title: 'Community', sub: 'Give back & connect',
+    stamps: [
+      'Volunteer',
+      'Attend three society socials',
+      'Bring a friend to an event',
+      'Become a Beyond Buddy',
+      'Mentor a new member',
+    ]
+  },
+  {
+    id: 'comfort', cls: 'cat-comfort', icon: '🎯', title: 'Comfort Zone', sub: 'Small steps, big growth',
+    stamps: [
+      'Introduce yourself to someone new',
+      'Go to an event alone',
+      'Ask a question during a talk',
+      'Message an alumnus',
+      'Apply for a role you\'re unsure about',
+    ]
+  },
+];
+
+const LEVELS = [
+  { emoji: '🌱', name: 'Explorer',      req: 5,  reward: 'LinkedIn shout-out from the society' },
+  { emoji: '🧭', name: 'Adventurer',    req: 10, reward: 'Official Beyond Borders certificate' },
+  { emoji: '🚀', name: 'Trailblazer',   req: 20, reward: 'Society merchandise (hoodie or tote)' },
+  { emoji: '🌟', name: 'BB Ambassador', req: 30, reward: 'Priority networking event + end-of-year award' },
+];
+
+const MONTHS = [
+  { month: 'October',  name: 'Explore',   action: 'Attend one new event', current: false },
+  { month: 'November', name: 'Connect',   action: 'Speak to someone new', current: false },
+  { month: 'December', name: 'Reflect',   action: 'Complete a journal prompt', current: false },
+  { month: 'January',  name: 'Challenge', action: 'Apply for one opportunity', current: false },
+  { month: 'February', name: 'Give Back', action: 'Volunteer or help a member', current: false },
+  { month: 'March',    name: 'Grow',      action: 'Learn a new skill', current: true },
+];
+
+let earned = {};
+CATEGORIES.forEach(c => { earned[c.id] = new Set(); });
+
+const EVENT_LINKABLE_STAMPS = {
+  'career-0': 'Careers', 'career-3': 'Careers', 'growth-0': 'Wellbeing', 'growth-2': 'Wellbeing',
+  'skill-3': 'Careers', 'community-1': 'Social', 'community-2': null, 'comfort-1': null, 'comfort-2': 'Careers',
+};
+let stampEventLinks = {};
+let pendingStampPick = null;
+
+function totalEarned() { return Object.values(earned).reduce((s, set) => s + set.size, 0); }
+
+function getLevelInfo(total) {
+  let current = { emoji: '🌱', name: 'Explorer', req: 5 };
+  for (const l of LEVELS) { if (total >= l.req) current = l; }
+  const idx = LEVELS.indexOf(current);
+  const next = LEVELS[idx + 1] || null;
+  return { current, next, idx };
+}
+
+function updateBanner() {
+  const total = totalEarned();
+  document.getElementById('totalStamps').textContent = total;
+  document.getElementById('statTotal').textContent = total + 128;
+
+  const { current, next } = getLevelInfo(total);
+  document.getElementById('badgeIcon').textContent = current.emoji;
+  document.getElementById('badgeTitle').textContent = current.name;
+
+  if (next) {
+    const pct = Math.round((total / next.req) * 100);
+    document.getElementById('progressFill').style.width = Math.min(pct, 100) + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressLabel').textContent = `Progress to ${next.name}`;
+    document.getElementById('badgeSub').textContent = `Earn ${next.req - total} more stamp${next.req - total !== 1 ? 's' : ''} to advance`;
+  } else {
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('progressPct').textContent = '100%';
+    document.getElementById('progressLabel').textContent = 'Max level reached!';
+    document.getElementById('badgeSub').textContent = 'You\'ve reached Ambassador status!';
+  }
+
+  document.querySelectorAll('#passport-view .level-card').forEach((card, i) => {
+    const unlocked = total >= LEVELS[i].req;
+    const wasUnlocked = card.classList.contains('unlocked');
+    if (unlocked && !wasUnlocked) {
+      card.classList.add('unlocked', 'just-unlocked');
+      setTimeout(() => card.classList.remove('just-unlocked'), 700);
+    } else if (!unlocked) {
+      card.classList.remove('unlocked');
+    }
+  });
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function buildCategories() {
+  const grid = document.getElementById('categoriesGrid');
+  grid.innerHTML = '';
+
+  CATEGORIES.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = `category-card ${cat.cls}`;
+    card.id = `cat-${cat.id}`;
+    const countId = `count-${cat.id}`;
+
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-icon">${cat.icon}</div>
+        <div class="card-title">
+          <h3>${cat.title}</h3>
+          <p>${cat.sub}</p>
+        </div>
+        <div class="card-count" id="${countId}">${earned[cat.id].size} / ${cat.stamps.length}</div>
+      </div>
+      <div class="card-body">
+        <ul class="stamp-list" id="stamps-${cat.id}"></ul>
+      </div>
+    `;
+    grid.appendChild(card);
+
+    const list = document.getElementById(`stamps-${cat.id}`);
+    cat.stamps.forEach((stamp, idx) => {
+      const li = document.createElement('li');
+      li.className = 'stamp-item' + (earned[cat.id].has(idx) ? ' earned' : '');
+      li.dataset.cat = cat.id;
+      li.dataset.idx = idx;
+      li.innerHTML = `
+        <div class="stamp-checkbox">✓</div>
+        <span class="stamp-text">${stamp}</span>
+        <span class="stamp-earned-badge">Stamped ✦</span>
+      `;
+      li.addEventListener('click', () => toggleStamp(cat.id, idx, li));
+      list.appendChild(li);
+      updateStampLinkDisplay(li, `${cat.id}-${idx}`);
+    });
+  });
+}
+
+function toggleStamp(catId, idx, li) {
+  const key = `${catId}-${idx}`;
+  const aboutToEarn = !earned[catId].has(idx);
+  if (aboutToEarn && key in EVENT_LINKABLE_STAMPS) {
+    openEventPicker(catId, idx, li);
+    return;
+  }
+  completeStampToggle(catId, idx, li, null);
+}
+
+function completeStampToggle(catId, idx, li, linkedEventId) {
+  const cat = CATEGORIES.find(c => c.id === catId);
+  const key = `${catId}-${idx}`;
+  const prevTotal = totalEarned();
+  const { current: prevLevel } = getLevelInfo(prevTotal);
+
+  let nowEarned;
+  if (earned[catId].has(idx)) {
+    earned[catId].delete(idx);
+    li.classList.remove('earned', 'just-earned');
+    nowEarned = false;
+    delete stampEventLinks[key];
+  } else {
+    earned[catId].add(idx);
+    li.classList.add('earned', 'just-earned');
+    setTimeout(() => li.classList.remove('just-earned'), 500);
+    nowEarned = true;
+    if (linkedEventId) stampEventLinks[key] = linkedEventId;
+  }
+  updateStampLinkDisplay(li, key);
+
+  if (typeof saveStampToggle === 'function') {
+    saveStampToggle(catId, idx, nowEarned, nowEarned ? (linkedEventId || null) : null);
+  }
+
+  const count = earned[catId].size;
+  document.getElementById(`count-${catId}`).textContent = `${count} / ${cat.stamps.length}`;
+
+  const newTotal = totalEarned();
+  const { current: newLevel } = getLevelInfo(newTotal);
+
+  updateBanner();
+
+  if (earned[catId].has(idx)) {
+    if (newLevel.name !== prevLevel.name) {
+      showToast(`🎉 Level up! You're now a ${newLevel.name} ${newLevel.emoji}`, 'gold');
+    } else if (linkedEventId && typeof EVENTS !== 'undefined') {
+      const ev = EVENTS.find(e => e.id === linkedEventId);
+      showToast(`✦ Stamp earned: ${cat.stamps[idx]}${ev ? ' — ' + ev.title : ''}`);
+    } else {
+      showToast(`✦ Stamp earned: ${cat.stamps[idx]}`);
+    }
+  }
+}
+
+function updateStampLinkDisplay(li, key) {
+  let linkEl = li.querySelector('.stamp-event-link');
+  const eventId = stampEventLinks[key];
+  if (eventId && typeof EVENTS !== 'undefined') {
+    const ev = EVENTS.find(e => e.id === eventId);
+    if (ev) {
+      if (!linkEl) {
+        linkEl = document.createElement('span');
+        linkEl.className = 'stamp-event-link';
+        li.querySelector('.stamp-text').insertAdjacentElement('afterend', linkEl);
+      }
+      linkEl.textContent = '🎫 ' + ev.title;
+      return;
+    }
+  }
+  if (linkEl) linkEl.remove();
+}
+
+function openEventPicker(catId, idx, li) {
+  pendingStampPick = { catId, idx, li };
+  const key = `${catId}-${idx}`;
+  const tagFilter = EVENT_LINKABLE_STAMPS[key];
+  const listEl = document.getElementById('eventPickList');
+  listEl.innerHTML = '';
+
+  const events = typeof EVENTS !== 'undefined' ? EVENTS : [];
+  const matches = tagFilter ? events.filter(e => e.tag === tagFilter) : events;
+
+  if (!matches.length) {
+    listEl.innerHTML = '<p class="event-pick-empty">No matching events on the calendar yet — you can still mark this earned below.</p>';
+  } else {
+    matches.forEach(ev => {
+      const btn = document.createElement('button');
+      btn.className = 'event-pick-item';
+      btn.innerHTML = `
+        <span class="ev-date-chip" style="background:${TRIP_TAG_COLORS[ev.tag] || '#6E0F1E'}">${ev.monthLabel}<br>${String(ev.day).padStart(2,'0')}</span>
+        <span>${ev.title}</span>
+      `;
+      btn.addEventListener('click', () => {
+        closeEventPicker();
+        completeStampToggle(pendingStampPick.catId, pendingStampPick.idx, pendingStampPick.li, ev.id);
+      });
+      listEl.appendChild(btn);
+    });
+  }
+
+  document.getElementById('eventPickOverlay').classList.add('open');
+}
+
+function closeEventPicker() {
+  document.getElementById('eventPickOverlay').classList.remove('open');
+  pendingStampPick = null;
+}
+
+document.getElementById('eventPickClose').addEventListener('click', closeEventPicker);
+document.getElementById('eventPickSkip').addEventListener('click', () => {
+  if (pendingStampPick) {
+    completeStampToggle(pendingStampPick.catId, pendingStampPick.idx, pendingStampPick.li, null);
+  }
+  closeEventPicker();
+});
+document.getElementById('eventPickOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'eventPickOverlay') closeEventPicker();
+});
+
+function buildLevels() {
+  const grid = document.getElementById('levelsGrid');
+  LEVELS.forEach(l => {
+    const card = document.createElement('div');
+    card.className = 'level-card';
+    card.innerHTML = `
+      <div class="level-emoji">${l.emoji}</div>
+      <div class="level-name">${l.name}</div>
+      <div class="level-req">${l.req} stamps required</div>
+      <div class="level-reward">${l.reward}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function buildThemes() {
+  const grid = document.getElementById('themesGrid');
+  MONTHS.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'theme-card' + (m.current ? ' current' : '');
+    card.innerHTML = `
+      <div class="theme-month">${m.month}</div>
+      <div class="theme-name">${m.name}</div>
+      <div class="theme-action">${m.action}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ── UPCOMING TRIPS CALENDAR ──
+const TRIP_TAG_COLORS = { Social:'#6E0F1E', Careers:'#B8860B', Wellbeing:'#3A6B4A', Formal:'#1A5F6B' };
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+let tripsViewYear = (typeof EVENTS !== 'undefined' && EVENTS.length) ? EVENTS[0].year : new Date().getFullYear();
+let tripsViewMonth = (typeof EVENTS !== 'undefined' && EVENTS.length) ? EVENTS[0].month : (new Date().getMonth() + 1);
+
+function renderTripsCalendar() {
+  const label = document.getElementById('tripsMonthLabel');
+  const grid = document.getElementById('tripsGrid');
+  if (!label || !grid) return;
+
+  label.textContent = `${MONTH_NAMES[tripsViewMonth - 1]} ${tripsViewYear}`;
+  grid.innerHTML = '';
+
+  const firstDay = new Date(tripsViewYear, tripsViewMonth - 1, 1);
+  const daysInMonth = new Date(tripsViewYear, tripsViewMonth, 0).getDate();
+  let startOffset = firstDay.getDay() - 1;
+  if (startOffset < 0) startOffset = 6;
+
+  for (let i = 0; i < startOffset; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'trips-day empty';
+    grid.appendChild(cell);
+  }
+
+  const events = typeof EVENTS !== 'undefined' ? EVENTS : [];
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cell = document.createElement('div');
+    cell.className = 'trips-day';
+    cell.textContent = d;
+
+    const ev = events.find(e => e.year === tripsViewYear && e.month === tripsViewMonth && e.day === d);
+    if (ev) {
+      cell.classList.add('has-event');
+      cell.style.background = TRIP_TAG_COLORS[ev.tag] || 'var(--pp-terracotta)';
+      cell.title = `${ev.title} — click for details`;
+      cell.addEventListener('click', () => { location.hash = 'ev-' + ev.id; });
+    }
+    grid.appendChild(cell);
+  }
+}
+
+document.getElementById('tripsPrev').addEventListener('click', () => {
+  tripsViewMonth--;
+  if (tripsViewMonth < 1) { tripsViewMonth = 12; tripsViewYear--; }
+  renderTripsCalendar();
+});
+document.getElementById('tripsNext').addEventListener('click', () => {
+  tripsViewMonth++;
+  if (tripsViewMonth > 12) { tripsViewMonth = 1; tripsViewYear++; }
+  renderTripsCalendar();
+});
+
+// Init passport UI (safe to run while section is hidden)
+buildCategories();
+buildLevels();
+buildThemes();
+updateBanner();
+renderTripsCalendar();
+
+// ── Passport plane intro: plays once per session, the first time the
+// Passport section is opened (not on every toggle) ──
+let passportIntroPlayed = sessionStorage.getItem('bbPassportIntroShown') === '1';
+
+function spawnTrailDots(overlay) {
+  const pathEl = document.querySelector('#flight-path-line');
+  let dotCount = 0;
+  const maxDots = 18;
+
+  function spawnDot() {
+    if (dotCount >= maxDots || !pathEl) return;
+    const t = dotCount / maxDots;
+    let x, y;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const sx = vw / 1100;
+    const sy = vh / 600;
+
+    if (t < 0.5) {
+      const u = t * 2;
+      x = (1-u)*(1-u)*(-80) + 2*(1-u)*u*(300) + u*u*(500);
+      y = (1-u)*(1-u)*(520) + 2*(1-u)*u*(480) + u*u*(320);
+    } else {
+      const u = (t - 0.5) * 2;
+      x = (1-u)*(1-u)*(500) + 2*(1-u)*u*(700) + u*u*(1180);
+      y = (1-u)*(1-u)*(320) + 2*(1-u)*u*(160) + u*u*(-60);
+    }
+
+    const dot = document.createElement('div');
+    dot.className = 'trail-dot';
+    dot.style.left = (x * sx) + 'px';
+    dot.style.top  = (y * sy) + 'px';
+    overlay.appendChild(dot);
+    dotCount++;
+    setTimeout(() => dot.remove(), 800);
+  }
+
+  for (let i = 0; i < maxDots; i++) {
+    setTimeout(spawnDot, 250 + i * 90);
+  }
+}
+
+function maybePlayPassportIntro() {
+  const overlay = document.getElementById('intro-overlay');
+  if (!overlay) return;
+  if (passportIntroPlayed) { overlay.style.display = 'none'; return; }
+
+  passportIntroPlayed = true;
+  sessionStorage.setItem('bbPassportIntroShown', '1');
+
+  overlay.style.display = 'flex';
+  overlay.classList.remove('fade-out');
+
+  // restart the CSS animations on the plane / path / text
+  const plane = document.getElementById('intro-plane');
+  const pathEl = document.getElementById('flight-path-line');
+  const textEl = document.getElementById('intro-text');
+  [plane, pathEl, textEl].forEach(el => {
+    if (!el) return;
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = '';
+  });
+
+  spawnTrailDots(overlay);
+
+  setTimeout(() => {
+    overlay.classList.add('fade-out');
+    overlay.addEventListener('animationend', () => { overlay.style.display = 'none'; }, { once: true });
+  }, 2300);
+}
+</script>
+
+<!-- ===== EVENTS VIEW LOGIC ===== -->
+<script>
+(function() {
+  const list = document.getElementById('eventsList');
+  EVENTS.forEach(ev => {
+    const card = document.createElement('div');
+    card.className = 'event-card';
+    card.id = 'ev-' + ev.id;
+    card.innerHTML = `
+      <div class="event-date"><span class="month">${ev.monthLabel}</span><span class="day">${String(ev.day).padStart(2,'0')}</span></div>
+      <div class="event-body">
+        <span class="event-tag">${ev.tag}</span>
+        <h2>${ev.title}</h2>
+        <div class="event-meta">${ev.meta.map(m => `<span>${m}</span>`).join('')}</div>
+        <p class="desc">${ev.desc}</p>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+})();
+
+function scrollToEventCard(hash) {
+  const target = document.getElementById(hash);
+  if (target) {
+    setTimeout(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.style.transition = 'box-shadow .3s ease';
+      target.style.boxShadow = '0 0 0 3px rgba(212,160,23,0.6), 0 6px 24px rgba(0,0,0,0.25)';
+      setTimeout(() => { target.style.boxShadow = ''; }, 2200);
+    }, 80);
+  }
+}
+</script>
+
+<!-- ===== SECTION ROUTING (keeps everything on one page, no separate tabs) ===== -->
+<script>
+function showSection(name) {
+  document.getElementById('home-view').style.display = name === 'home' ? '' : 'none';
+  document.getElementById('passport-view').style.display = name === 'passport' ? '' : 'none';
+  document.getElementById('events-view').style.display = name === 'events' ? '' : 'none';
+  window.scrollTo(0, 0);
+  if (name === 'passport' && typeof maybePlayPassportIntro === 'function') maybePlayPassportIntro();
+}
+
+function renderRoute() {
+  const hash = location.hash.slice(1);
+  if (hash === 'passport') {
+    showSection('passport');
+  } else if (hash === 'events') {
+    showSection('events');
+  } else if (hash.startsWith('ev-')) {
+    showSection('events');
+    scrollToEventCard(hash);
+  } else {
+    showSection('home');
+  }
+}
+
+window.addEventListener('hashchange', renderRoute);
+renderRoute();
+</script>
+
 <!-- Firebase (compat SDK) -->
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
@@ -610,6 +2171,71 @@
 <script src="firebase-config.js"></script>
 <script src="auth.js"></script>
 
+<!-- ===== PASSPORT ↔ FIREBASE (same signed-in account as the nav bar) ===== -->
+<script>
+  let currentPassportUser = null;
+
+  async function loadSavedStamps(uid) {
+    const snap = await db.collection('users').doc(uid).get();
+    const data = snap.data() || {};
+    const savedStamps = data.stamps || {};
+    const savedStampEvents = data.stampEvents || {};
+
+    CATEGORIES.forEach(c => { earned[c.id] = new Set(savedStamps[c.id] || []); });
+
+    stampEventLinks = {};
+    Object.keys(savedStampEvents).forEach(catId => {
+      const catMap = savedStampEvents[catId] || {};
+      Object.keys(catMap).forEach(idx => {
+        stampEventLinks[`${catId}-${idx}`] = catMap[idx];
+      });
+    });
+  }
+
+  function saveStampToggle(catId, idx, isEarned, linkedEventId) {
+    if (!currentPassportUser) return;
+    const update = {};
+    update['stamps.' + catId] = isEarned
+      ? firebase.firestore.FieldValue.arrayUnion(idx)
+      : firebase.firestore.FieldValue.arrayRemove(idx);
+
+    const eventField = `stampEvents.${catId}.${idx}`;
+    update[eventField] = (isEarned && linkedEventId)
+      ? linkedEventId
+      : firebase.firestore.FieldValue.delete();
+
+    db.collection('users').doc(currentPassportUser.uid).update(update).catch(err => {
+      console.error('Could not save stamp:', err);
+    });
+  }
+
+  auth.onAuthStateChanged(async (user) => {
+    currentPassportUser = user;
+    const avatarEl = document.getElementById('avatarInitial');
+    const nameEl = document.getElementById('memberName');
+    const sinceEl = document.getElementById('memberSince');
+
+    if (!user) {
+      avatarEl.textContent = '?';
+      nameEl.textContent = 'Not signed in';
+      sinceEl.innerHTML = '<a href="#" onclick="document.getElementById(\'signInNavBtn\').click(); return false;" style="color:var(--pp-gold-light);text-decoration:underline;">Sign in</a> to get your passport number';
+      return;
+    }
+
+    // splitName + getOrAssignPassportNumber come from auth.js, already loaded above
+    const { first, last } = splitName(user.email);
+    const passportNo = await getOrAssignPassportNumber(user);
+    avatarEl.textContent = first.charAt(0) || 'E';
+    nameEl.textContent = `${first} ${last}`.trim();
+    sinceEl.textContent = `Passport #${passportNo}`;
+
+    await loadSavedStamps(user.uid);
+    buildCategories();
+    updateBanner();
+  });
+</script>
+
+<!-- ===== HOME INTRO (icon assembly) ===== -->
 <script>
   const intro = document.getElementById('intro-screen');
   const skipBtn = document.getElementById('skip-intro');
@@ -626,12 +2252,9 @@
     intro.addEventListener('animationend', () => { intro.style.display = 'none'; }, { once:true });
   }
 
-  // Play the intro on a genuinely fresh visit or an explicit refresh, but not
-  // when navigating back to this page from elsewhere on the site within the
-  // same browser tab/session.
   function getNavigationType(){
     const entries = performance.getEntriesByType('navigation');
-    if (entries.length) return entries[0].type; // 'navigate' | 'reload' | 'back_forward' | 'prerender'
+    if (entries.length) return entries[0].type;
     if (performance.navigation) return ['navigate','reload','back_forward'][performance.navigation.type] || 'navigate';
     return 'navigate';
   }
