@@ -38,7 +38,7 @@ const EVENTS = [
     id: 'panel-failure',
     year: 2026, month: 10, day: 29, monthLabel: 'Oct',
     tag: 'Careers',
-    title: 'Panel: Learning from Failure',
+    title: 'Panel',
     meta: ['🕕 6:00 – 8:00 PM', '📍 Room TBC'],
     desc: "Speakers who changed career direction, recent graduates and young professionals talk rejections, career mistakes, and the parts of the journey that don't make it onto LinkedIn. Panellists to be confirmed."
   },
@@ -57,13 +57,5 @@ const EVENTS = [
     title: 'Networking Event: Industry Roundtables',
     meta: ['🕕 6:00 – 8:00 PM', '📍 Room TBC', '👔 Smart casual'],
     desc: "Rotate between roundtables on consulting, law, finance, healthcare, tech and marketing, spending 10–15 minutes at each table with industry guests. Guests to be confirmed."
-  },
-  {
-    id: 'formal-dinner',
-    year: 2026, month: 11, day: 28, monthLabel: 'Nov',
-    tag: 'Formal',
-    title: 'Celebration Formal Dinner',
-    meta: ['🕡 6:30 PM – Late', '👥 ~60–70 attending', '🎩 Black tie'],
-    desc: "Round off the semester in style with a president's speech, awards (including Most Active Member), a raffle, and a photo / red carpet moment. Exact date, venue and alcohol availability (budget-dependent) to be confirmed."
   },
 ];
