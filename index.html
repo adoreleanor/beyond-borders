@@ -2073,9 +2073,12 @@ function buildLevels() {
 function buildThemes() {
   const grid = document.getElementById('themesGrid');
   grid.innerHTML = '';
+  // "Current" is worked out live from today's actual date, not a manually
+  // set flag, so this always matches the real month with no admin upkeep.
+  const liveMonthName = new Date().toLocaleString('en-US', { month: 'long' });
   MONTHS.forEach(m => {
     const card = document.createElement('div');
-    card.className = 'theme-card' + (m.current ? ' current' : '');
+    card.className = 'theme-card' + (m.month === liveMonthName ? ' current' : '');
     card.innerHTML = `
       <div class="theme-month">${m.month}</div>
       <div class="theme-name">${m.name}</div>

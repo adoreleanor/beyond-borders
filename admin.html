@@ -380,9 +380,10 @@
 
     <div class="panel">
       <h2>Passport Monthly Challenges</h2>
+      <p class="seed-note">The "current" highlight on the live site is worked out automatically from today's date. It matches whichever card's Month field equals the real current month, no need to mark one manually.</p>
       <table>
-        <thead><tr><th>Order</th><th>Month</th><th>Theme</th><th>Action</th><th>Current?</th><th></th></tr></thead>
-        <tbody id="monthsBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+        <thead><tr><th>Order</th><th>Month</th><th>Theme</th><th>Action</th><th></th></tr></thead>
+        <tbody id="monthsBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
       </table>
       <div class="divider-sm"></div>
       <p class="form-title" id="monthFormTitle">Add monthly challenge</p>
@@ -403,9 +404,6 @@
       <div class="field">
         <label for="monthActionInput">Action / challenge</label>
         <input type="text" id="monthActionInput" placeholder="e.g. Attend one new event">
-      </div>
-      <div class="field-check">
-        <input type="checkbox" id="monthCurrentInput"> <label for="monthCurrentInput" style="margin:0;text-transform:none;letter-spacing:0;font-size:13px;color:rgba(245,237,227,0.8);">This is the current month (only one can be marked current)</label>
       </div>
       <button class="save-btn" id="monthSaveBtn">Save monthly challenge</button>
       <button class="cancel-btn" id="monthCancelBtn">Cancel / clear form</button>
@@ -607,12 +605,12 @@
     { emoji: '🌟', name: 'BB Ambassador', req: 30, reward: 'Priority networking event + end-of-year award', order: 4 },
   ];
   const CURRENT_MONTHS = [
-    { month: 'October',  name: 'Explore',   action: 'Attend one new event', current: false, order: 1 },
-    { month: 'November', name: 'Connect',   action: 'Speak to someone new', current: false, order: 2 },
-    { month: 'December', name: 'Reflect',   action: 'Complete a journal prompt', current: false, order: 3 },
-    { month: 'January',  name: 'Challenge', action: 'Apply for one opportunity', current: false, order: 4 },
-    { month: 'February', name: 'Give Back', action: 'Volunteer or help a member', current: false, order: 5 },
-    { month: 'March',    name: 'Grow',      action: 'Learn a new skill', current: true, order: 6 },
+    { month: 'October',  name: 'Explore',   action: 'Attend one new event', order: 1 },
+    { month: 'November', name: 'Connect',   action: 'Speak to someone new', order: 2 },
+    { month: 'December', name: 'Reflect',   action: 'Complete a journal prompt', order: 3 },
+    { month: 'January',  name: 'Challenge', action: 'Apply for one opportunity', order: 4 },
+    { month: 'February', name: 'Give Back', action: 'Volunteer or help a member', order: 5 },
+    { month: 'March',    name: 'Grow',      action: 'Learn a new skill', order: 6 },
   ];
 
   document.getElementById('seedContentBtn').addEventListener('click', async () => {
@@ -1101,7 +1099,7 @@
     try {
       const snap = await db.collection('passportMonths').orderBy('order').get();
       if (snap.empty) {
-        body.innerHTML = '<tr class="empty-row"><td colspan="6">No monthly challenges yet. Use Import above or add one below.</td></tr>';
+        body.innerHTML = '<tr class="empty-row"><td colspan="5">No monthly challenges yet. Use Import above or add one below.</td></tr>';
         return;
       }
       body.innerHTML = snap.docs.map(d => {
@@ -1111,7 +1109,6 @@
           <td>${m.month || ''}</td>
           <td>${m.name || ''}</td>
           <td>${m.action || ''}</td>
-          <td>${m.current ? 'Yes' : ''}</td>
           <td>
             <button class="mini-btn" onclick="editMonth('${d.id}')">Edit</button>
             <button class="mini-btn danger" onclick="deleteMonth('${d.id}')">Delete</button>
@@ -1119,7 +1116,7 @@
         </tr>`;
       }).join('');
     } catch (err) {
-      body.innerHTML = `<tr class="empty-row"><td colspan="6">Could not load: ${err.message}</td></tr>`;
+      body.innerHTML = `<tr class="empty-row"><td colspan="5">Could not load: ${err.message}</td></tr>`;
     }
   }
 
@@ -1132,7 +1129,6 @@
     document.getElementById('monthThemeInput').value = m.name || '';
     document.getElementById('monthActionInput').value = m.action || '';
     document.getElementById('monthOrderInput').value = m.order ?? '';
-    document.getElementById('monthCurrentInput').checked = !!m.current;
     document.getElementById('monthFormTitle').textContent = 'Edit monthly challenge';
     document.getElementById('monthFormTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
@@ -1148,7 +1144,6 @@
     ['monthNameFieldInput','monthThemeInput','monthActionInput','monthOrderInput'].forEach(id => {
       document.getElementById(id).value = '';
     });
-    document.getElementById('monthCurrentInput').checked = false;
     document.getElementById('monthFormTitle').textContent = 'Add monthly challenge';
   }
 
@@ -1159,20 +1154,11 @@
     const name = document.getElementById('monthThemeInput').value.trim();
     const action = document.getElementById('monthActionInput').value.trim();
     const order = Number(document.getElementById('monthOrderInput').value) || 0;
-    const current = document.getElementById('monthCurrentInput').checked;
 
     if (!month || !name || !action) { alert('Month, theme name and action are all required.'); return; }
-    const data = { month, name, action, order, current };
+    const data = { month, name, action, order };
 
     try {
-      // only one month can be "current": unmark any others first
-      if (current) {
-        const snap = await db.collection('passportMonths').where('current', '==', true).get();
-        const batch = db.batch();
-        snap.docs.forEach(d => { if (d.id !== editingMonthId) batch.update(d.ref, { current: false }); });
-        await batch.commit();
-      }
-
       if (editingMonthId) {
         await db.collection('passportMonths').doc(editingMonthId).update(data);
       } else {
