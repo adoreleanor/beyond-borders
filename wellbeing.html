@@ -365,7 +365,7 @@
 
 <a class="back-home" href="index.html">&larr; Beyond Borders Home</a>
 
-  <div class="admin-bar" id="admin-bar" style="display:none">🔐 Admin mode — you can delete any post or reply</div>
+  <div class="admin-bar" id="admin-bar" style="display:none">🔐 Admin mode: you can delete any post or reply</div>
   <div id="safeguarding">
     <strong>💛 Need urgent support?</strong>
     Call <a href="tel:116123">Samaritans: 116 123</a> (free, 24/7) &nbsp;·&nbsp;
@@ -377,7 +377,7 @@
     <img src="logo.png" alt="KCL BBSOC logo" class="header-logo" />
     <div class="header-text">
       <h1>Beyond Borders Wellbeing Board</h1>
-      <p>A safe, anonymous space to share what's on your mind — and lift each other up.</p>
+      <p>A safe, anonymous space to share what's on your mind, and lift each other up.</p>
     </div>
   </header>
 
@@ -387,7 +387,7 @@
       <h2 class="section-title">Pin something to the board</h2>
       <form id="post-form">
         <textarea id="post-content" placeholder="What's on your mind? Write it here…" required></textarea>
-        <p class="anon-note">🔒 Completely anonymous — no account, no name, no tracking.</p>
+        <p class="anon-note">🔒 Completely anonymous: no account, no name, no tracking.</p>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary" id="post-submit-btn">Pin to board 📌</button>
         </div>
@@ -410,7 +410,7 @@
       <h2>Welcome to the Wellbeing Board 💛</h2>
       <p>A safe, anonymous space to share what's on your mind and support each other.</p>
       <ul class="welcome-features">
-        <li>🔒 Posts are completely anonymous — no name, no account, no tracking</li>
+        <li>🔒 Posts are completely anonymous: no name, no account, no tracking</li>
         <li>💬 Reply with kind words to support others</li>
         <li>❤️ React to show someone you care</li>
         <li>🚩 Flag anything that needs a moderator's eye</li>
@@ -692,7 +692,7 @@
         myFlags[post.id]=true;
         sessionStorage.setItem('bbsoc_flags', JSON.stringify(myFlags));
         flagBtn.classList.add('flagged');
-        toast('Thanks — flagged for review 🚩');
+        toast('Thanks, flagged for review 🚩');
       });
 
       const miniReplies = card.querySelector('.mini-replies');
@@ -744,7 +744,7 @@
       countEl.textContent = posts.length===0?'':`${posts.length} note${posts.length!==1?'s':''}`;
 
       if(posts.length===0){
-        feed.innerHTML='<div class="empty-state"><div class="big-icon">📌</div><p>The board is empty — pin the first note!</p></div>';
+        feed.innerHTML='<div class="empty-state"><div class="big-icon">📌</div><p>The board is empty, pin the first note!</p></div>';
         return;
       }
       posts.forEach(p=>feed.appendChild(renderPost(p,replyMap[p.id]||[],false,heartMap[p.id]||0,flagMap[p.id]||0)));

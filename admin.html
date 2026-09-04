@@ -92,10 +92,12 @@
   /* editor panels */
   .field{ margin-bottom:16px; }
   .field label{ display:block; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:#D4B896; margin-bottom:6px; }
-  .field input[type=text], .field input[type=email], .field input[type=number], .field textarea{
+  .field input[type=text], .field input[type=email], .field input[type=number], .field textarea, .field select{
     width:100%; background:rgba(245,237,227,0.06); border:1px solid rgba(245,237,227,0.2);
     border-radius:10px; padding:10px 13px; color:var(--cream); font-size:13.5px; font-family:'Inter',sans-serif;
   }
+  .field select{ cursor:pointer; }
+  .field select option{ background:var(--maroon-dark); color:var(--cream); }
   .field textarea{ min-height:90px; resize:vertical; }
   .field-row{ display:flex; gap:16px; flex-wrap:wrap; }
   .field-row .field{ flex:1; min-width:160px; }
@@ -171,7 +173,7 @@
 
     <div class="panel">
       <h2>One-time content import</h2>
-      <p class="seed-note">The first time anyone uses this dashboard, click below to copy the site's current About Us text, committee list, and events into the editable database. After that, everyone edits from here — this button won't overwrite anything that's already been imported.</p>
+      <p class="seed-note">The first time anyone uses this dashboard, click below to copy the site's current About Us text, committee list, and events into the editable database. After that, everyone edits from here. This button won't overwrite anything that's already been imported.</p>
       <button class="seed-btn" id="seedContentBtn">Import current site content</button>
       <p class="save-status" id="seedStatus"></p>
     </div>
@@ -209,7 +211,7 @@
         </div>
       </div>
       <button class="save-btn" id="saveAboutUsBtn">Save About Us</button>
-      <p class="save-status" id="aboutUsSaveStatus">Saved — live on the site now.</p>
+      <p class="save-status" id="aboutUsSaveStatus">Saved, live on the site now.</p>
     </div>
 
     <div class="panel">
@@ -233,7 +235,7 @@
       <div class="field-row">
         <div class="field">
           <label for="committeePhotoInput">Photo URL (optional)</label>
-          <input type="text" id="committeePhotoInput" placeholder="Link to a hosted photo — leave blank for initial-letter avatar">
+          <input type="text" id="committeePhotoInput" placeholder="Link to a hosted photo (leave blank for initial-letter avatar)">
         </div>
         <div class="field">
           <label for="committeeOrderInput">Display order</label>
@@ -284,7 +286,7 @@
         </div>
       </div>
       <div class="field">
-        <label for="eventMetaInput">Meta lines (one per line — time, room, dress code etc.)</label>
+        <label for="eventMetaInput">Meta lines (one per line: time, room, dress code etc.)</label>
         <textarea id="eventMetaInput" placeholder="🕕 6:00 – 8:00 PM&#10;📍 Big classroom (room TBC)"></textarea>
       </div>
       <div class="field">
@@ -293,6 +295,120 @@
       </div>
       <button class="save-btn" id="eventSaveBtn">Save event</button>
       <button class="cancel-btn" id="eventCancelBtn">Cancel / clear form</button>
+    </div>
+
+    <div class="panel">
+      <h2>Passport Categories &amp; Tasks</h2>
+      <table>
+        <thead><tr><th>Order</th><th>Icon</th><th>Title</th><th>Subtitle</th><th>Tasks</th><th></th></tr></thead>
+        <tbody id="categoriesBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+      </table>
+      <div class="divider-sm"></div>
+      <p class="form-title" id="categoryFormTitle">Add category</p>
+      <div class="field-row">
+        <div class="field">
+          <label for="categoryIconInput">Icon (emoji)</label>
+          <input type="text" id="categoryIconInput" placeholder="💼">
+        </div>
+        <div class="field">
+          <label for="categoryTitleInput">Title</label>
+          <input type="text" id="categoryTitleInput" placeholder="e.g. Career Explorer">
+        </div>
+        <div class="field">
+          <label for="categorySubInput">Subtitle</label>
+          <input type="text" id="categorySubInput" placeholder="e.g. Professional development">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="categoryClsInput">Colour theme</label>
+          <select id="categoryClsInput">
+            <option value="cat-career">Maroon (Career Explorer style)</option>
+            <option value="cat-growth">Green (Personal Growth style)</option>
+            <option value="cat-skill">Orange (Skill Builder style)</option>
+            <option value="cat-community">Teal (Community style)</option>
+            <option value="cat-comfort">Gold (Comfort Zone style)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="categoryOrderInput">Display order</label>
+          <input type="number" id="categoryOrderInput" placeholder="1, 2, 3...">
+        </div>
+      </div>
+      <div class="field">
+        <label for="categoryStampsInput">Tasks (one per line: these are the stamps members tick off)</label>
+        <textarea id="categoryStampsInput" placeholder="Attend a careers fair&#10;Visit an employer insight day&#10;Speak to a recruiter" style="min-height:140px;"></textarea>
+      </div>
+      <button class="save-btn" id="categorySaveBtn">Save category</button>
+      <button class="cancel-btn" id="categoryCancelBtn">Cancel / clear form</button>
+      <p class="seed-note">Deleting a category removes it and all its tasks from the live Passport page. New categories reuse one of the five colour themes above rather than a brand-new colour.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Passport Levels &amp; Rewards</h2>
+      <table>
+        <thead><tr><th>Order</th><th>Emoji</th><th>Name</th><th>Stamps required</th><th>Reward</th><th></th></tr></thead>
+        <tbody id="levelsBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+      </table>
+      <div class="divider-sm"></div>
+      <p class="form-title" id="levelFormTitle">Add level</p>
+      <div class="field-row">
+        <div class="field">
+          <label for="levelEmojiInput">Emoji</label>
+          <input type="text" id="levelEmojiInput" placeholder="🌱">
+        </div>
+        <div class="field">
+          <label for="levelNameInput">Name</label>
+          <input type="text" id="levelNameInput" placeholder="e.g. Explorer">
+        </div>
+        <div class="field">
+          <label for="levelReqInput">Stamps required</label>
+          <input type="number" id="levelReqInput" placeholder="5">
+        </div>
+        <div class="field">
+          <label for="levelOrderInput">Display order</label>
+          <input type="number" id="levelOrderInput" placeholder="1, 2, 3...">
+        </div>
+      </div>
+      <div class="field">
+        <label for="levelRewardInput">Reward</label>
+        <input type="text" id="levelRewardInput" placeholder="e.g. LinkedIn shout-out from the society">
+      </div>
+      <button class="save-btn" id="levelSaveBtn">Save level</button>
+      <button class="cancel-btn" id="levelCancelBtn">Cancel / clear form</button>
+    </div>
+
+    <div class="panel">
+      <h2>Passport Monthly Challenges</h2>
+      <table>
+        <thead><tr><th>Order</th><th>Month</th><th>Theme</th><th>Action</th><th>Current?</th><th></th></tr></thead>
+        <tbody id="monthsBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+      </table>
+      <div class="divider-sm"></div>
+      <p class="form-title" id="monthFormTitle">Add monthly challenge</p>
+      <div class="field-row">
+        <div class="field">
+          <label for="monthNameFieldInput">Month</label>
+          <input type="text" id="monthNameFieldInput" placeholder="e.g. October">
+        </div>
+        <div class="field">
+          <label for="monthThemeInput">Theme name</label>
+          <input type="text" id="monthThemeInput" placeholder="e.g. Explore">
+        </div>
+        <div class="field">
+          <label for="monthOrderInput">Display order</label>
+          <input type="number" id="monthOrderInput" placeholder="1, 2, 3...">
+        </div>
+      </div>
+      <div class="field">
+        <label for="monthActionInput">Action / challenge</label>
+        <input type="text" id="monthActionInput" placeholder="e.g. Attend one new event">
+      </div>
+      <div class="field-check">
+        <input type="checkbox" id="monthCurrentInput"> <label for="monthCurrentInput" style="margin:0;text-transform:none;letter-spacing:0;font-size:13px;color:rgba(245,237,227,0.8);">This is the current month (only one can be marked current)</label>
+      </div>
+      <button class="save-btn" id="monthSaveBtn">Save monthly challenge</button>
+      <button class="cancel-btn" id="monthCancelBtn">Cancel / clear form</button>
     </div>
   </div>
 </div>
@@ -316,7 +432,7 @@
   const adminAuthMsg = document.getElementById('adminAuthMsg');
 
   function fmtDate(ts) {
-    if (!ts || !ts.toDate) return '—';
+    if (!ts || !ts.toDate) return 'N/A';
     return ts.toDate().toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
   }
 
@@ -335,7 +451,7 @@
     try {
       await auth.sendSignInLinkToEmail(email, actionCodeSettings);
       window.localStorage.setItem('bbAdminEmailForSignIn', email);
-      adminAuthMsg.textContent = 'Sign-in link sent to ' + email + ' — open it on this device.';
+      adminAuthMsg.textContent = 'Sign-in link sent to ' + email + '. Open it on this device.';
     } catch (err) {
       adminAuthError.textContent = 'Could not send link: ' + err.message;
       adminAuthError.classList.add('show');
@@ -373,7 +489,7 @@
         membersBody.innerHTML = usersSnap.docs.map(d => {
           const u = d.data();
           return `<tr>
-            <td><span class="pill">${u.passportNo || '—'}</span></td>
+            <td><span class="pill">${u.passportNo || 'N/A'}</span></td>
             <td>${(u.firstName||'')} ${(u.lastName||'')}</td>
             <td>${u.email || ''}</td>
             <td>${fmtDate(u.createdAt)}</td>
@@ -393,7 +509,7 @@
         feedbackBody.innerHTML = fbSnap.docs.map(d => {
           const f = d.data();
           return `<tr>
-            <td><span class="pill">${f.passportNo || '—'}</span></td>
+            <td><span class="pill">${f.passportNo || 'N/A'}</span></td>
             <td>${f.email || ''}</td>
             <td>${(f.message||'').replace(/</g,'&lt;')}</td>
             <td>${fmtDate(f.createdAt)}</td>
@@ -429,6 +545,9 @@
     loadAboutUsEditor();
     loadCommitteeList();
     loadEventsList();
+    loadCategoriesList();
+    loadLevelsList();
+    loadMonthsList();
   });
 
   (async function init() {
@@ -441,9 +560,9 @@
   // ONE-TIME CONTENT IMPORT
   // Copies the site's current hardcoded About Us / committee /
   // events content into Firestore, but only for collections that
-  // are still empty — safe to click more than once.
+  // are still empty. Safe to click more than once.
   // ============================================================
-  const CURRENT_MISSION_TEXT = "Beyond Borders (BBSOC) is a King's College London society dedicated to helping students step outside their comfort zone — professionally, personally, and creatively. We bring together career development, wellbeing, culture, and community into one place, so members can grow in every direction, not just academically.";
+  const CURRENT_MISSION_TEXT = "Beyond Borders (BBSOC) is a King's College London society dedicated to helping students step outside their comfort zone: professionally, personally, and creatively. We bring together career development, wellbeing, culture, and community into one place, so members can grow in every direction, not just academically.";
   const CURRENT_WHAT_WE_DO_TEXT = "From careers fairs and networking nights to wellbeing walks, volunteering days, and skills workshops, BBSOC runs events across five pillars: Career Explorer, Personal Growth, Skill Builder, Community, and Comfort Zone. Members track their journey through the Beyond Borders Passport and unlock rewards as they go.";
   const CURRENT_COMMITTEE = [
     { name: 'Layla Chen',        role: 'Co-President',            isLead: true,  order: 1 },
@@ -457,13 +576,39 @@
     { name: 'Sawani Vaidya',     role: 'Social Media Officer',     isLead: false, order: 9 },
     { name: 'Eleanor Wang',      role: 'Head of Wellbeing',        isLead: false, order: 10 },
   ];
+  const CURRENT_CATEGORIES = [
+    { id: 'career', cls: 'cat-career', icon: '💼', title: 'Career Explorer', sub: 'Professional development', order: 1,
+      stamps: ['Attend a careers fair','Visit an employer insight day','Speak to a recruiter','Attend a Beyond Borders networking event','Apply for your first internship'] },
+    { id: 'growth', cls: 'cat-growth', icon: '🧠', title: 'Personal Growth', sub: 'Wellbeing & reflection', order: 2,
+      stamps: ['Attend a wellbeing event','Complete a mindfulness session','Join a wellbeing walk','Write a reflection on the Wellbeing Board','Support another member by replying to a post'] },
+    { id: 'skill', cls: 'cat-skill', icon: '🚀', title: 'Skill Builder', sub: 'Knowledge & capability', order: 3,
+      stamps: ['Learn a new software','Complete a LinkedIn Learning course','Improve your CV','Attend an interview workshop','Give a presentation','Learn basic Excel or Canva'] },
+    { id: 'community', cls: 'cat-community', icon: '🌍', title: 'Community', sub: 'Give back & connect', order: 4,
+      stamps: ['Volunteer','Attend three society socials','Bring a friend to an event','Become a Beyond Buddy','Mentor a new member'] },
+    { id: 'comfort', cls: 'cat-comfort', icon: '🎯', title: 'Comfort Zone', sub: 'Small steps, big growth', order: 5,
+      stamps: ['Introduce yourself to someone new','Go to an event alone','Ask a question during a talk','Message an alumnus','Apply for a role you\'re unsure about'] },
+  ];
+  const CURRENT_LEVELS = [
+    { emoji: '🌱', name: 'Explorer',      req: 5,  reward: 'LinkedIn shout-out from the society', order: 1 },
+    { emoji: '🧭', name: 'Adventurer',    req: 10, reward: 'Official Beyond Borders certificate', order: 2 },
+    { emoji: '🚀', name: 'Trailblazer',   req: 20, reward: 'Society merchandise (hoodie or tote)', order: 3 },
+    { emoji: '🌟', name: 'BB Ambassador', req: 30, reward: 'Priority networking event + end-of-year award', order: 4 },
+  ];
+  const CURRENT_MONTHS = [
+    { month: 'October',  name: 'Explore',   action: 'Attend one new event', current: false, order: 1 },
+    { month: 'November', name: 'Connect',   action: 'Speak to someone new', current: false, order: 2 },
+    { month: 'December', name: 'Reflect',   action: 'Complete a journal prompt', current: false, order: 3 },
+    { month: 'January',  name: 'Challenge', action: 'Apply for one opportunity', current: false, order: 4 },
+    { month: 'February', name: 'Give Back', action: 'Volunteer or help a member', current: false, order: 5 },
+    { month: 'March',    name: 'Grow',      action: 'Learn a new skill', current: true, order: 6 },
+  ];
 
   document.getElementById('seedContentBtn').addEventListener('click', async () => {
     const status = document.getElementById('seedStatus');
     status.classList.add('show');
     status.textContent = 'Importing…';
     try {
-      // About Us — only write if the doc doesn't exist yet
+      // About Us: only write if the doc doesn't exist yet
       const aboutSnap = await db.collection('siteContent').doc('aboutUs').get();
       if (!aboutSnap.exists) {
         await db.collection('siteContent').doc('aboutUs').set({
@@ -475,7 +620,7 @@
         });
       }
 
-      // Committee — only seed if the collection is empty
+      // Committee: only seed if the collection is empty
       const committeeSnap = await db.collection('committee').limit(1).get();
       if (committeeSnap.empty) {
         const batch = db.batch();
@@ -486,7 +631,7 @@
         await batch.commit();
       }
 
-      // Events — only seed if the collection is empty, using events-data.js
+      // Events: only seed if the collection is empty, using events-data.js
       const eventsSnap = await db.collection('events').limit(1).get();
       if (eventsSnap.empty && typeof EVENTS !== 'undefined') {
         const batch = db.batch();
@@ -497,10 +642,46 @@
         await batch.commit();
       }
 
-      status.textContent = 'Done — your current content is now in the editable database below.';
+      // Passport categories: only seed if the collection is empty
+      const categoriesSnap = await db.collection('passportCategories').limit(1).get();
+      if (categoriesSnap.empty) {
+        const batch = db.batch();
+        CURRENT_CATEGORIES.forEach(c => {
+          const ref = db.collection('passportCategories').doc(c.id);
+          batch.set(ref, c);
+        });
+        await batch.commit();
+      }
+
+      // Passport levels: only seed if the collection is empty
+      const levelsSnap = await db.collection('passportLevels').limit(1).get();
+      if (levelsSnap.empty) {
+        const batch = db.batch();
+        CURRENT_LEVELS.forEach(l => {
+          const ref = db.collection('passportLevels').doc();
+          batch.set(ref, l);
+        });
+        await batch.commit();
+      }
+
+      // Passport monthly challenges: only seed if the collection is empty
+      const monthsSnap = await db.collection('passportMonths').limit(1).get();
+      if (monthsSnap.empty) {
+        const batch = db.batch();
+        CURRENT_MONTHS.forEach(m => {
+          const ref = db.collection('passportMonths').doc();
+          batch.set(ref, m);
+        });
+        await batch.commit();
+      }
+
+      status.textContent = 'Done. Your current content is now in the editable database below.';
       loadAboutUsEditor();
       loadCommitteeList();
       loadEventsList();
+      loadCategoriesList();
+      loadLevelsList();
+      loadMonthsList();
     } catch (err) {
       status.textContent = 'Import failed: ' + err.message;
     }
@@ -554,7 +735,7 @@
     try {
       const snap = await db.collection('committee').orderBy('order').get();
       if (snap.empty) {
-        body.innerHTML = '<tr class="empty-row"><td colspan="5">No committee members yet — use Import above or add one below.</td></tr>';
+        body.innerHTML = '<tr class="empty-row"><td colspan="5">No committee members yet. Use Import above or add one below.</td></tr>';
         return;
       }
       body.innerHTML = snap.docs.map(d => {
@@ -639,7 +820,7 @@
     try {
       const snap = await db.collection('events').orderBy('month').orderBy('day').get();
       if (snap.empty) {
-        body.innerHTML = '<tr class="empty-row"><td colspan="4">No events yet — use Import above or add one below.</td></tr>';
+        body.innerHTML = '<tr class="empty-row"><td colspan="4">No events yet. Use Import above or add one below.</td></tr>';
         return;
       }
       body.innerHTML = snap.docs.map(d => {
@@ -718,6 +899,276 @@
       }
       resetEventForm();
       loadEventsList();
+    } catch (err) {
+      alert('Could not save: ' + err.message);
+    }
+  });
+
+  // ============================================================
+  // PASSPORT CATEGORIES & TASKS EDITOR
+  // ============================================================
+  let editingCategoryId = null;
+
+  async function loadCategoriesList() {
+    const body = document.getElementById('categoriesBody');
+    try {
+      const snap = await db.collection('passportCategories').orderBy('order').get();
+      if (snap.empty) {
+        body.innerHTML = '<tr class="empty-row"><td colspan="6">No categories yet. Use Import above or add one below.</td></tr>';
+        return;
+      }
+      body.innerHTML = snap.docs.map(d => {
+        const c = d.data();
+        return `<tr>
+          <td>${c.order ?? ''}</td>
+          <td>${c.icon || ''}</td>
+          <td>${c.title || ''}</td>
+          <td>${c.sub || ''}</td>
+          <td>${(c.stamps || []).length}</td>
+          <td>
+            <button class="mini-btn" onclick="editCategory('${d.id}')">Edit</button>
+            <button class="mini-btn danger" onclick="deleteCategory('${d.id}')">Delete</button>
+          </td>
+        </tr>`;
+      }).join('');
+    } catch (err) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="6">Could not load: ${err.message}</td></tr>`;
+    }
+  }
+
+  window.editCategory = async function(id) {
+    const doc = await db.collection('passportCategories').doc(id).get();
+    if (!doc.exists) return;
+    const c = doc.data();
+    editingCategoryId = id;
+    document.getElementById('categoryIconInput').value = c.icon || '';
+    document.getElementById('categoryTitleInput').value = c.title || '';
+    document.getElementById('categorySubInput').value = c.sub || '';
+    document.getElementById('categoryClsInput').value = c.cls || 'cat-career';
+    document.getElementById('categoryOrderInput').value = c.order ?? '';
+    document.getElementById('categoryStampsInput').value = (c.stamps || []).join('\n');
+    document.getElementById('categoryFormTitle').textContent = 'Edit category';
+    document.getElementById('categoryFormTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.deleteCategory = async function(id) {
+    if (!confirm('Remove this whole category and its tasks from the Passport page?')) return;
+    await db.collection('passportCategories').doc(id).delete();
+    loadCategoriesList();
+  };
+
+  function resetCategoryForm() {
+    editingCategoryId = null;
+    ['categoryIconInput','categoryTitleInput','categorySubInput','categoryOrderInput','categoryStampsInput'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('categoryClsInput').value = 'cat-career';
+    document.getElementById('categoryFormTitle').textContent = 'Add category';
+  }
+
+  document.getElementById('categoryCancelBtn').addEventListener('click', resetCategoryForm);
+
+  document.getElementById('categorySaveBtn').addEventListener('click', async () => {
+    const icon = document.getElementById('categoryIconInput').value.trim();
+    const title = document.getElementById('categoryTitleInput').value.trim();
+    const sub = document.getElementById('categorySubInput').value.trim();
+    const cls = document.getElementById('categoryClsInput').value;
+    const order = Number(document.getElementById('categoryOrderInput').value) || 0;
+    const stamps = document.getElementById('categoryStampsInput').value.split('\n').map(s => s.trim()).filter(Boolean);
+
+    if (!icon || !title || stamps.length === 0) { alert('Icon, title and at least one task are required.'); return; }
+    const data = { icon, title, sub, cls, order, stamps };
+
+    try {
+      if (editingCategoryId) {
+        await db.collection('passportCategories').doc(editingCategoryId).update(data);
+      } else {
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString().slice(-4);
+        await db.collection('passportCategories').doc(slug).set(data);
+      }
+      resetCategoryForm();
+      loadCategoriesList();
+    } catch (err) {
+      alert('Could not save: ' + err.message);
+    }
+  });
+
+  // ============================================================
+  // PASSPORT LEVELS & REWARDS EDITOR
+  // ============================================================
+  let editingLevelId = null;
+
+  async function loadLevelsList() {
+    const body = document.getElementById('levelsBody');
+    try {
+      const snap = await db.collection('passportLevels').orderBy('order').get();
+      if (snap.empty) {
+        body.innerHTML = '<tr class="empty-row"><td colspan="6">No levels yet. Use Import above or add one below.</td></tr>';
+        return;
+      }
+      body.innerHTML = snap.docs.map(d => {
+        const l = d.data();
+        return `<tr>
+          <td>${l.order ?? ''}</td>
+          <td>${l.emoji || ''}</td>
+          <td>${l.name || ''}</td>
+          <td>${l.req ?? ''}</td>
+          <td>${l.reward || ''}</td>
+          <td>
+            <button class="mini-btn" onclick="editLevel('${d.id}')">Edit</button>
+            <button class="mini-btn danger" onclick="deleteLevel('${d.id}')">Delete</button>
+          </td>
+        </tr>`;
+      }).join('');
+    } catch (err) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="6">Could not load: ${err.message}</td></tr>`;
+    }
+  }
+
+  window.editLevel = async function(id) {
+    const doc = await db.collection('passportLevels').doc(id).get();
+    if (!doc.exists) return;
+    const l = doc.data();
+    editingLevelId = id;
+    document.getElementById('levelEmojiInput').value = l.emoji || '';
+    document.getElementById('levelNameInput').value = l.name || '';
+    document.getElementById('levelReqInput').value = l.req ?? '';
+    document.getElementById('levelOrderInput').value = l.order ?? '';
+    document.getElementById('levelRewardInput').value = l.reward || '';
+    document.getElementById('levelFormTitle').textContent = 'Edit level';
+    document.getElementById('levelFormTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.deleteLevel = async function(id) {
+    if (!confirm('Remove this level from the Passport page?')) return;
+    await db.collection('passportLevels').doc(id).delete();
+    loadLevelsList();
+  };
+
+  function resetLevelForm() {
+    editingLevelId = null;
+    ['levelEmojiInput','levelNameInput','levelReqInput','levelOrderInput','levelRewardInput'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('levelFormTitle').textContent = 'Add level';
+  }
+
+  document.getElementById('levelCancelBtn').addEventListener('click', resetLevelForm);
+
+  document.getElementById('levelSaveBtn').addEventListener('click', async () => {
+    const emoji = document.getElementById('levelEmojiInput').value.trim();
+    const name = document.getElementById('levelNameInput').value.trim();
+    const req = Number(document.getElementById('levelReqInput').value);
+    const order = Number(document.getElementById('levelOrderInput').value) || 0;
+    const reward = document.getElementById('levelRewardInput').value.trim();
+
+    if (!emoji || !name || !req || !reward) { alert('Emoji, name, stamps required and reward are all required.'); return; }
+    const data = { emoji, name, req, order, reward };
+
+    try {
+      if (editingLevelId) {
+        await db.collection('passportLevels').doc(editingLevelId).update(data);
+      } else {
+        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString().slice(-4);
+        await db.collection('passportLevels').doc(slug).set(data);
+      }
+      resetLevelForm();
+      loadLevelsList();
+    } catch (err) {
+      alert('Could not save: ' + err.message);
+    }
+  });
+
+  // ============================================================
+  // PASSPORT MONTHLY CHALLENGES EDITOR
+  // ============================================================
+  let editingMonthId = null;
+
+  async function loadMonthsList() {
+    const body = document.getElementById('monthsBody');
+    try {
+      const snap = await db.collection('passportMonths').orderBy('order').get();
+      if (snap.empty) {
+        body.innerHTML = '<tr class="empty-row"><td colspan="6">No monthly challenges yet. Use Import above or add one below.</td></tr>';
+        return;
+      }
+      body.innerHTML = snap.docs.map(d => {
+        const m = d.data();
+        return `<tr>
+          <td>${m.order ?? ''}</td>
+          <td>${m.month || ''}</td>
+          <td>${m.name || ''}</td>
+          <td>${m.action || ''}</td>
+          <td>${m.current ? 'Yes' : ''}</td>
+          <td>
+            <button class="mini-btn" onclick="editMonth('${d.id}')">Edit</button>
+            <button class="mini-btn danger" onclick="deleteMonth('${d.id}')">Delete</button>
+          </td>
+        </tr>`;
+      }).join('');
+    } catch (err) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="6">Could not load: ${err.message}</td></tr>`;
+    }
+  }
+
+  window.editMonth = async function(id) {
+    const doc = await db.collection('passportMonths').doc(id).get();
+    if (!doc.exists) return;
+    const m = doc.data();
+    editingMonthId = id;
+    document.getElementById('monthNameFieldInput').value = m.month || '';
+    document.getElementById('monthThemeInput').value = m.name || '';
+    document.getElementById('monthActionInput').value = m.action || '';
+    document.getElementById('monthOrderInput').value = m.order ?? '';
+    document.getElementById('monthCurrentInput').checked = !!m.current;
+    document.getElementById('monthFormTitle').textContent = 'Edit monthly challenge';
+    document.getElementById('monthFormTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.deleteMonth = async function(id) {
+    if (!confirm('Remove this monthly challenge from the Passport page?')) return;
+    await db.collection('passportMonths').doc(id).delete();
+    loadMonthsList();
+  };
+
+  function resetMonthForm() {
+    editingMonthId = null;
+    ['monthNameFieldInput','monthThemeInput','monthActionInput','monthOrderInput'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('monthCurrentInput').checked = false;
+    document.getElementById('monthFormTitle').textContent = 'Add monthly challenge';
+  }
+
+  document.getElementById('monthCancelBtn').addEventListener('click', resetMonthForm);
+
+  document.getElementById('monthSaveBtn').addEventListener('click', async () => {
+    const month = document.getElementById('monthNameFieldInput').value.trim();
+    const name = document.getElementById('monthThemeInput').value.trim();
+    const action = document.getElementById('monthActionInput').value.trim();
+    const order = Number(document.getElementById('monthOrderInput').value) || 0;
+    const current = document.getElementById('monthCurrentInput').checked;
+
+    if (!month || !name || !action) { alert('Month, theme name and action are all required.'); return; }
+    const data = { month, name, action, order, current };
+
+    try {
+      // only one month can be "current": unmark any others first
+      if (current) {
+        const snap = await db.collection('passportMonths').where('current', '==', true).get();
+        const batch = db.batch();
+        snap.docs.forEach(d => { if (d.id !== editingMonthId) batch.update(d.ref, { current: false }); });
+        await batch.commit();
+      }
+
+      if (editingMonthId) {
+        await db.collection('passportMonths').doc(editingMonthId).update(data);
+      } else {
+        const slug = month.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString().slice(-4);
+        await db.collection('passportMonths').doc(slug).set(data);
+      }
+      resetMonthForm();
+      loadMonthsList();
     } catch (err) {
       alert('Could not save: ' + err.message);
     }

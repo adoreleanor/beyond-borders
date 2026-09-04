@@ -1425,21 +1425,21 @@
     <a class="tab-card" href="#passport">
       <div class="tab-icon">🌍</div>
       <h2>Beyond Borders Passport</h2>
-      <p>Collect stamps across career, growth, skills, community and comfort-zone challenges — track your journey and unlock rewards.</p>
+      <p>Collect stamps across career, growth, skills, community and comfort-zone challenges, track your journey and unlock rewards.</p>
       <span class="tab-enter">Open Passport &rarr;</span>
     </a>
 
     <a class="tab-card" href="wellbeing.html">
       <div class="tab-icon">💛</div>
       <h2>Wellbeing Board</h2>
-      <p>Resources, reflections and support for looking after yourself while you study — visit the BBSOC Wellbeing space.</p>
+      <p>Resources, reflections and support for looking after yourself while you study. Visit the BBSOC Wellbeing space.</p>
       <span class="tab-enter">Open Wellbeing Board &rarr;</span>
     </a>
 
     <a class="tab-card" href="#events">
       <div class="tab-icon">📅</div>
       <h2>Upcoming Events</h2>
-      <p>See what's next on the society calendar — socials, workshops, networking and more.</p>
+      <p>See what's next on the society calendar: socials, workshops, networking and more.</p>
       <span class="tab-enter">View Events &rarr;</span>
     </a>
   </div>
@@ -1525,7 +1525,7 @@
     <!-- CATEGORIES -->
     <div class="section-header">
       <h2>Your Passport Countries</h2>
-      <p>Click any stamp to mark it earned — every experience counts</p>
+      <p>Click any stamp to mark it earned. Every experience counts</p>
     </div>
 
     <div class="categories" id="categoriesGrid"></div>
@@ -1536,7 +1536,7 @@
     <div class="trips-section">
       <div class="section-header">
         <h2>Upcoming Trips</h2>
-        <p>Your society calendar — click a marked day for the full details</p>
+        <p>Your society calendar. Click a marked day for the full details</p>
       </div>
       <div class="trips-card">
         <div class="trips-nav">
@@ -1572,7 +1572,7 @@
     <div class="stats-section">
       <div class="section-header">
         <h2>Society Collective</h2>
-        <p>Celebrating what we've achieved together — not who's ahead</p>
+        <p>Celebrating what we've achieved together, not who's ahead</p>
       </div>
       <div class="stats-grid">
         <div class="stat-card">
@@ -1618,7 +1618,7 @@
     <div class="event-pick-box">
       <button class="event-pick-close" id="eventPickClose">&times;</button>
       <h3>Which trip was this?</h3>
-      <p class="event-pick-sub">Link this stamp to the event you attended — totally optional.</p>
+      <p class="event-pick-sub">Link this stamp to the event you attended (totally optional).</p>
       <div class="event-pick-list" id="eventPickList"></div>
       <button class="event-pick-skip" id="eventPickSkip">Mark earned without linking an event</button>
     </div>
@@ -1637,7 +1637,7 @@
     <p>"Collect experiences, not expectations."</p>
   </div>
 
-  <p class="placeholder-note">Semester 1 line-up below — some times, rooms and speakers are still being finalised and will be updated closer to each event.</p>
+  <p class="placeholder-note">Semester 1 line-up below. Some times, rooms and speakers are still being finalised and will be updated closer to each event.</p>
 
   <div class="events-list" id="eventsList"></div>
 
@@ -1661,8 +1661,8 @@
 
     <div id="signInStep2" style="display:none;">
       <h3>Check your inbox</h3>
-      <p class="modal-sub modal-success show">We've sent a sign-in link to <strong id="sentToEmail"></strong>. Open it on this device to finish signing in — you'll get your BB Passport number right after.</p>
-      <p class="modal-hint">Don't see it after a minute or two? Check your spam/junk folder — first-time sign-in emails sometimes land there.</p>
+      <p class="modal-sub modal-success show">We've sent a sign-in link to <strong id="sentToEmail"></strong>. Open it on this device to finish signing in. You'll get your BB Passport number right after.</p>
+      <p class="modal-hint">Don't see it after a minute or two? Check your spam/junk folder. First-time sign-in emails sometimes land there.</p>
       <button class="modal-btn" data-close>Got it</button>
     </div>
 
@@ -1687,7 +1687,7 @@
     <label for="feedbackText">Your feedback</label>
     <textarea id="feedbackText" placeholder="Type your thoughts here..."></textarea>
     <p class="modal-error" id="feedbackError"></p>
-    <p class="modal-success" id="feedbackSuccess">Thanks — your feedback has been sent to the committee.</p>
+    <p class="modal-success" id="feedbackSuccess">Thanks! Your feedback has been sent to the committee.</p>
     <button class="modal-btn" id="submitFeedbackBtn">Submit feedback</button>
   </div>
 </div>
@@ -1703,7 +1703,7 @@
 <!-- Shared event data (used by both Passport trips calendar and Events view) -->
 <script src="events-data.js"></script>
 
-<!-- Firebase (compat SDK) — loaded early so the events refresh below can use it -->
+<!-- Firebase (compat SDK), loaded early so the events refresh below can use it -->
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
@@ -1797,6 +1797,36 @@ const MONTHS = [
   { month: 'February', name: 'Give Back', action: 'Volunteer or help a member', current: false },
   { month: 'March',    name: 'Grow',      action: 'Learn a new skill', current: true },
 ];
+
+// ── Pull the latest categories/tasks, levels and monthly challenges from
+// the admin-editable database, falling back to the defaults above if any
+// collection is empty or the read fails ──
+async function refreshPassportFromFirestore() {
+  try {
+    const [catSnap, lvlSnap, moSnap] = await Promise.all([
+      db.collection('passportCategories').orderBy('order').get(),
+      db.collection('passportLevels').orderBy('order').get(),
+      db.collection('passportMonths').orderBy('order').get(),
+    ]);
+    if (!catSnap.empty) {
+      const fresh = catSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+      CATEGORIES.length = 0;
+      CATEGORIES.push(...fresh);
+    }
+    if (!lvlSnap.empty) {
+      const fresh = lvlSnap.docs.map(d => d.data());
+      LEVELS.length = 0;
+      LEVELS.push(...fresh);
+    }
+    if (!moSnap.empty) {
+      const fresh = moSnap.docs.map(d => d.data());
+      MONTHS.length = 0;
+      MONTHS.push(...fresh);
+    }
+  } catch (err) {
+    console.error('Could not load passport content from Firestore, using built-in defaults:', err);
+  }
+}
 
 let earned = {};
 CATEGORIES.forEach(c => { earned[c.id] = new Set(); });
@@ -1952,7 +1982,7 @@ function completeStampToggle(catId, idx, li, linkedEventId) {
       showToast(`🎉 Level up! You're now a ${newLevel.name} ${newLevel.emoji}`, 'gold');
     } else if (linkedEventId && typeof EVENTS !== 'undefined') {
       const ev = EVENTS.find(e => e.id === linkedEventId);
-      showToast(`✦ Stamp earned: ${cat.stamps[idx]}${ev ? ' — ' + ev.title : ''}`);
+      showToast(`✦ Stamp earned: ${cat.stamps[idx]}${ev ? ' (' + ev.title + ')' : ''}`);
     } else {
       showToast(`✦ Stamp earned: ${cat.stamps[idx]}`);
     }
@@ -1988,7 +2018,7 @@ function openEventPicker(catId, idx, li) {
   const matches = tagFilter ? events.filter(e => e.tag === tagFilter) : events;
 
   if (!matches.length) {
-    listEl.innerHTML = '<p class="event-pick-empty">No matching events on the calendar yet — you can still mark this earned below.</p>';
+    listEl.innerHTML = '<p class="event-pick-empty">No matching events on the calendar yet. You can still mark this earned below.</p>';
   } else {
     matches.forEach(ev => {
       const btn = document.createElement('button');
@@ -2026,6 +2056,7 @@ document.getElementById('eventPickOverlay').addEventListener('click', (e) => {
 
 function buildLevels() {
   const grid = document.getElementById('levelsGrid');
+  grid.innerHTML = '';
   LEVELS.forEach(l => {
     const card = document.createElement('div');
     card.className = 'level-card';
@@ -2041,6 +2072,7 @@ function buildLevels() {
 
 function buildThemes() {
   const grid = document.getElementById('themesGrid');
+  grid.innerHTML = '';
   MONTHS.forEach(m => {
     const card = document.createElement('div');
     card.className = 'theme-card' + (m.current ? ' current' : '');
@@ -2090,7 +2122,7 @@ function renderTripsCalendar() {
     if (ev) {
       cell.classList.add('has-event');
       cell.style.background = TRIP_TAG_COLORS[ev.tag] || 'var(--pp-terracotta)';
-      cell.title = `${ev.title} — click for details`;
+      cell.title = `${ev.title} (click for details)`;
       cell.addEventListener('click', () => openEventDetailModal(ev));
     }
     grid.appendChild(cell);
@@ -2274,6 +2306,11 @@ window.addEventListener('hashchange', renderRoute);
 // EVENTS, then route to whichever section the URL hash points at.
 (async function initEventsAndUI() {
   await refreshEventsFromFirestore();
+  await refreshPassportFromFirestore();
+  // rebuild the "earned" tracker to match whatever categories ended up
+  // live (defaults, or admin-edited ones from Firestore)
+  earned = {};
+  CATEGORIES.forEach(c => { earned[c.id] = new Set(); });
   buildCategories();
   buildLevels();
   buildThemes();
