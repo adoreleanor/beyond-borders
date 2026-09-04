@@ -309,6 +309,7 @@
     <ul class="contact-list">
       <li>Email: <a id="contactEmailLink" href="mailto:bbsoc@kcl.ac.uk">bbsoc@kcl.ac.uk</a></li>
       <li id="instagramLine">Instagram: <a id="instagramLink" href="#" target="_blank" rel="noopener">@kclbbsoc</a></li>
+      <li id="linkedinLine">LinkedIn: <a id="linkedinLink" href="#" target="_blank" rel="noopener">Beyond Borders BBSOC</a></li>
       <li id="kclsuLine">KCLSU: <a id="kclsuLink" href="#" target="_blank" rel="noopener">View our society page</a></li>
     </ul>
   </div>
@@ -374,6 +375,10 @@
           document.getElementById('instagramLine').style.display = '';
           document.getElementById('instagramLink').href = d.instagramUrl;
           document.getElementById('instagramLink').textContent = '@' + d.instagramUrl.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/$/, '');
+        }
+        if (d.linkedinUrl) {
+          document.getElementById('linkedinLine').style.display = '';
+          document.getElementById('linkedinLink').href = d.linkedinUrl;
         }
         if (d.kclsuUrl) {
           document.getElementById('kclsuLine').style.display = '';

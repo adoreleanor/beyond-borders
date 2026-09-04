@@ -196,6 +196,10 @@
           <input type="text" id="instagramUrlInput" placeholder="https://instagram.com/kclbbsoc">
         </div>
         <div class="field">
+          <label for="linkedinUrlInput">LinkedIn URL</label>
+          <input type="text" id="linkedinUrlInput" placeholder="https://linkedin.com/company/...">
+        </div>
+        <div class="field">
           <label for="kclsuUrlInput">KCLSU Page URL</label>
           <input type="text" id="kclsuUrlInput" placeholder="https://www.kclsu.org/societies/view/...">
         </div>
@@ -509,6 +513,7 @@
       document.getElementById('whatWeDoTextInput').value = d.whatWeDoText || '';
       document.getElementById('contactEmailInput').value = d.contactEmail || '';
       document.getElementById('instagramUrlInput').value = d.instagramUrl || '';
+      document.getElementById('linkedinUrlInput').value = d.linkedinUrl || '';
       document.getElementById('kclsuUrlInput').value = d.kclsuUrl || '';
     } catch (err) {
       console.error('Could not load About Us content:', err);
@@ -523,6 +528,7 @@
         whatWeDoText: document.getElementById('whatWeDoTextInput').value.trim(),
         contactEmail: document.getElementById('contactEmailInput').value.trim(),
         instagramUrl: document.getElementById('instagramUrlInput').value.trim(),
+        linkedinUrl: document.getElementById('linkedinUrlInput').value.trim(),
         kclsuUrl: document.getElementById('kclsuUrlInput').value.trim(),
       }, { merge: true });
       status.classList.add('show');
