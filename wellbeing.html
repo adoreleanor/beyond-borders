@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wellbeing Board · Beyond Borders</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Satisfy&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --crimson:#550412;--crimson-mid:#6B0518;--crimson-light:#7A0820;
+      --cream:#F0E8D8;--board:#E8DCC8;
+      --text:#1A0A10;--text-muted:#6B5058;--white:#FFFFFF;
+      --danger:#C0392B;--safe-bg:#FFF8F0;--safe-border:#E8C9A0;
+      --note-yellow:#FFF9B0;--note-yellow-dark:#F5EE80;
+      --note-pink:#FFD6D6;--note-green:#D4F5D4;--note-blue:#D4E8FF;--note-purple:#EAD4FF;
+      --radius:3px;
+      --shadow: 3px 3px 10px rgba(0,0,0,0.15), 0 0 2px rgba(0,0,0,0.05);
+      --shadow-hover: 6px 6px 18px rgba(0,0,0,0.22);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:var(--board);color:var(--text);min-height:100vh;line-height:1.6}
+
+    .back-home{
+      position:fixed;
+      top:18px; left:18px;
+      z-index:600;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:rgba(85,4,18,0.8);
+      color:#F0E8D8;
+      text-decoration:none;
+      font-size:13px;
+      letter-spacing:1px;
+      padding:8px 16px;
+      border-radius:20px;
+      border:1px solid rgba(212,160,23,0.4);
+      backdrop-filter:blur(6px);
+      transition:background 0.2s;
+    }
+    .back-home:hover{ background:rgba(85,4,18,1); }
+
+    /* ── Safeguarding ── */
+    #safeguarding{background:var(--safe-bg);border-bottom:2px solid var(--safe-border);padding:12px 24px 12px 160px;text-align:center;font-size:.85rem;color:#5C3D00}
+    #safeguarding strong{color:#7A4500}
+    #safeguarding a{color:#7A4500;font-weight:600}
+    #safeguarding a:hover{text-decoration:underline}
+
+    /* ── Header ── */
+    header{background:var(--crimson);padding:28px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:14px}
+    .header-logo{width:140px;height:140px;object-fit:contain;border-radius:50%}
+    .header-text{text-align:center;color:var(--white)}
+    .header-text h1{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;letter-spacing:.02em;line-height:1.15}
+    .header-text p{margin-top:6px;font-size:.875rem;font-weight:300;opacity:.85;max-width:400px}
+
+    /* ── Board layout ── */
+    main{max-width:900px;margin:0 auto;padding:32px 20px 64px}
+
+    /* ── Post form (as a large sticky note) ── */
+    #post-form-section{
+      background:var(--note-yellow);
+      border-radius:var(--radius);
+      padding:28px 28px 24px;
+      box-shadow:var(--shadow);
+      margin-bottom:40px;
+      position:relative;
+      transform:rotate(-0.4deg);
+    }
+    #post-form-section::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:36px;
+      background:var(--note-yellow-dark);
+      border-radius:var(--radius) var(--radius) 0 0;
+    }
+    .section-title{
+      font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;
+      color:var(--crimson);margin-bottom:14px;position:relative;z-index:1;
+      padding-top:4px;
+    }
+    textarea,input[type="text"]{
+      width:100%;font-family:'Satisfy',cursive;font-size:1rem;color:var(--text);
+      border:none;border-bottom:1.5px dashed rgba(0,0,0,0.2);
+      border-radius:0;padding:8px 4px;resize:vertical;
+      background:transparent;transition:border-color .2s;outline:none;
+      line-height:1.7;
+    }
+    textarea:focus,input[type="text"]:focus{border-bottom-color:var(--crimson-light)}
+    textarea{min-height:100px;resize:none;overflow:hidden}
+    .anon-note{font-size:.78rem;color:var(--text-muted);margin-top:10px;display:flex;align-items:center;gap:5px}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border:none;border-radius:4px;font-family:'Inter',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;transition:background .2s,transform .1s,box-shadow .2s}
+    .btn:active{transform:scale(.97)}
+    .btn-primary{background:var(--crimson);color:var(--white)}
+    .btn-primary:hover{background:var(--crimson-mid)}
+    .btn-primary:disabled{background:#B08090;cursor:not-allowed}
+    .form-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:14px}
+
+    /* ── Feed header ── */
+    #feed-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px}
+    .feed-title{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:600;color:var(--crimson)}
+    #post-count{font-size:.8rem;color:var(--text-muted)}
+
+    /* ── Post notes grid ── */
+    #feed{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+      gap:28px;
+      align-items:start;
+    }
+
+    /* ── Individual post note ── */
+    .post-note{
+      background:var(--note-yellow);
+      border-radius:var(--radius);
+      padding:0;
+      box-shadow:var(--shadow);
+      transition:box-shadow .2s, transform .2s;
+      position:relative;
+    }
+    .post-note:hover{box-shadow:var(--shadow-hover);transform:rotate(0deg) scale(1.02)!important}
+
+    .note-tab{
+      height:32px;border-radius:var(--radius) var(--radius) 0 0;
+      filter:brightness(0.88);
+      background:inherit;
+      position:relative;
+    }
+    .note-pin{
+      position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+      font-size:1.4rem;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+      pointer-events:none;
+    }
+    .note-body{padding:14px 16px 16px}
+
+    .post-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .anon-badge{background:rgba(0,0,0,0.08);color:var(--text-muted);font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:99px}
+    .post-time{font-size:.72rem;color:var(--text-muted)}
+    .post-body-text{font-family:'Satisfy',cursive;font-size:1.15rem;line-height:1.65;color:var(--text);white-space:pre-wrap;word-break:break-word}
+
+    /* ── Mini replies row ── */
+    .replies-area{margin-top:12px;border-top:1px dashed rgba(0,0,0,0.15);padding-top:10px}
+    .mini-replies{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+
+    .mini-note{
+      width:64px;height:64px;border-radius:2px;
+      box-shadow:2px 2px 6px rgba(0,0,0,0.15);
+      cursor:pointer;
+      transition:transform .15s, box-shadow .15s;
+      position:relative;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+      flex-shrink:0;
+    }
+    .mini-note:hover{transform:scale(1.12) rotate(0deg)!important;box-shadow:4px 4px 12px rgba(0,0,0,0.25)}
+    .mini-note:nth-child(odd){transform:rotate(-2deg)}
+    .mini-note:nth-child(even){transform:rotate(1.5deg)}
+    .mini-note-text{
+      font-family:'Satisfy',cursive;font-size:.55rem;
+      color:rgba(0,0,0,0.6);padding:6px;text-align:center;
+      overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;
+      line-height:1.3;
+    }
+    .mini-note:nth-child(3n+1){background:#FFF9B0}
+    .mini-note:nth-child(3n+2){background:#FFD6D6}
+    .mini-note:nth-child(3n+3){background:#D4E8FF}
+    .mini-note:nth-child(4n){background:#EAD4FF}
+
+    .toggle-reply-btn{
+      font-size:.78rem;color:var(--text-muted);background:none;border:none;
+      cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:4px;
+      transition:color .15s;font-family:'Inter',sans-serif;
+    }
+    .toggle-reply-btn:hover{color:var(--crimson)}
+
+    /* ── Reply form (inline) ── */
+    .reply-form{display:none;margin-top:10px}
+    .reply-form.open{display:block}
+    .reply-form textarea{min-height:60px;font-size:1rem;border-bottom:1px dashed rgba(0,0,0,0.2);resize:none;overflow:hidden}
+    .reply-form input[type="text"]{font-size:.9rem}
+    .reply-form-row{display:flex;gap:8px;margin-top:8px;align-items:flex-start;flex-wrap:wrap}
+    .reply-form-row input{flex:1;min-width:120px}
+    .btn-submit-reply{background:var(--crimson);color:var(--white);font-size:.78rem;padding:6px 14px;border-radius:4px;border:none;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;white-space:nowrap}
+    .btn-submit-reply:hover{background:var(--crimson-mid)}
+    .btn-submit-reply:disabled{background:#B08090;cursor:not-allowed}
+
+    /* ── Reply modal ── */
+    #reply-modal{
+      display:none;position:fixed;inset:0;z-index:200;
+      background:rgba(0,0,0,0.45);
+      align-items:center;justify-content:center;
+      padding:24px;
+    }
+    #reply-modal.open{display:flex}
+    .modal-note{
+      max-width:680px;width:100%;border-radius:var(--radius);
+      box-shadow:8px 8px 32px rgba(0,0,0,0.35);
+      animation:popIn .2s cubic-bezier(.34,1.56,.64,1);
+      position:relative;
+      max-height:80vh;display:flex;flex-direction:column;
+    }
+    @keyframes popIn{from{transform:scale(0.7);opacity:0}to{transform:scale(1);opacity:1}}
+    .modal-note-tab{height:36px;border-radius:var(--radius) var(--radius) 0 0;filter:brightness(0.88);flex-shrink:0}
+    .modal-note-body{padding:20px 32px 28px;overflow-y:auto;flex:1}
+    .modal-author{font-size:.82rem;font-weight:600;color:var(--crimson);margin-bottom:6px}
+    .modal-text{font-family:'Satisfy',cursive;font-size:1.15rem;line-height:1.7;color:var(--text);white-space:pre-wrap;word-break:break-word}
+    .modal-time{font-size:.72rem;color:var(--text-muted);margin-top:10px}
+    .modal-close{
+      position:absolute;top:8px;right:10px;
+      background:none;border:none;font-size:1.3rem;cursor:pointer;
+      color:rgba(0,0,0,0.4);line-height:1;
+      transition:color .15s;
+    }
+    .modal-close:hover{color:rgba(0,0,0,0.8)}
+
+    /* ── Compose reply modal ── */
+    #compose-modal{
+      display:none;position:fixed;inset:0;z-index:300;
+      background:rgba(0,0,0,0.5);
+      align-items:center;justify-content:center;padding:24px;
+    }
+    #compose-modal.open{display:flex}
+    .compose-box{
+      background:#fffde7;border-radius:6px;
+      width:90vw;max-width:860px;
+      box-shadow:6px 6px 28px rgba(0,0,0,0.35);
+      padding:28px 32px 24px;position:relative;
+      animation:popIn .2s cubic-bezier(.34,1.56,.64,1);
+    }
+    .compose-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--crimson);margin:0 0 14px}
+    .compose-box textarea{
+      width:100%;font-family:'Satisfy',cursive;font-size:1rem;
+      border:none;border-bottom:2px dashed rgba(0,0,0,0.2);
+      background:transparent;outline:none;resize:none;
+      color:var(--text);line-height:1.6;padding:4px 0;
+      min-height:160px;
+    }
+    .compose-row{display:flex;gap:10px;margin-top:16px;align-items:center}
+    .compose-row input{
+      flex:1;font-family:'Inter',sans-serif;font-size:.875rem;
+      border:none;border-bottom:1px solid rgba(0,0,0,0.2);
+      background:transparent;outline:none;padding:4px 0;color:var(--text);
+    }
+    .compose-send-btn{background:var(--crimson);color:#fff;font-size:.875rem;padding:8px 18px;border-radius:4px;white-space:nowrap}
+    .compose-close{
+      position:absolute;top:10px;right:14px;
+      background:none;border:none;font-size:1.3rem;cursor:pointer;
+      color:rgba(0,0,0,0.35);transition:color .15s;
+    }
+    .compose-close:hover{color:rgba(0,0,0,0.7)}
+
+    /* ── Loading / empty ── */
+    .loader{text-align:center;padding:40px;color:var(--text-muted);font-size:.9rem;grid-column:1/-1}
+    .loader-spinner{display:inline-block;width:28px;height:28px;border:3px solid rgba(0,0,0,0.1);border-top-color:var(--crimson);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:10px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .empty-state{text-align:center;padding:48px 24px;color:var(--text-muted);grid-column:1/-1}
+    .empty-state .big-icon{font-size:2.5rem;margin-bottom:10px}
+
+    /* ── Toast ── */
+    #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--white);padding:12px 22px;border-radius:99px;font-size:.875rem;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:300;white-space:nowrap}
+    #toast.show{transform:translateX(-50%) translateY(0)}
+    #toast.error{background:var(--danger)}
+
+    .delete-btn{
+      position:absolute;top:-8px;right:-8px;
+      background:#C0392B;color:white;border:none;cursor:pointer;
+      font-size:9px;width:18px;height:18px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      padding:0;line-height:1;
+      box-shadow:0 1px 4px rgba(0,0,0,0.3);
+      transition:background .15s, transform .15s;
+      z-index:10;
+    }
+    .delete-btn:hover{background:#922B21;transform:scale(1.15)}
+    .admin-bar{
+      background:#550412;color:white;
+      text-align:center;padding:8px;font-size:.8rem;
+      font-family:'Inter',sans-serif;
+    }
+
+    /* ── Title animation ── */
+    @keyframes fadeSlideIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+    .header-text h1{animation:fadeSlideIn .7s ease both}
+    .header-text p{animation:fadeSlideIn .7s .15s ease both}
+
+    /* ── Feed area ── */
+    #feed{
+      background-color:var(--board);
+      padding:24px 16px;border-radius:6px;
+      box-shadow:inset 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    /* ── Paper lines on note body ── */
+    .note-body{
+      background-image:repeating-linear-gradient(transparent,transparent 27px,rgba(0,0,0,0.05) 27px,rgba(0,0,0,0.05) 28px);
+      background-position:0 14px;
+    }
+
+    /* ── Post actions bar (hearts + flag) ── */
+    .post-actions{display:flex;align-items:center;gap:8px;margin-top:10px}
+    .heart-btn{
+      background:none;border:none;cursor:pointer;
+      font-size:.78rem;color:var(--text-muted);
+      display:inline-flex;align-items:center;gap:3px;
+      padding:3px 7px;border-radius:99px;
+      transition:background .15s,color .15s;
+      font-family:'Inter',sans-serif;
+    }
+    .heart-btn:hover{background:rgba(255,100,100,0.12);color:#c0392b}
+    .heart-btn.hearted{color:#e74c3c;font-weight:600}
+    .heart-btn.hearted .heart-icon{animation:heartPop .3s cubic-bezier(.34,1.56,.64,1)}
+    @keyframes heartPop{0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
+    .flag-btn{
+      position:absolute;bottom:8px;right:10px;
+      background:none;border:none;cursor:pointer;
+      font-size:.72rem;color:rgba(0,0,0,0.18);
+      padding:3px 5px;border-radius:4px;
+      transition:color .15s,background .15s;
+    }
+    .flag-btn:hover{color:#e67e22;background:rgba(230,126,34,0.1)}
+    .flag-btn.flagged{color:#e67e22}
+    .post-note.hidden-post{opacity:0.35;filter:blur(2px);pointer-events:none}
+    .post-note.hidden-post::after{
+      content:'⚠️ Hidden pending review';
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+      font-size:.8rem;color:var(--crimson);font-family:'Inter',sans-serif;
+      pointer-events:all;filter:none;opacity:1;
+    }
+
+    /* ── Welcome modal ── */
+    #welcome-modal{
+      display:none;position:fixed;inset:0;z-index:500;
+      background:rgba(0,0,0,0.6);
+      align-items:center;justify-content:center;padding:24px;
+    }
+    #welcome-modal.open{display:flex}
+    .welcome-box{
+      background:#fffde7;border-radius:6px;
+      width:100%;max-width:480px;
+      padding:36px 36px 28px;
+      box-shadow:8px 8px 40px rgba(0,0,0,0.4);
+      animation:popIn .35s cubic-bezier(.34,1.56,.64,1);
+      text-align:center;
+    }
+    .welcome-box h2{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--crimson);margin-bottom:12px}
+    .welcome-box p{font-size:.9rem;color:var(--text-muted);line-height:1.6;margin-bottom:18px}
+    .welcome-features{list-style:none;margin:0 0 24px;display:flex;flex-direction:column;gap:10px}
+    .welcome-features li{font-size:.9rem;color:var(--text);background:rgba(0,0,0,0.04);border-radius:6px;padding:9px 14px;text-align:left}
+    .welcome-go{background:var(--crimson);color:#fff;border:none;border-radius:4px;padding:11px 28px;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .2s}
+    .welcome-go:hover{background:var(--crimson-mid)}
+
+    @media(max-width:520px){
+      .header-text h1{font-size:1.55rem}
+      main{padding:20px 14px 60px}
+      #feed{grid-template-columns:1fr 1fr}
+      #safeguarding{padding-left:24px;padding-top:52px}
+      .back-home{top:10px;left:10px;font-size:12px;padding:6px 12px}
+    }
+  </style>
+</head>
+<body>
+
+<a class="back-home" href="index.html">&larr; Beyond Borders Home</a>
+
+  <div class="admin-bar" id="admin-bar" style="display:none">🔐 Admin mode — you can delete any post or reply</div>
+  <div id="safeguarding">
+    <strong>💛 Need urgent support?</strong>
+    Call <a href="tel:116123">Samaritans: 116 123</a> (free, 24/7) &nbsp;·&nbsp;
+    <a href="https://www.kcl.ac.uk/student-life/services/wellbeing" target="_blank" rel="noopener">KCL Student Wellbeing</a> &nbsp;·&nbsp;
+    Text <strong>SHOUT</strong> to <a href="sms:85258">85258</a> for crisis text support
+  </div>
+
+  <header>
+    <img src="logo.png" alt="KCL BBSOC logo" class="header-logo" />
+    <div class="header-text">
+      <h1>Beyond Borders Wellbeing Board</h1>
+      <p>A safe, anonymous space to share what's on your mind — and lift each other up.</p>
+    </div>
+  </header>
+
+  <main>
+    <!-- Post form -->
+    <section id="post-form-section">
+      <h2 class="section-title">Pin something to the board</h2>
+      <form id="post-form">
+        <textarea id="post-content" placeholder="What's on your mind? Write it here…" required></textarea>
+        <p class="anon-note">🔒 Completely anonymous — no account, no name, no tracking.</p>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="post-submit-btn">Pin to board 📌</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Feed -->
+    <div id="feed-header">
+      <span class="feed-title">The board</span>
+      <span id="post-count"></span>
+    </div>
+    <div id="feed">
+      <div class="loader"><div class="loader-spinner"></div><div>Loading the board…</div></div>
+    </div>
+  </main>
+
+  <!-- Welcome modal -->
+  <div id="welcome-modal">
+    <div class="welcome-box">
+      <h2>Welcome to the Wellbeing Board 💛</h2>
+      <p>A safe, anonymous space to share what's on your mind and support each other.</p>
+      <ul class="welcome-features">
+        <li>🔒 Posts are completely anonymous — no name, no account, no tracking</li>
+        <li>💬 Reply with kind words to support others</li>
+        <li>❤️ React to show someone you care</li>
+        <li>🚩 Flag anything that needs a moderator's eye</li>
+      </ul>
+      <button class="welcome-go" id="welcome-go">Let's go →</button>
+    </div>
+  </div>
+
+  <!-- Compose reply modal -->
+  <div id="compose-modal">
+    <div class="compose-box">
+      <button class="compose-close" id="compose-close">✕</button>
+      <h3 class="compose-title">Write a reply</h3>
+      <textarea id="compose-textarea" placeholder="Write a kind reply…" rows="8"></textarea>
+      <div class="compose-row">
+        <input id="compose-author" type="text" placeholder="Your name (optional)" maxlength="60" />
+        <button class="btn compose-send-btn" id="compose-send">Send 💛</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reply modal -->
+  <div id="reply-modal">
+    <div class="modal-note" id="modal-note">
+      <button class="modal-close" id="modal-close">✕</button>
+      <div class="modal-note-tab" id="modal-tab"></div>
+      <div class="modal-note-body">
+        <div class="modal-author" id="modal-author"></div>
+        <div class="modal-text" id="modal-text"></div>
+        <div class="modal-time" id="modal-time"></div>
+        <button class="heart-btn modal-heart-btn" id="modal-heart-btn" style="margin-top:14px"><span class="heart-icon">❤️</span> <span class="heart-count" id="modal-heart-count">0</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- Templates -->
+  <template id="post-template">
+    <div class="post-note">
+      <button class="delete-btn post-delete-btn" style="display:none" title="Delete post">✕</button>
+      <div class="note-tab"><span class="note-pin">📌</span></div>
+      <div class="note-body">
+        <div class="post-meta">
+          <span class="anon-badge">Anonymous</span>
+          <span class="post-time"></span>
+        </div>
+        <div class="post-body-text"></div>
+        <div class="post-actions">
+          <button class="heart-btn"><span class="heart-icon">❤️</span> <span class="heart-count">0</span></button>
+        </div>
+        <button class="flag-btn" title="Flag for review">🚩</button>
+        <div class="replies-area">
+          <div class="mini-replies"></div>
+          <button class="toggle-reply-btn"><span>💬</span> <span class="toggle-label">Add a reply</span></button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    // ── Admin mode ──
+    const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'bbsoc2026';
+    if (isAdmin) document.getElementById('admin-bar').style.display = 'block';
+
+    // ── My posts (in-memory + sessionStorage fallback) ──
+    const myPostIds = new Set();
+    const myReplyIds = new Set();
+
+    try {
+      JSON.parse(sessionStorage.getItem('bbsoc_posts') || '[]').forEach(id => myPostIds.add(id));
+      JSON.parse(sessionStorage.getItem('bbsoc_replies') || '[]').forEach(id => myReplyIds.add(id));
+    } catch(e) {}
+
+    function getMyPosts() { return [...myPostIds]; }
+    function saveMyPost(id) {
+      myPostIds.add(id);
+      try { sessionStorage.setItem('bbsoc_posts', JSON.stringify([...myPostIds])); } catch(e) {}
+    }
+    function getMyReplies() { return [...myReplyIds]; }
+    function saveMyReply(id) {
+      myReplyIds.add(id);
+      try { sessionStorage.setItem('bbsoc_replies', JSON.stringify([...myReplyIds])); } catch(e) {}
+    }
+
+    const SUPABASE_URL  = 'https://xjjldspygsxzqxkflvfz.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqamxkc3B5Z3N4enF4a2ZsdmZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNjQyMDMsImV4cCI6MjA5NzY0MDIwM30.Tjs3Mx9i6O2e1r9_86eQ3nSR_-99UKiLTh8LKa3vRvk';
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    const NOTE_COLOURS = ['#FFF9B0','#FFD6D6','#D4E8FF','#EAD4FF','#D4F5D4','#FFE5C0','#C8F0F0','#F5D4E8','#E8F5C8','#FFD6F0'];
+
+    function colourForId(id) {
+      let hash = 0;
+      for (let c of String(id)) hash = (hash * 31 + c.charCodeAt(0)) & 0xffffffff;
+      return NOTE_COLOURS[Math.abs(hash) % NOTE_COLOURS.length];
+    }
+
+    let toastTimer;
+    function toast(msg, isError=false){
+      const el=document.getElementById('toast');
+      el.textContent=msg;el.className='show'+(isError?' error':'');
+      clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.className=''},3200);
+    }
+
+    function timeAgo(d){
+      const s=Math.floor((Date.now()-new Date(d))/1000);
+      if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';
+      if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+    }
+
+    // ── Modal ──
+    const modal    = document.getElementById('reply-modal');
+    const modalNote= document.getElementById('modal-note');
+    const modalTab = document.getElementById('modal-tab');
+    const modalAuthor = document.getElementById('modal-author');
+    const modalText= document.getElementById('modal-text');
+    const modalTime= document.getElementById('modal-time');
+    const modalHeartBtn = document.getElementById('modal-heart-btn');
+    const modalHeartCount = document.getElementById('modal-heart-count');
+
+    function openModal(reply, colour) {
+      modalTab.style.background = colour;
+      modalNote.style.background = colour;
+      modalAuthor.textContent = reply.author_name || 'Anonymous';
+      modalText.textContent   = reply.content;
+      const fullDate = new Date(reply.created_at).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'});
+      modalTime.textContent   = timeAgo(reply.created_at);
+      modalTime.title = fullDate;
+      modal.classList.add('open');
+
+      const myReplyHearts = JSON.parse(sessionStorage.getItem('bbsoc_reply_hearts')||'{}');
+      let replyHearts = reply._heartCount || 0;
+      modalHeartCount.textContent = replyHearts;
+      modalHeartBtn.classList.toggle('hearted', !!myReplyHearts[reply.id]);
+      const newBtn = modalHeartBtn.cloneNode(true);
+      modalHeartBtn.replaceWith(newBtn);
+      const freshHeartBtn = document.getElementById('modal-heart-btn');
+      const freshHeartCount = document.getElementById('modal-heart-count');
+      freshHeartBtn.addEventListener('click', async()=>{
+        const hearts2 = JSON.parse(sessionStorage.getItem('bbsoc_reply_hearts')||'{}');
+        if(hearts2[reply.id]){
+          await db.from('reply_reactions').delete().eq('id', hearts2[reply.id]);
+          delete hearts2[reply.id]; replyHearts = Math.max(0,replyHearts-1);
+          freshHeartBtn.classList.remove('hearted');
+        } else {
+          const {data} = await db.from('reply_reactions').insert({reply_id:reply.id}).select().single();
+          if(data){ hearts2[reply.id]=data.id; replyHearts++; freshHeartBtn.classList.add('hearted'); }
+        }
+        freshHeartCount.textContent = replyHearts;
+        sessionStorage.setItem('bbsoc_reply_hearts', JSON.stringify(hearts2));
+      });
+    }
+
+    document.getElementById('modal-close').addEventListener('click', ()=>modal.classList.remove('open'));
+    modal.addEventListener('click', e=>{ if(e.target===modal) modal.classList.remove('open'); });
+
+    // ── Compose reply modal ──
+    const composeModal = document.getElementById('compose-modal');
+    const composeTextarea = document.getElementById('compose-textarea');
+    const composeAuthor = document.getElementById('compose-author');
+    const composeSendBtn = document.getElementById('compose-send');
+    let _composePostId = null, _composeMiniReplies = null, _composeColour = null;
+
+    function openComposeModal(postId, miniRepliesEl, colour) {
+      _composePostId = postId;
+      _composeMiniReplies = miniRepliesEl;
+      _composeColour = colour;
+      composeTextarea.value = '';
+      composeAuthor.value = '';
+      composeModal.classList.add('open');
+      composeTextarea.focus();
+    }
+
+    function closeComposeModal() { composeModal.classList.remove('open'); }
+
+    document.getElementById('compose-close').addEventListener('click', closeComposeModal);
+    composeModal.addEventListener('click', e=>{ if(e.target===composeModal) closeComposeModal(); });
+
+    composeSendBtn.addEventListener('click', async()=>{
+      const content = composeTextarea.value.trim();
+      const author = composeAuthor.value.trim() || null;
+      if(!content){toast('Write something first 💛');return;}
+      composeSendBtn.disabled=true; composeSendBtn.textContent='Sending…';
+      const {data,error} = await db.from('replies').insert({post_id:_composePostId,content,author_name:author}).select().single();
+      composeSendBtn.disabled=false; composeSendBtn.textContent='Send 💛';
+      if(error){toast('Error: '+(error.message||error.code||'unknown'),true);console.error(error);return;}
+      if(data) saveMyReply(data.id);
+      _composeMiniReplies.appendChild(renderMiniNote(data, _composeColour));
+      closeComposeModal();
+      toast('Reply pinned! 💛');
+    });
+
+    // ── Render mini reply note ──
+    function renderMiniNote(reply, postColour) {
+      const colour = colourForId(reply.id);
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'relative';
+      wrapper.style.display = 'inline-block';
+
+      const el = document.createElement('div');
+      el.className = 'mini-note';
+      el.style.background = colour;
+      el.title = reply.author_name ? `From ${reply.author_name}` : 'Anonymous reply';
+      el.innerHTML = `<div class="mini-note-text">${reply.content.replace(/</g,'&lt;')}</div>`;
+      el.addEventListener('click', ()=>openModal(reply, colour));
+      wrapper.appendChild(el);
+
+      const canDelete = isAdmin || getMyReplies().includes(reply.id);
+      if (canDelete) {
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Delete reply';
+        delBtn.style.cssText = 'position:absolute;top:-6px;right:-6px;background:#C0392B;color:white;border:none;border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;';
+        delBtn.addEventListener('click', async(e)=>{
+          e.stopPropagation();
+          if(!confirm('Delete this reply?')) return;
+          const {error} = await db.from('replies').delete().eq('id', reply.id);
+          if(error){toast('Could not delete.',true);return;}
+          wrapper.remove();
+        });
+        wrapper.appendChild(delBtn);
+      }
+      return wrapper;
+    }
+
+    // ── Render a post note ──
+    function renderPost(post, replies=[], forceDelete=false, heartCount=0, flagCount=0) {
+      const tmpl = document.getElementById('post-template');
+      const node = tmpl.content.cloneNode(true);
+      const card = node.querySelector('.post-note');
+
+      const colour = colourForId(post.id);
+      card.style.background = colour;
+      card.querySelector('.note-tab').style.background = colour;
+      card.querySelector('.note-tab').style.filter = 'brightness(0.85)';
+
+      let hash = 0;
+      for(let c of post.id) hash = (hash*31 + c.charCodeAt(0)) & 0xffffffff;
+      const rotation = ((Math.abs(hash) % 70) - 35) / 10;
+      card.style.transform = `rotate(${rotation}deg)`;
+
+      const timeEl = card.querySelector('.post-time');
+      const fullDate = new Date(post.created_at).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'});
+      timeEl.textContent = timeAgo(post.created_at);
+      timeEl.title = fullDate;
+      timeEl.style.cursor = 'help';
+
+      card.querySelector('.post-body-text').textContent = post.content;
+
+      const heartBtn = card.querySelector('.heart-btn');
+      const heartCountEl = card.querySelector('.heart-count');
+      const myHearts = JSON.parse(sessionStorage.getItem('bbsoc_hearts')||'{}');
+      let currentHearts = heartCount;
+      heartCountEl.textContent = currentHearts;
+      if(myHearts[post.id]) heartBtn.classList.add('hearted');
+      heartBtn.addEventListener('click', async()=>{
+        if(myHearts[post.id]){
+          await db.from('reactions').delete().eq('id', myHearts[post.id]);
+          delete myHearts[post.id];
+          currentHearts = Math.max(0, currentHearts-1);
+          heartBtn.classList.remove('hearted');
+        } else {
+          const {data} = await db.from('reactions').insert({post_id:post.id}).select().single();
+          if(data){ myHearts[post.id]=data.id; currentHearts++; heartBtn.classList.add('hearted'); }
+        }
+        heartCountEl.textContent = currentHearts;
+        sessionStorage.setItem('bbsoc_hearts', JSON.stringify(myHearts));
+      });
+
+      const flagBtn = card.querySelector('.flag-btn');
+      const myFlags = JSON.parse(sessionStorage.getItem('bbsoc_flags')||'{}');
+      if(myFlags[post.id]) flagBtn.classList.add('flagged');
+      if(flagCount >= 3 && !isAdmin) card.classList.add('hidden-post');
+      if(isAdmin && flagCount > 0) flagBtn.title = `🚩 ${flagCount} flag${flagCount!==1?'s':''}`;
+      flagBtn.addEventListener('click', async()=>{
+        if(myFlags[post.id]){toast('Already flagged 🚩');return;}
+        await db.from('flags').insert({post_id:post.id});
+        myFlags[post.id]=true;
+        sessionStorage.setItem('bbsoc_flags', JSON.stringify(myFlags));
+        flagBtn.classList.add('flagged');
+        toast('Thanks — flagged for review 🚩');
+      });
+
+      const miniReplies = card.querySelector('.mini-replies');
+      replies.forEach(r => miniReplies.appendChild(renderMiniNote(r, colour)));
+
+      const toggleBtn = card.querySelector('.toggle-reply-btn');
+
+      toggleBtn.addEventListener('click', ()=>{
+        openComposeModal(post.id, miniReplies, colour);
+      });
+
+      const deleteBtn = card.querySelector('.post-delete-btn');
+      const canDeletePost = forceDelete || isAdmin || getMyPosts().includes(post.id);
+      if (canDeletePost) {
+        deleteBtn.style.display = 'block';
+        deleteBtn.addEventListener('click', async(e)=>{
+          e.stopPropagation();
+          if(!confirm('Delete this post and all its replies?')) return;
+          const {error} = await db.from('posts').delete().eq('id', post.id);
+          if(error){toast('Could not delete.',true);return;}
+          card.closest('.post-note') ? card.closest('.post-note').remove() : card.remove();
+          loadFeed();
+        });
+      }
+
+      return node;
+    }
+
+    // ── Load feed ──
+    async function loadFeed(silent=false){
+      const feed=document.getElementById('feed');
+      const scrollY = window.scrollY;
+      if(!silent) feed.innerHTML='<div class="loader"><div class="loader-spinner"></div><div>Loading the board…</div></div>';
+
+      const [{data:posts,error},{data:replies},{data:reactionsData},{data:flagsData}] = await Promise.all([
+        db.from('posts').select('*').order('created_at',{ascending:false}),
+        db.from('replies').select('*').order('created_at',{ascending:true}),
+        db.from('reactions').select('post_id'),
+        db.from('flags').select('post_id'),
+      ]);
+      if(error){feed.innerHTML='<div class="empty-state"><div class="big-icon">⚠️</div><p>Could not load posts.</p></div>';return}
+
+      const replyMap={};(replies||[]).forEach(r=>{if(!replyMap[r.post_id])replyMap[r.post_id]=[];replyMap[r.post_id].push(r)});
+      const heartMap={};(reactionsData||[]).forEach(r=>{heartMap[r.post_id]=(heartMap[r.post_id]||0)+1});
+      const flagMap={};(flagsData||[]).forEach(f=>{flagMap[f.post_id]=(flagMap[f.post_id]||0)+1});
+
+      feed.innerHTML='';
+      const countEl=document.getElementById('post-count');
+      countEl.textContent = posts.length===0?'':`${posts.length} note${posts.length!==1?'s':''}`;
+
+      if(posts.length===0){
+        feed.innerHTML='<div class="empty-state"><div class="big-icon">📌</div><p>The board is empty — pin the first note!</p></div>';
+        return;
+      }
+      posts.forEach(p=>feed.appendChild(renderPost(p,replyMap[p.id]||[],false,heartMap[p.id]||0,flagMap[p.id]||0)));
+      if(silent) window.scrollTo({top:scrollY,behavior:'instant'});
+    }
+
+    // ── Submit post ──
+    function autoResize(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}
+    document.querySelectorAll('textarea').forEach(ta=>{
+      ta.addEventListener('input',()=>autoResize(ta));
+    });
+    document.addEventListener('input',e=>{if(e.target.tagName==='TEXTAREA')autoResize(e.target);});
+
+    document.getElementById('post-form').addEventListener('submit', async(e)=>{
+      e.preventDefault();
+      const contentEl=document.getElementById('post-content');
+      const content=contentEl.value.trim();
+      if(!content)return;
+      const btn=document.getElementById('post-submit-btn');
+      btn.disabled=true; btn.textContent='Pinning…';
+      const {data:newPost, error} = await db.from('posts').insert({content}).select().single();
+      btn.disabled=false; btn.textContent='Pin to board 📌';
+      if(error){toast('Error: ' + (error.message || error.code || 'unknown'), true);console.error(error);return}
+      if(newPost) saveMyPost(newPost.id);
+      contentEl.value='';
+      toast('Pinned to the board! 🔒');
+      if(newPost){
+        const feed = document.getElementById('feed');
+        const emptyState = feed.querySelector('.empty-state');
+        if(emptyState) feed.innerHTML='';
+        feed.insertBefore(renderPost(newPost,[],true,0,0), feed.firstChild);
+        const countEl = document.getElementById('post-count');
+        const current = parseInt(countEl.textContent)||0;
+        countEl.textContent = `${current+1} note${current+1!==1?'s':''}`;
+      }
+    });
+
+    // ── Welcome modal (first 3 visits) ──
+    const welcomeModal = document.getElementById('welcome-modal');
+    const visitCount = parseInt(localStorage.getItem('bbsoc_visits')||'0');
+    if(visitCount < 3) welcomeModal.classList.add('open');
+    document.getElementById('welcome-go').addEventListener('click',()=>{
+      welcomeModal.classList.remove('open');
+      localStorage.setItem('bbsoc_visits', String(visitCount + 1));
+    });
+
+    loadFeed();
+    setInterval(()=>loadFeed(true), 120000);
+  </script>
+
+</body>
+</html>
