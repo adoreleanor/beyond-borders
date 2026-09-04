@@ -802,6 +802,32 @@
     margin-top: 6px;
   }
 
+  /* ── EVENT DETAIL POPUP (opened from the trips calendar) ── */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(20,3,6,0.72); backdrop-filter:blur(3px);
+    z-index:700; display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-box{
+    background:var(--cream); color:#2C1810; border-radius:16px; padding:28px 26px;
+    max-width:460px; width:100%; position:relative; box-shadow:0 24px 60px rgba(0,0,0,0.35);
+  }
+  .modal-close{
+    position:absolute; top:12px; right:14px; background:none; border:none;
+    font-size:20px; color:rgba(44,24,16,0.4); cursor:pointer; line-height:1;
+  }
+  .modal-close:hover{ color:rgba(44,24,16,0.8); }
+  .ed-tag{
+    display:inline-block; font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
+    color:#8B6914; background:rgba(212,160,23,0.18); border-radius:10px; padding:3px 10px; margin-bottom:12px;
+  }
+  .ed-date{ font-family:'Cormorant Garamond',serif; font-size:14.5px; font-style:italic; color:#6b5a4e; margin-bottom:4px; }
+  .ed-title{ font-family:'Cormorant Garamond',serif; font-size:23px; font-weight:700; color:#3A0810; margin-bottom:12px; line-height:1.2; }
+  .ed-meta{ display:flex; flex-wrap:wrap; gap:12px; font-size:12.5px; color:#6b5a4e; margin-bottom:14px; }
+  .ed-meta span{ display:inline-flex; align-items:center; gap:5px; }
+  .ed-desc{ font-size:14px; line-height:1.65; color:#4a3d34; margin-bottom:18px; }
+  .ed-viewall{ font-size:12.5px; color:#6E0F1E; font-weight:600; text-decoration:underline; cursor:pointer; }
+
   /* small dots that trail behind the plane */
   .trail-dot {
     position: absolute;
@@ -988,6 +1014,14 @@
 </footer>
 
 <div class="toast" id="toast"></div>
+
+<!-- EVENT DETAIL POPUP (opened by clicking a day on the trips calendar) -->
+<div class="modal-overlay" id="eventDetailModal">
+  <div class="modal-box">
+    <button class="modal-close" id="eventDetailClose">&times;</button>
+    <div id="eventDetailContent"></div>
+  </div>
+</div>
 
 <!-- EVENT PICKER MODAL -->
 <div class="event-pick-overlay" id="eventPickOverlay">
@@ -1428,7 +1462,7 @@ function renderTripsCalendar() {
       cell.classList.add('has-event');
       cell.style.background = TRIP_TAG_COLORS[ev.tag] || 'var(--terracotta)';
       cell.title = `${ev.title} — click for details`;
-      cell.addEventListener('click', () => window.open(`events.html#ev-${ev.id}`, '_blank'));
+      cell.addEventListener('click', () => openEventDetailModal(ev));
     }
     grid.appendChild(cell);
   }
@@ -1443,6 +1477,26 @@ document.getElementById('tripsNext').addEventListener('click', () => {
   tripsViewMonth++;
   if (tripsViewMonth > 12) { tripsViewMonth = 1; tripsViewYear++; }
   renderTripsCalendar();
+});
+
+// ── Event detail popup (clicking a marked day on the trips calendar) ──
+function openEventDetailModal(ev) {
+  document.getElementById('eventDetailContent').innerHTML = `
+    <span class="ed-tag">${ev.tag}</span>
+    <div class="ed-date">${ev.monthLabel} ${String(ev.day).padStart(2,'0')}, ${ev.year}</div>
+    <div class="ed-title">${ev.title}</div>
+    <div class="ed-meta">${ev.meta.map(m => `<span>${m}</span>`).join('')}</div>
+    <p class="ed-desc">${ev.desc}</p>
+    <a class="ed-viewall" href="events.html#ev-${ev.id}">View all events →</a>
+  `;
+  document.getElementById('eventDetailModal').classList.add('open');
+}
+function closeEventDetailModal() {
+  document.getElementById('eventDetailModal').classList.remove('open');
+}
+document.getElementById('eventDetailClose').addEventListener('click', closeEventDetailModal);
+document.getElementById('eventDetailModal').addEventListener('click', (e) => {
+  if (e.target.id === 'eventDetailModal') closeEventDetailModal();
 });
 
 // Init — refresh events from the admin-editable database first, then build
