@@ -410,6 +410,15 @@
       <button class="save-btn" id="monthSaveBtn">Save monthly challenge</button>
       <button class="cancel-btn" id="monthCancelBtn">Cancel / clear form</button>
     </div>
+
+    <div class="panel">
+      <h2>Wellbeing Board Moderation</h2>
+      <p class="seed-note">Posts with 3 or more flags are automatically hidden from members on the board. Deleting a post also removes its replies. This connects to the same Wellbeing Board database as <code>wellbeing.html</code> (a separate database from the rest of this dashboard).</p>
+      <table>
+        <thead><tr><th>Posted</th><th>Content</th><th>Hearts</th><th>Flags</th><th>Replies</th><th></th></tr></thead>
+        <tbody id="wellbeingBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -417,6 +426,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<!-- Supabase (Wellbeing Board's own database, separate from Firebase) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="firebase-config.js"></script>
 <script src="events-data.js"></script>
 
@@ -548,6 +559,7 @@
     loadCategoriesList();
     loadLevelsList();
     loadMonthsList();
+    loadWellbeingBoard();
   });
 
   (async function init() {
@@ -1173,6 +1185,75 @@
       alert('Could not save: ' + err.message);
     }
   });
+
+  // ============================================================
+  // WELLBEING BOARD MODERATION
+  // Connects to the Wellbeing Board's own Supabase database (kept
+  // separate from Firebase). Visibility of this whole panel is
+  // already gated by the Firebase admin sign-in above, so no
+  // separate password/URL trick is needed here.
+  // ============================================================
+  const WB_SUPABASE_URL  = 'https://xjjldspygsxzqxkflvfz.supabase.co';
+  const WB_SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqamxkc3B5Z3N4enF4a2ZsdmZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNjQyMDMsImV4cCI6MjA5NzY0MDIwM30.Tjs3Mx9i6O2e1r9_86eQ3nSR_-99UKiLTh8LKa3vRvk';
+  const wbDb = window.supabase.createClient(WB_SUPABASE_URL, WB_SUPABASE_ANON);
+
+  async function loadWellbeingBoard() {
+    const body = document.getElementById('wellbeingBody');
+    try {
+      const [{ data: posts, error }, { data: replies }, { data: reactions }, { data: flags }] = await Promise.all([
+        wbDb.from('posts').select('*').order('created_at', { ascending: false }),
+        wbDb.from('replies').select('*').order('created_at', { ascending: true }),
+        wbDb.from('reactions').select('post_id'),
+        wbDb.from('flags').select('post_id'),
+      ]);
+      if (error) { body.innerHTML = `<tr class="empty-row"><td colspan="6">Could not load: ${error.message}</td></tr>`; return; }
+      if (!posts || posts.length === 0) { body.innerHTML = '<tr class="empty-row"><td colspan="6">No posts on the board yet.</td></tr>'; return; }
+
+      const replyMap = {};
+      (replies || []).forEach(r => { (replyMap[r.post_id] = replyMap[r.post_id] || []).push(r); });
+      const heartMap = {};
+      (reactions || []).forEach(r => { heartMap[r.post_id] = (heartMap[r.post_id] || 0) + 1; });
+      const flagMap = {};
+      (flags || []).forEach(f => { flagMap[f.post_id] = (flagMap[f.post_id] || 0) + 1; });
+
+      body.innerHTML = posts.map(p => {
+        const postReplies = replyMap[p.id] || [];
+        const flagCount = flagMap[p.id] || 0;
+        const repliesHtml = postReplies.length
+          ? '<div style="margin-top:8px;display:flex;flex-direction:column;gap:5px;">' + postReplies.map(r => `
+              <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:rgba(245,237,227,0.65);border-top:1px dashed rgba(245,237,227,0.1);padding-top:5px;">
+                <span style="flex:1;">${(r.content || '').replace(/</g, '&lt;')}</span>
+                <button class="mini-btn danger" onclick="deleteWellbeingReply('${r.id}')">Delete</button>
+              </div>
+            `).join('') + '</div>'
+          : '';
+        return `<tr>
+          <td>${new Date(p.created_at).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
+          <td>${(p.content || '').replace(/</g, '&lt;')}${repliesHtml}</td>
+          <td>${heartMap[p.id] || 0}</td>
+          <td>${flagCount ? `<span class="pill" style="${flagCount >= 3 ? 'background:rgba(232,163,163,0.25);color:#e8a3a3;' : ''}">🚩 ${flagCount}</span>` : ''}</td>
+          <td>${postReplies.length}</td>
+          <td><button class="mini-btn danger" onclick="deleteWellbeingPost('${p.id}')">Delete post</button></td>
+        </tr>`;
+      }).join('');
+    } catch (err) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="6">Could not load: ${err.message}</td></tr>`;
+    }
+  }
+
+  window.deleteWellbeingPost = async function(id) {
+    if (!confirm('Delete this post and all its replies from the Wellbeing Board?')) return;
+    const { error } = await wbDb.from('posts').delete().eq('id', id);
+    if (error) { alert('Could not delete: ' + error.message); return; }
+    loadWellbeingBoard();
+  };
+
+  window.deleteWellbeingReply = async function(id) {
+    if (!confirm('Delete this reply?')) return;
+    const { error } = await wbDb.from('replies').delete().eq('id', id);
+    if (error) { alert('Could not delete: ' + error.message); return; }
+    loadWellbeingBoard();
+  };
 </script>
 
 </body>

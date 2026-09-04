@@ -275,11 +275,6 @@
       z-index:10;
     }
     .delete-btn:hover{background:#922B21;transform:scale(1.15)}
-    .admin-bar{
-      background:#550412;color:white;
-      text-align:center;padding:8px;font-size:.8rem;
-      font-family:'Inter',sans-serif;
-    }
 
     /* ── Title animation ── */
     @keyframes fadeSlideIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
@@ -365,7 +360,6 @@
 
 <a class="back-home" href="index.html">&larr; Beyond Borders Home</a>
 
-  <div class="admin-bar" id="admin-bar" style="display:none">🔐 Admin mode: you can delete any post or reply</div>
   <div id="safeguarding">
     <strong>💛 Need urgent support?</strong>
     Call <a href="tel:116123">Samaritans: 116 123</a> (free, 24/7) &nbsp;·&nbsp;
@@ -473,8 +467,11 @@
 
   <script>
     // ── Admin mode ──
-    const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'bbsoc2026';
-    if (isAdmin) document.getElementById('admin-bar').style.display = 'block';
+    // Moderation (deleting any post/reply, seeing flagged posts) now lives
+    // in admin.html, gated by the real KCL committee sign-in there, instead
+    // of a shared URL secret on this public page. Members can still delete
+    // their own posts/replies below via getMyPosts()/getMyReplies().
+    const isAdmin = false;
 
     // ── My posts (in-memory + sessionStorage fallback) ──
     const myPostIds = new Set();
