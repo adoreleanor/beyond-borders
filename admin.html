@@ -410,6 +410,24 @@
     </div>
 
     <div class="panel">
+      <h2>Society Collective Stats</h2>
+      <p class="seed-note" id="societyStatsAutoNote">Total society members and experiences completed are tracked automatically as members sign up and earn stamps. Loading current totals…</p>
+      <div class="field-row">
+        <div class="field">
+          <label for="statNetworkingInput">Members attended their first networking event</label>
+          <input type="number" id="statNetworkingInput" placeholder="0">
+        </div>
+        <div class="field">
+          <label for="statVolunteersInput">Members volunteered in the community</label>
+          <input type="number" id="statVolunteersInput" placeholder="0">
+        </div>
+      </div>
+      <p class="seed-note">These two numbers aren't tracked automatically (they don't map cleanly to a single Passport task), so update them by hand whenever you have a real figure to report.</p>
+      <button class="save-btn" id="saveSocietyStatsBtn">Save society stats</button>
+      <p class="save-status" id="societyStatsSaveStatus">Saved, live on the site now.</p>
+    </div>
+
+    <div class="panel">
       <h2>Wellbeing Board Moderation</h2>
       <p class="seed-note">Posts with 3 or more flags are automatically hidden from members on the board. Deleting a post also removes its replies. This connects to the same Wellbeing Board database as <code>wellbeing.html</code> (a separate database from the rest of this dashboard).</p>
       <table>
@@ -557,6 +575,7 @@
     loadCategoriesList();
     loadLevelsList();
     loadMonthsList();
+    loadSocietyStats();
     loadWellbeingBoard();
   });
 
@@ -1167,6 +1186,46 @@
       }
       resetMonthForm();
       loadMonthsList();
+    } catch (err) {
+      alert('Could not save: ' + err.message);
+    }
+  });
+
+  // ============================================================
+  // SOCIETY COLLECTIVE STATS
+  // Total members and total experiences are tracked automatically
+  // (meta/stats, updated by auth.js and the stamp-toggle code on the
+  // live site) and shown here read-only for reference. The other two
+  // numbers don't map cleanly to one Passport task, so they're plain
+  // editable fields saved to siteContent/societyStats.
+  // ============================================================
+  async function loadSocietyStats() {
+    const note = document.getElementById('societyStatsAutoNote');
+    try {
+      const [statsDoc, contentDoc] = await Promise.all([
+        db.collection('meta').doc('stats').get(),
+        db.collection('siteContent').doc('societyStats').get(),
+      ]);
+      const s = statsDoc.exists ? statsDoc.data() : {};
+      note.textContent = `Total society members and experiences completed are tracked automatically. Current totals: ${s.totalMembers || 0} members, ${s.totalStampsEarned || 0} experiences completed.`;
+
+      const c = contentDoc.exists ? contentDoc.data() : {};
+      document.getElementById('statNetworkingInput').value = c.networkingAttendees ?? '';
+      document.getElementById('statVolunteersInput').value = c.volunteers ?? '';
+    } catch (err) {
+      note.textContent = 'Could not load current totals: ' + err.message;
+    }
+  }
+
+  document.getElementById('saveSocietyStatsBtn').addEventListener('click', async () => {
+    const status = document.getElementById('societyStatsSaveStatus');
+    try {
+      await db.collection('siteContent').doc('societyStats').set({
+        networkingAttendees: Number(document.getElementById('statNetworkingInput').value) || 0,
+        volunteers: Number(document.getElementById('statVolunteersInput').value) || 0,
+      }, { merge: true });
+      status.classList.add('show');
+      setTimeout(() => status.classList.remove('show'), 3000);
     } catch (err) {
       alert('Could not save: ' + err.message);
     }

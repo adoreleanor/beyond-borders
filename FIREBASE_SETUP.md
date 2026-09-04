@@ -68,6 +68,16 @@ service cloud.firestore {
       allow read, write: if isKclEmail();
     }
 
+    // Shared, publicly-readable counters behind the home page's "Society
+    // Collective" numbers (total members, total experiences completed).
+    // Any signed-in KCL member can increment these as they sign up or
+    // earn a stamp; nobody but admins can otherwise touch the rest of
+    // the site's data.
+    match /meta/stats {
+      allow read: if true;
+      allow write: if isKclEmail();
+    }
+
     // Members can submit feedback (once written, it can't be edited or deleted from the client).
     // Only admins can read the feedback list.
     match /feedback/{feedbackId} {
@@ -88,6 +98,18 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     match /events/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /passportCategories/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /passportLevels/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /passportMonths/{docId} {
       allow read: if true;
       allow write: if isAdmin();
     }
@@ -133,9 +155,16 @@ Once Steps 1–7 are done, open `index.html` (locally via `localhost`, or on you
 - Edit the **About Us** mission/what-we-do text and contact links
 - Add, edit, or remove **committee members** (name, role, optional photo link, and whether they show as a featured "lead" card)
 - Add, edit, or remove **events** on the calendar (which automatically updates both the Events page and the Passport's Upcoming Trips calendar, since they now share the same live data)
+- Add, edit, or remove **Passport categories and their tasks** (the stamp lists under Career Explorer, Personal Growth, etc.) — including adding whole new categories, which reuse one of the five existing colour themes
+- Add, edit, or remove **Passport levels and rewards** (Explorer, Adventurer, Trailblazer, Ambassador)
+- Add, edit, or remove **Passport monthly challenges** (the Oct–Mar theme cards). Which one shows as "current" on the live site is worked out automatically from today's date (matched against each card's Month field), so there's nothing to toggle manually
+- Edit the two manual **Society Collective** numbers (networking attendees, volunteers) on the home page. The other two numbers in that section (total members, total experiences completed) update themselves automatically as people sign up and earn stamps; they're shown read-only for reference
+- **Moderate the Wellbeing Board** (delete any post or reply, see flag counts) without needing the old `?admin=` link
 
 **One-time setup:** the very first time anyone opens the updated `admin.html`, click **"Import current site content"** near the top of the dashboard. This copies whatever's currently on the live site into the editable database, so nothing is lost — it only fills in collections that are still empty, so it's safe even if someone clicks it twice.
 
 After that, all edits happen in the browser via forms — no GitHub, no HTML, no re-uploading files. Changes save straight to Firestore and show up on the live site within a few seconds of refreshing.
 
 **Note on committee photos:** the "Photo URL" field expects a link to an already-hosted image (e.g. uploaded to the GitHub repo, or any image host) — it doesn't handle file uploads directly. Leaving it blank keeps the colored initial-letter avatar.
+
+**Note on Passport tasks:** a small handful of the original tasks (e.g. "Attend a careers fair") prompt members to link the stamp to a specific event when they tick it. That linking is tied to a task's original position in its category, so reordering or deleting tasks in a category may cause that prompt to appear on a different task than before, or stop appearing. It's a minor cosmetic nicety, not something that affects stamps, levels, or progress tracking.

@@ -139,6 +139,7 @@ async function completeEmailLinkSignInIfPresent() {
 async function getOrAssignPassportNumber(user) {
   const userRef = db.collection('users').doc(user.uid);
   const counterRef = db.collection('meta').doc('passportCounter');
+  const statsRef = db.collection('meta').doc('stats');
   const { first, last } = splitName(user.email);
 
   return db.runTransaction(async (tx) => {
@@ -158,6 +159,10 @@ async function getOrAssignPassportNumber(user) {
       passportNo,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
+    // This is a brand-new member (they didn't already have a passport
+    // number), so bump the public "total society members" counter shown
+    // on the home page's Society Collective section.
+    tx.set(statsRef, { totalMembers: firebase.firestore.FieldValue.increment(1) }, { merge: true });
 
     return passportNo;
   });

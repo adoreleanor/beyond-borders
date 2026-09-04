@@ -1576,19 +1576,19 @@
       </div>
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-number" id="statTotal">0</div>
+          <div class="stat-number" id="statExperiences">0</div>
           <div class="stat-label">experiences completed this semester</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number">46</div>
+          <div class="stat-number" id="statNetworking">0</div>
           <div class="stat-label">members attended their first networking event</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number">30</div>
+          <div class="stat-number" id="statVolunteers">0</div>
           <div class="stat-label">members volunteered in the community</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number">128</div>
+          <div class="stat-number" id="statMembers">0</div>
           <div class="stat-label">total society members on their journey</div>
         </div>
       </div>
@@ -1851,7 +1851,6 @@ function getLevelInfo(total) {
 function updateBanner() {
   const total = totalEarned();
   document.getElementById('totalStamps').textContent = total;
-  document.getElementById('statTotal').textContent = total + 128;
 
   const { current, next } = getLevelInfo(total);
   document.getElementById('badgeIcon').textContent = current.emoji;
@@ -2074,11 +2073,22 @@ function buildThemes() {
   const grid = document.getElementById('themesGrid');
   grid.innerHTML = '';
   // "Current" is worked out live from today's actual date, not a manually
-  // set flag, so this always matches the real month with no admin upkeep.
-  const liveMonthName = new Date().toLocaleString('en-US', { month: 'long' });
+  // set flag. If today's real month isn't one of the cards (e.g. over the
+  // summer, before the cycle starts in October), the soonest upcoming card
+  // is highlighted instead, wrapping around the calendar year, so one card
+  // is always highlighted.
+  const MONTH_INDEX = { January:0, February:1, March:2, April:3, May:4, June:5, July:6, August:7, September:8, October:9, November:10, December:11 };
+  const currentIdx = new Date().getMonth();
+  let bestMonthKey = null, bestDist = Infinity;
+  MONTHS.forEach(m => {
+    const mi = MONTH_INDEX[m.month];
+    if (mi === undefined) return;
+    const dist = (mi - currentIdx + 12) % 12;
+    if (dist < bestDist) { bestDist = dist; bestMonthKey = m.month; }
+  });
   MONTHS.forEach(m => {
     const card = document.createElement('div');
-    card.className = 'theme-card' + (m.month === liveMonthName ? ' current' : '');
+    card.className = 'theme-card' + (m.month === bestMonthKey ? ' current' : '');
     card.innerHTML = `
       <div class="theme-month">${m.month}</div>
       <div class="theme-name">${m.name}</div>
@@ -2307,9 +2317,28 @@ window.addEventListener('hashchange', renderRoute);
 
 // Refresh events from the database, build everything that depends on
 // EVENTS, then route to whichever section the URL hash points at.
+async function refreshSocietyStatsFromFirestore() {
+  try {
+    const [statsDoc, contentDoc] = await Promise.all([
+      db.collection('meta').doc('stats').get(),
+      db.collection('siteContent').doc('societyStats').get(),
+    ]);
+    const s = statsDoc.exists ? statsDoc.data() : {};
+    document.getElementById('statExperiences').textContent = s.totalStampsEarned || 0;
+    document.getElementById('statMembers').textContent = s.totalMembers || 0;
+
+    const c = contentDoc.exists ? contentDoc.data() : {};
+    document.getElementById('statNetworking').textContent = c.networkingAttendees ?? 0;
+    document.getElementById('statVolunteers').textContent = c.volunteers ?? 0;
+  } catch (err) {
+    console.error('Could not load society stats from Firestore:', err);
+  }
+}
+
 (async function initEventsAndUI() {
   await refreshEventsFromFirestore();
   await refreshPassportFromFirestore();
+  refreshSocietyStatsFromFirestore();
   // rebuild the "earned" tracker to match whatever categories ended up
   // live (defaults, or admin-edited ones from Firestore)
   earned = {};
@@ -2361,6 +2390,14 @@ window.addEventListener('hashchange', renderRoute);
 
     db.collection('users').doc(currentPassportUser.uid).update(update).catch(err => {
       console.error('Could not save stamp:', err);
+    });
+
+    // Keep the public "experiences completed" counter on the home page's
+    // Society Collective section in sync with everyone's stamp-earning.
+    db.collection('meta').doc('stats').set({
+      totalStampsEarned: firebase.firestore.FieldValue.increment(isEarned ? 1 : -1)
+    }, { merge: true }).catch(err => {
+      console.error('Could not update society stats:', err);
     });
   }
 
