@@ -1001,6 +1001,26 @@
 </div>
 
 <script src="events-data.js"></script>
+
+<!-- Firebase (compat SDK) — loaded early so the events refresh below can use it -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  async function refreshEventsFromFirestore() {
+    try {
+      const snap = await db.collection('events').orderBy('month').orderBy('day').get();
+      if (!snap.empty) {
+        const fresh = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+        EVENTS.length = 0;
+        EVENTS.push(...fresh);
+      }
+    } catch (err) {
+      console.error('Could not load events from Firestore, using built-in defaults:', err);
+    }
+  }
+</script>
 <script>
 const CATEGORIES = [
   {
@@ -1425,12 +1445,17 @@ document.getElementById('tripsNext').addEventListener('click', () => {
   renderTripsCalendar();
 });
 
-// Init
-buildCategories();
-buildLevels();
-buildThemes();
-updateBanner();
-renderTripsCalendar();
+// Init — refresh events from the admin-editable database first, then build
+// everything that depends on EVENTS (falls back to events-data.js if the
+// database has nothing yet or fails to load).
+(async function() {
+  await refreshEventsFromFirestore();
+  buildCategories();
+  buildLevels();
+  buildThemes();
+  updateBanner();
+  renderTripsCalendar();
+})();
 
 // ── INTRO ANIMATION ──
 (function() {
@@ -1489,11 +1514,6 @@ renderTripsCalendar();
 })();
 </script>
 
-<!-- Firebase (compat SDK) — links this page to the same account signed in on the home page -->
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
 <script>
   // Firebase Auth persists sign-in across tabs/pages on the same site, so if the
   // member already signed in on the home page, this fires automatically here too.

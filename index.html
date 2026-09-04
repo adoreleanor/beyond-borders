@@ -1640,6 +1640,29 @@
 <!-- Shared event data (used by both Passport trips calendar and Events view) -->
 <script src="events-data.js"></script>
 
+<!-- Firebase (compat SDK) — loaded early so the events refresh below can use it -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<!-- Pull the latest events from the admin-editable database (falls back to
+     events-data.js above if Firestore has nothing yet, or fails to load) -->
+<script>
+  async function refreshEventsFromFirestore() {
+    try {
+      const snap = await db.collection('events').orderBy('month').orderBy('day').get();
+      if (!snap.empty) {
+        const fresh = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+        EVENTS.length = 0;
+        EVENTS.push(...fresh);
+      }
+    } catch (err) {
+      console.error('Could not load events from Firestore, using built-in defaults:', err);
+    }
+  }
+</script>
+
 <!-- ===== PASSPORT LOGIC ===== -->
 <script>
 const CATEGORIES = [
@@ -2022,12 +2045,9 @@ document.getElementById('tripsNext').addEventListener('click', () => {
   renderTripsCalendar();
 });
 
-// Init passport UI (safe to run while section is hidden)
-buildCategories();
-buildLevels();
-buildThemes();
-updateBanner();
-renderTripsCalendar();
+// buildCategories(), buildLevels(), buildThemes(), updateBanner() and
+// renderTripsCalendar() are called once, after the events refresh, in the
+// consolidated init block near the bottom of the page.
 
 // ── Passport plane intro: plays once per session, the first time the
 // Passport section is opened (not on every toggle) ──
@@ -2104,8 +2124,9 @@ function maybePlayPassportIntro() {
 
 <!-- ===== EVENTS VIEW LOGIC ===== -->
 <script>
-(function() {
+function buildEventsListCards() {
   const list = document.getElementById('eventsList');
+  list.innerHTML = '';
   EVENTS.forEach(ev => {
     const card = document.createElement('div');
     card.className = 'event-card';
@@ -2121,7 +2142,7 @@ function maybePlayPassportIntro() {
     `;
     list.appendChild(card);
   });
-})();
+}
 
 function scrollToEventCard(hash) {
   const target = document.getElementById(hash);
@@ -2161,14 +2182,21 @@ function renderRoute() {
 }
 
 window.addEventListener('hashchange', renderRoute);
-renderRoute();
+
+// Refresh events from the database, build everything that depends on
+// EVENTS, then route to whichever section the URL hash points at.
+(async function initEventsAndUI() {
+  await refreshEventsFromFirestore();
+  buildCategories();
+  buildLevels();
+  buildThemes();
+  updateBanner();
+  renderTripsCalendar();
+  buildEventsListCards();
+  renderRoute();
+})();
 </script>
 
-<!-- Firebase (compat SDK) -->
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
 <script src="auth.js"></script>
 
 <!-- ===== PASSPORT ↔ FIREBASE (same signed-in account as the nav bar) ===== -->

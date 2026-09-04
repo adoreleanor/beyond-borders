@@ -194,36 +194,59 @@
 <footer>KCL Beyond Borders Society</footer>
 
 <script src="events-data.js"></script>
-<script>
-  const list = document.getElementById('eventsList');
-  EVENTS.forEach(ev => {
-    const card = document.createElement('div');
-    card.className = 'event-card';
-    card.id = 'ev-' + ev.id;
-    card.innerHTML = `
-      <div class="event-date"><span class="month">${ev.monthLabel}</span><span class="day">${String(ev.day).padStart(2,'0')}</span></div>
-      <div class="event-body">
-        <span class="event-tag">${ev.tag}</span>
-        <h2>${ev.title}</h2>
-        <div class="event-meta">${ev.meta.map(m => `<span>${m}</span>`).join('')}</div>
-        <p class="desc">${ev.desc}</p>
-      </div>
-    `;
-    list.appendChild(card);
-  });
 
-  // if we arrived via #ev-<id>, scroll to it and give it a brief highlight
-  if (location.hash) {
-    const target = document.querySelector(location.hash);
-    if (target) {
-      setTimeout(() => {
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        target.style.transition = 'box-shadow .3s ease';
-        target.style.boxShadow = '0 0 0 3px rgba(212,160,23,0.6), 0 6px 24px rgba(0,0,0,0.25)';
-        setTimeout(() => { target.style.boxShadow = ''; }, 2200);
-      }, 80);
+<!-- Firebase (compat SDK) — pulls the latest events from the admin-editable
+     database, falling back to events-data.js above if it's empty or fails -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  async function refreshEventsFromFirestore() {
+    try {
+      const snap = await db.collection('events').orderBy('month').orderBy('day').get();
+      if (!snap.empty) {
+        const fresh = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+        EVENTS.length = 0;
+        EVENTS.push(...fresh);
+      }
+    } catch (err) {
+      console.error('Could not load events from Firestore, using built-in defaults:', err);
     }
   }
+
+  (async function() {
+    await refreshEventsFromFirestore();
+
+    const list = document.getElementById('eventsList');
+    EVENTS.forEach(ev => {
+      const card = document.createElement('div');
+      card.className = 'event-card';
+      card.id = 'ev-' + ev.id;
+      card.innerHTML = `
+        <div class="event-date"><span class="month">${ev.monthLabel}</span><span class="day">${String(ev.day).padStart(2,'0')}</span></div>
+        <div class="event-body">
+          <span class="event-tag">${ev.tag}</span>
+          <h2>${ev.title}</h2>
+          <div class="event-meta">${ev.meta.map(m => `<span>${m}</span>`).join('')}</div>
+          <p class="desc">${ev.desc}</p>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+
+    // if we arrived via #ev-<id>, scroll to it and give it a brief highlight
+    if (location.hash) {
+      const target = document.querySelector(location.hash);
+      if (target) {
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.style.transition = 'box-shadow .3s ease';
+          target.style.boxShadow = '0 0 0 3px rgba(212,160,23,0.6), 0 6px 24px rgba(0,0,0,0.25)';
+          setTimeout(() => { target.style.boxShadow = ''; }, 2200);
+        }, 80);
+      }
+    }
+  })();
 </script>
 
 </body>

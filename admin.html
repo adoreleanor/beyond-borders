@@ -88,6 +88,31 @@
   .empty-row td{ text-align:center; color:rgba(245,237,227,0.4); padding:20px; }
   .top-bar{ display:flex; justify-content:flex-end; margin-bottom:16px; }
   .signout-link{ background:none; border:1px solid rgba(212,160,23,0.35); color:var(--gold-light); border-radius:18px; padding:7px 16px; font-size:12.5px; cursor:pointer; }
+
+  /* editor panels */
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:#D4B896; margin-bottom:6px; }
+  .field input[type=text], .field input[type=email], .field input[type=number], .field textarea{
+    width:100%; background:rgba(245,237,227,0.06); border:1px solid rgba(245,237,227,0.2);
+    border-radius:10px; padding:10px 13px; color:var(--cream); font-size:13.5px; font-family:'Inter',sans-serif;
+  }
+  .field textarea{ min-height:90px; resize:vertical; }
+  .field-row{ display:flex; gap:16px; flex-wrap:wrap; }
+  .field-row .field{ flex:1; min-width:160px; }
+  .field-check{ display:flex; align-items:center; gap:8px; font-size:13px; color:rgba(245,237,227,0.8); margin-bottom:16px; }
+  .save-btn{
+    background:linear-gradient(135deg, var(--gold), #b8860b); color:#2C1810; border:none;
+    border-radius:20px; padding:10px 22px; font-weight:600; font-size:13.5px; cursor:pointer;
+  }
+  .cancel-btn{ background:none; border:1px solid rgba(245,237,227,0.25); color:rgba(245,237,227,0.7); border-radius:20px; padding:10px 18px; font-size:13.5px; cursor:pointer; margin-left:10px; }
+  .mini-btn{ background:none; border:1px solid rgba(212,160,23,0.35); color:var(--gold-light); border-radius:14px; padding:4px 10px; font-size:11.5px; cursor:pointer; margin-right:6px; }
+  .mini-btn.danger{ border-color:rgba(232,163,163,0.4); color:#e8a3a3; }
+  .form-title{ font-size:14px; font-weight:600; color:var(--cream); margin-bottom:14px; }
+  .divider-sm{ border-top:1px solid rgba(245,237,227,0.1); margin:22px 0; }
+  .save-status{ font-size:12.5px; color:#a8d6b5; margin-top:10px; display:none; }
+  .save-status.show{ display:block; }
+  .seed-btn{ background:none; border:1px solid rgba(212,160,23,0.4); color:var(--gold-light); border-radius:18px; padding:9px 18px; font-size:13px; cursor:pointer; }
+  .seed-note{ font-size:12.5px; color:rgba(245,237,227,0.55); margin-top:10px; line-height:1.6; }
 </style>
 </head>
 <body>
@@ -143,6 +168,124 @@
         <tbody id="feedbackBody"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
       </table>
     </div>
+
+    <div class="panel">
+      <h2>One-time content import</h2>
+      <p class="seed-note">The first time anyone uses this dashboard, click below to copy the site's current About Us text, committee list, and events into the editable database. After that, everyone edits from here — this button won't overwrite anything that's already been imported.</p>
+      <button class="seed-btn" id="seedContentBtn">Import current site content</button>
+      <p class="save-status" id="seedStatus"></p>
+    </div>
+
+    <div class="panel">
+      <h2>About Us Content</h2>
+      <div class="field">
+        <label for="missionTextInput">Our Mission</label>
+        <textarea id="missionTextInput" placeholder="Mission statement paragraph..."></textarea>
+      </div>
+      <div class="field">
+        <label for="whatWeDoTextInput">What We Do</label>
+        <textarea id="whatWeDoTextInput" placeholder="Programming description paragraph..."></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="contactEmailInput">Contact Email</label>
+          <input type="email" id="contactEmailInput" placeholder="bbsoc@kcl.ac.uk">
+        </div>
+        <div class="field">
+          <label for="instagramUrlInput">Instagram URL</label>
+          <input type="text" id="instagramUrlInput" placeholder="https://instagram.com/kclbbsoc">
+        </div>
+        <div class="field">
+          <label for="kclsuUrlInput">KCLSU Page URL</label>
+          <input type="text" id="kclsuUrlInput" placeholder="https://www.kclsu.org/societies/view/...">
+        </div>
+      </div>
+      <button class="save-btn" id="saveAboutUsBtn">Save About Us</button>
+      <p class="save-status" id="aboutUsSaveStatus">Saved — live on the site now.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Committee Members</h2>
+      <table>
+        <thead><tr><th>Order</th><th>Name</th><th>Role</th><th>Featured lead?</th><th></th></tr></thead>
+        <tbody id="committeeBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
+      </table>
+      <div class="divider-sm"></div>
+      <p class="form-title" id="committeeFormTitle">Add committee member</p>
+      <div class="field-row">
+        <div class="field">
+          <label for="committeeNameInput">Name</label>
+          <input type="text" id="committeeNameInput" placeholder="Full name">
+        </div>
+        <div class="field">
+          <label for="committeeRoleInput">Role</label>
+          <input type="text" id="committeeRoleInput" placeholder="e.g. Treasurer">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="committeePhotoInput">Photo URL (optional)</label>
+          <input type="text" id="committeePhotoInput" placeholder="Link to a hosted photo — leave blank for initial-letter avatar">
+        </div>
+        <div class="field">
+          <label for="committeeOrderInput">Display order</label>
+          <input type="number" id="committeeOrderInput" placeholder="1, 2, 3...">
+        </div>
+      </div>
+      <div class="field-check">
+        <input type="checkbox" id="committeeLeadInput"> <label for="committeeLeadInput" style="margin:0;text-transform:none;letter-spacing:0;font-size:13px;color:rgba(245,237,227,0.8);">Show as a featured lead (Co-President style card)</label>
+      </div>
+      <button class="save-btn" id="committeeSaveBtn">Save committee member</button>
+      <button class="cancel-btn" id="committeeCancelBtn">Cancel / clear form</button>
+    </div>
+
+    <div class="panel">
+      <h2>Events</h2>
+      <table>
+        <thead><tr><th>Date</th><th>Title</th><th>Tag</th><th></th></tr></thead>
+        <tbody id="eventsBody"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+      </table>
+      <div class="divider-sm"></div>
+      <p class="form-title" id="eventFormTitle">Add event</p>
+      <div class="field-row">
+        <div class="field">
+          <label for="eventTitleInput">Title</label>
+          <input type="text" id="eventTitleInput" placeholder="e.g. Meet &amp; Greet">
+        </div>
+        <div class="field">
+          <label for="eventTagInput">Tag</label>
+          <input type="text" id="eventTagInput" placeholder="Social / Careers / Wellbeing / Formal">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="eventYearInput">Year</label>
+          <input type="number" id="eventYearInput" placeholder="2026">
+        </div>
+        <div class="field">
+          <label for="eventMonthInput">Month (1-12)</label>
+          <input type="number" id="eventMonthInput" placeholder="10">
+        </div>
+        <div class="field">
+          <label for="eventDayInput">Day</label>
+          <input type="number" id="eventDayInput" placeholder="5">
+        </div>
+        <div class="field">
+          <label for="eventMonthLabelInput">Month label</label>
+          <input type="text" id="eventMonthLabelInput" placeholder="Oct">
+        </div>
+      </div>
+      <div class="field">
+        <label for="eventMetaInput">Meta lines (one per line — time, room, dress code etc.)</label>
+        <textarea id="eventMetaInput" placeholder="🕕 6:00 – 8:00 PM&#10;📍 Big classroom (room TBC)"></textarea>
+      </div>
+      <div class="field">
+        <label for="eventDescInput">Description</label>
+        <textarea id="eventDescInput" placeholder="Full event description..."></textarea>
+      </div>
+      <button class="save-btn" id="eventSaveBtn">Save event</button>
+      <button class="cancel-btn" id="eventCancelBtn">Cancel / clear form</button>
+    </div>
   </div>
 </div>
 
@@ -151,6 +294,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="events-data.js"></script>
 
 <script>
   const KCL_EMAIL_RE = /^[a-z]+(?:-[a-z]+)*\.[a-z]+(?:-[a-z]+)*@kcl\.ac\.uk$/i;
@@ -274,6 +418,9 @@
     deniedBox.style.display = 'none';
     dashboard.style.display = '';
     loadDashboard();
+    loadAboutUsEditor();
+    loadCommitteeList();
+    loadEventsList();
   });
 
   (async function init() {
@@ -281,6 +428,288 @@
       await completeEmailLinkSignInIfPresent();
     }
   })();
+
+  // ============================================================
+  // ONE-TIME CONTENT IMPORT
+  // Copies the site's current hardcoded About Us / committee /
+  // events content into Firestore, but only for collections that
+  // are still empty — safe to click more than once.
+  // ============================================================
+  const CURRENT_MISSION_TEXT = "Beyond Borders (BBSOC) is a King's College London society dedicated to helping students step outside their comfort zone — professionally, personally, and creatively. We bring together career development, wellbeing, culture, and community into one place, so members can grow in every direction, not just academically.";
+  const CURRENT_WHAT_WE_DO_TEXT = "From careers fairs and networking nights to wellbeing walks, volunteering days, and skills workshops, BBSOC runs events across five pillars: Career Explorer, Personal Growth, Skill Builder, Community, and Comfort Zone. Members track their journey through the Beyond Borders Passport and unlock rewards as they go.";
+  const CURRENT_COMMITTEE = [
+    { name: 'Layla Chen',        role: 'Co-President',            isLead: true,  order: 1 },
+    { name: 'Fatima Rajani',     role: 'Co-President',            isLead: true,  order: 2 },
+    { name: 'Minnah Khan',       role: 'Treasurer',                isLead: false, order: 3 },
+    { name: 'Hassan Imtiaz',     role: 'Secretary',                isLead: false, order: 4 },
+    { name: 'Fiona Chiu',        role: 'Head of Events',           isLead: false, order: 5 },
+    { name: 'Jennifer Qiu',      role: 'Events Officer',           isLead: false, order: 6 },
+    { name: 'Eleanor Wang',      role: 'Events Officer',           isLead: false, order: 7 },
+    { name: 'Zhenya Kunytsyna',  role: 'Head of Social Media',     isLead: false, order: 8 },
+    { name: 'Sawani Vaidya',     role: 'Social Media Officer',     isLead: false, order: 9 },
+    { name: 'Eleanor Wang',      role: 'Head of Wellbeing',        isLead: false, order: 10 },
+  ];
+
+  document.getElementById('seedContentBtn').addEventListener('click', async () => {
+    const status = document.getElementById('seedStatus');
+    status.classList.add('show');
+    status.textContent = 'Importing…';
+    try {
+      // About Us — only write if the doc doesn't exist yet
+      const aboutSnap = await db.collection('siteContent').doc('aboutUs').get();
+      if (!aboutSnap.exists) {
+        await db.collection('siteContent').doc('aboutUs').set({
+          missionText: CURRENT_MISSION_TEXT,
+          whatWeDoText: CURRENT_WHAT_WE_DO_TEXT,
+          contactEmail: 'bbsoc@kcl.ac.uk',
+          instagramUrl: '',
+          kclsuUrl: '',
+        });
+      }
+
+      // Committee — only seed if the collection is empty
+      const committeeSnap = await db.collection('committee').limit(1).get();
+      if (committeeSnap.empty) {
+        const batch = db.batch();
+        CURRENT_COMMITTEE.forEach(c => {
+          const ref = db.collection('committee').doc();
+          batch.set(ref, c);
+        });
+        await batch.commit();
+      }
+
+      // Events — only seed if the collection is empty, using events-data.js
+      const eventsSnap = await db.collection('events').limit(1).get();
+      if (eventsSnap.empty && typeof EVENTS !== 'undefined') {
+        const batch = db.batch();
+        EVENTS.forEach(ev => {
+          const ref = db.collection('events').doc(ev.id);
+          batch.set(ref, ev);
+        });
+        await batch.commit();
+      }
+
+      status.textContent = 'Done — your current content is now in the editable database below.';
+      loadAboutUsEditor();
+      loadCommitteeList();
+      loadEventsList();
+    } catch (err) {
+      status.textContent = 'Import failed: ' + err.message;
+    }
+  });
+
+  // ============================================================
+  // ABOUT US EDITOR
+  // ============================================================
+  async function loadAboutUsEditor() {
+    try {
+      const doc = await db.collection('siteContent').doc('aboutUs').get();
+      const d = doc.exists ? doc.data() : {};
+      document.getElementById('missionTextInput').value = d.missionText || '';
+      document.getElementById('whatWeDoTextInput').value = d.whatWeDoText || '';
+      document.getElementById('contactEmailInput').value = d.contactEmail || '';
+      document.getElementById('instagramUrlInput').value = d.instagramUrl || '';
+      document.getElementById('kclsuUrlInput').value = d.kclsuUrl || '';
+    } catch (err) {
+      console.error('Could not load About Us content:', err);
+    }
+  }
+
+  document.getElementById('saveAboutUsBtn').addEventListener('click', async () => {
+    const status = document.getElementById('aboutUsSaveStatus');
+    try {
+      await db.collection('siteContent').doc('aboutUs').set({
+        missionText: document.getElementById('missionTextInput').value.trim(),
+        whatWeDoText: document.getElementById('whatWeDoTextInput').value.trim(),
+        contactEmail: document.getElementById('contactEmailInput').value.trim(),
+        instagramUrl: document.getElementById('instagramUrlInput').value.trim(),
+        kclsuUrl: document.getElementById('kclsuUrlInput').value.trim(),
+      }, { merge: true });
+      status.classList.add('show');
+      setTimeout(() => status.classList.remove('show'), 3000);
+    } catch (err) {
+      alert('Could not save: ' + err.message);
+    }
+  });
+
+  // ============================================================
+  // COMMITTEE EDITOR
+  // ============================================================
+  let editingCommitteeId = null;
+
+  async function loadCommitteeList() {
+    const body = document.getElementById('committeeBody');
+    try {
+      const snap = await db.collection('committee').orderBy('order').get();
+      if (snap.empty) {
+        body.innerHTML = '<tr class="empty-row"><td colspan="5">No committee members yet — use Import above or add one below.</td></tr>';
+        return;
+      }
+      body.innerHTML = snap.docs.map(d => {
+        const c = d.data();
+        return `<tr>
+          <td>${c.order ?? ''}</td>
+          <td>${c.name || ''}</td>
+          <td>${c.role || ''}</td>
+          <td>${c.isLead ? 'Yes' : ''}</td>
+          <td>
+            <button class="mini-btn" onclick="editCommitteeMember('${d.id}')">Edit</button>
+            <button class="mini-btn danger" onclick="deleteCommitteeMember('${d.id}')">Delete</button>
+          </td>
+        </tr>`;
+      }).join('');
+    } catch (err) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="5">Could not load: ${err.message}</td></tr>`;
+    }
+  }
+
+  window.editCommitteeMember = async function(id) {
+    const doc = await db.collection('committee').doc(id).get();
+    if (!doc.exists) return;
+    const c = doc.data();
+    editingCommitteeId = id;
+    document.getElementById('committeeNameInput').value = c.name || '';
+    document.getElementById('committeeRoleInput').value = c.role || '';
+    document.getElementById('committeePhotoInput').value = c.photoUrl || '';
+    document.getElementById('committeeOrderInput').value = c.order ?? '';
+    document.getElementById('committeeLeadInput').checked = !!c.isLead;
+    document.getElementById('committeeFormTitle').textContent = 'Edit committee member';
+    document.getElementById('committeeFormTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.deleteCommitteeMember = async function(id) {
+    if (!confirm('Remove this committee member from the About Us page?')) return;
+    await db.collection('committee').doc(id).delete();
+    loadCommitteeList();
+  };
+
+  function resetCommitteeForm() {
+    editingCommitteeId = null;
+    document.getElementById('committeeNameInput').value = '';
+    document.getElementById('committeeRoleInput').value = '';
+    document.getElementById('committeePhotoInput').value = '';
+    document.getElementById('committeeOrderInput').value = '';
+    document.getElementById('committeeLeadInput').checked = false;
+    document.getElementById('committeeFormTitle').textContent = 'Add committee member';
+  }
+
+  document.getElementById('committeeCancelBtn').addEventListener('click', resetCommitteeForm);
+
+  document.getElementById('committeeSaveBtn').addEventListener('click', async () => {
+    const data = {
+      name: document.getElementById('committeeNameInput').value.trim(),
+      role: document.getElementById('committeeRoleInput').value.trim(),
+      photoUrl: document.getElementById('committeePhotoInput').value.trim(),
+      order: Number(document.getElementById('committeeOrderInput').value) || 0,
+      isLead: document.getElementById('committeeLeadInput').checked,
+    };
+    if (!data.name || !data.role) { alert('Name and role are required.'); return; }
+    try {
+      if (editingCommitteeId) {
+        await db.collection('committee').doc(editingCommitteeId).update(data);
+      } else {
+        await db.collection('committee').add(data);
+      }
+      resetCommitteeForm();
+      loadCommitteeList();
+    } catch (err) {
+      alert('Could not save: ' + err.message);
+    }
+  });
+
+  // ============================================================
+  // EVENTS EDITOR
+  // ============================================================
+  let editingEventId = null;
+
+  async function loadEventsList() {
+    const body = document.getElementById('eventsBody');
+    try {
+      const snap = await db.collection('events').orderBy('month').orderBy('day').get();
+      if (snap.empty) {
+        body.innerHTML = '<tr class="empty-row"><td colspan="4">No events yet — use Import above or add one below.</td></tr>';
+        return;
+      }
+      body.innerHTML = snap.docs.map(d => {
+        const e = d.data();
+        return `<tr>
+          <td>${e.monthLabel || ''} ${e.day || ''}</td>
+          <td>${e.title || ''}</td>
+          <td>${e.tag || ''}</td>
+          <td>
+            <button class="mini-btn" onclick="editEvent('${d.id}')">Edit</button>
+            <button class="mini-btn danger" onclick="deleteEvent('${d.id}')">Delete</button>
+          </td>
+        </tr>`;
+      }).join('');
+    } catch (err) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="4">Could not load: ${err.message}</td></tr>`;
+    }
+  }
+
+  window.editEvent = async function(id) {
+    const doc = await db.collection('events').doc(id).get();
+    if (!doc.exists) return;
+    const e = doc.data();
+    editingEventId = id;
+    document.getElementById('eventTitleInput').value = e.title || '';
+    document.getElementById('eventTagInput').value = e.tag || '';
+    document.getElementById('eventYearInput').value = e.year ?? '';
+    document.getElementById('eventMonthInput').value = e.month ?? '';
+    document.getElementById('eventDayInput').value = e.day ?? '';
+    document.getElementById('eventMonthLabelInput').value = e.monthLabel || '';
+    document.getElementById('eventMetaInput').value = (e.meta || []).join('\n');
+    document.getElementById('eventDescInput').value = e.desc || '';
+    document.getElementById('eventFormTitle').textContent = 'Edit event';
+    document.getElementById('eventFormTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.deleteEvent = async function(id) {
+    if (!confirm('Remove this event from the calendar?')) return;
+    await db.collection('events').doc(id).delete();
+    loadEventsList();
+  };
+
+  function resetEventForm() {
+    editingEventId = null;
+    ['eventTitleInput','eventTagInput','eventYearInput','eventMonthInput','eventDayInput','eventMonthLabelInput','eventMetaInput','eventDescInput'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('eventFormTitle').textContent = 'Add event';
+  }
+
+  document.getElementById('eventCancelBtn').addEventListener('click', resetEventForm);
+
+  document.getElementById('eventSaveBtn').addEventListener('click', async () => {
+    const title = document.getElementById('eventTitleInput').value.trim();
+    const tag = document.getElementById('eventTagInput').value.trim();
+    const year = Number(document.getElementById('eventYearInput').value);
+    const month = Number(document.getElementById('eventMonthInput').value);
+    const day = Number(document.getElementById('eventDayInput').value);
+    const monthLabel = document.getElementById('eventMonthLabelInput').value.trim();
+    const meta = document.getElementById('eventMetaInput').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const desc = document.getElementById('eventDescInput').value.trim();
+
+    if (!title || !tag || !year || !month || !day || !monthLabel) {
+      alert('Title, tag, year, month, day and month label are all required.');
+      return;
+    }
+    const data = { title, tag, year, month, day, monthLabel, meta, desc };
+
+    try {
+      if (editingEventId) {
+        await db.collection('events').doc(editingEventId).update(data);
+      } else {
+        // slugify the title for a stable, readable doc id
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString().slice(-4);
+        await db.collection('events').doc(slug).set(data);
+      }
+      resetEventForm();
+      loadEventsList();
+    } catch (err) {
+      alert('Could not save: ' + err.message);
+    }
+  });
 </script>
 
 </body>

@@ -152,6 +152,7 @@
     font-size:28px;
     color:var(--cream);
     box-shadow:0 4px 14px rgba(212,160,23,0.35);
+    overflow:hidden;
   }
   .committee-lead-role{
     font-size:11px;
@@ -199,6 +200,10 @@
     font-weight:700;
     font-size:20px;
     color:var(--cream);
+    overflow:hidden;
+  }
+  .committee-lead-avatar img, .committee-avatar img{
+    width:100%; height:100%; object-fit:cover; border-radius:50%;
   }
   .committee-name{ font-size:13px; font-weight:600; color:#3A0810; }
   .committee-role{ font-size:11.5px; color:#7a6a5c; margin-top:2px; }
@@ -229,24 +234,19 @@
 <div class="content">
 
   <div class="section">
-    
     <h2>Our Mission</h2>
-    <p>Beyond Borders (BBSoc) is a student society at King’s College London created to connect students beyond the boundaries of their degrees. Our mission is to create a community where students from different courses and interests can exchange perspectives and discover opportunities they may not encounter within their own disciplines. We aim to make meaningful interdisciplinary connections that lead to new friendships, collaborations or career possibilities. Ultimately, we want to equip students with a network and perspective that extends far beyond their own degree.</p>
+    <p id="missionTextEl">Beyond Borders (BBSOC) is a King's College London society dedicated to helping students step outside their comfort zone — professionally, personally, and creatively. We bring together career development, wellbeing, culture, and community into one place, so members can grow in every direction, not just academically.</p>
   </div>
 
   <div class="section">
-    
     <h2>What We Do</h2>
-    <p>Throughout the year, BBSoc brings students together through social, career, academic and wellbeing events. We connect students from different courses in BBSoc Families, giving members a smaller group to socialise with at our events and outside the society. 
-Our Career Month will include practical application workshops, networking opportunities and panels about different industries and career journeys. 
-Beyond careers, we hope to develop inter-course debates, industry tasters and wellbeing events, alongside initiatives such as the BBSoc Study Cup. 
-We also want to create more casual opportunities to connect with King’s alumni, graduates, academics and postgraduates.</p>
+    <p id="whatWeDoTextEl">From careers fairs and networking nights to wellbeing walks, volunteering days, and skills workshops, BBSOC runs events across five pillars: Career Explorer, Personal Growth, Skill Builder, Community, and Comfort Zone. Members track their journey through the Beyond Borders Passport and unlock rewards as they go.</p>
   </div>
 
   <div class="section">
     <h2>Committee</h2>
 
-    <div class="committee-leads">
+    <div class="committee-leads" id="committeeLeadsEl">
       <div class="committee-lead-card">
         <div class="committee-lead-avatar">L</div>
         <div class="committee-lead-role">Co-President</div>
@@ -259,8 +259,8 @@ We also want to create more casual opportunities to connect with King’s alumni
       </div>
     </div>
 
-    <div class="committee-subheading">Rest of the committee</div>
-    <div class="committee-grid">
+    <div class="committee-subheading" id="committeeSubheadingEl">Rest of the committee</div>
+    <div class="committee-grid" id="committeeGridEl">
       <div class="committee-card">
         <div class="committee-avatar">M</div>
         <div class="committee-name">Treasurer</div>
@@ -284,7 +284,7 @@ We also want to create more casual opportunities to connect with King’s alumni
       <div class="committee-card">
         <div class="committee-avatar">E</div>
         <div class="committee-name">Events Officer</div>
-        <div class="committee-role">Sahar X </div>
+        <div class="committee-role">Eleanor Wang</div>
       </div>
       <div class="committee-card">
         <div class="committee-avatar">Z</div>
@@ -299,25 +299,105 @@ We also want to create more casual opportunities to connect with King’s alumni
       <div class="committee-card">
         <div class="committee-avatar">E</div>
         <div class="committee-name">Head of Wellbeing</div>
-        <div class="committee-role">TBC</div>
+        <div class="committee-role">Eleanor Wang</div>
       </div>
     </div>
   </div>
 
   <div class="section">
-   
     <h2>Get in Touch</h2>
     <ul class="contact-list">
-      <li>Email: <a href="mailto:bbsoc.kcl@outlook.com">bbsoc.kcl@outlook.com</a></li>
-      <li>Instagram: <a href="https://instagram.com/kcl_bbsoc">@kcl_bbsoc</a></li>
-      <li>KCLSU: <a href="https://www.kclsu.org/groups/activities/join/group/29620/">View our society page</a></li>
-      <li>LinkedIn: <a href="https://www.linkedin.com/company/kcl-beyond-borders-society/posts/">KCL Beyond Borders Society</a></li>
+      <li>Email: <a id="contactEmailLink" href="mailto:bbsoc@kcl.ac.uk">bbsoc@kcl.ac.uk</a></li>
+      <li id="instagramLine" style="display:none;">Instagram: <a id="instagramLink" href="#" target="_blank" rel="noopener">@kclbbsoc</a></li>
+      <li id="kclsuLine" style="display:none;">KCLSU: <a id="kclsuLink" href="#" target="_blank" rel="noopener">View our society page</a></li>
     </ul>
   </div>
 
 </div>
 
 <footer>KCL Beyond Borders Society</footer>
+
+<!-- Firebase (compat SDK) — reads editable content saved from admin.html -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  // These elements already contain sensible default text above, so if
+  // Firestore hasn't been seeded yet (or fails to load), the page still
+  // looks complete — this script only overwrites it once real data loads.
+
+  function avatarLetter(name) {
+    return (name || '?').trim().charAt(0).toUpperCase();
+  }
+
+  function renderCommittee(members) {
+    const leadsEl = document.getElementById('committeeLeadsEl');
+    const gridEl = document.getElementById('committeeGridEl');
+    const subheadingEl = document.getElementById('committeeSubheadingEl');
+
+    const sorted = members.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+    const leads = sorted.filter(m => m.isLead);
+    const rest = sorted.filter(m => !m.isLead);
+
+    leadsEl.innerHTML = leads.map(m => `
+      <div class="committee-lead-card">
+        <div class="committee-lead-avatar">${m.photoUrl ? `<img src="${m.photoUrl}" alt="${m.name}">` : avatarLetter(m.name)}</div>
+        <div class="committee-lead-role">${m.role || ''}</div>
+        <div class="committee-lead-name">${m.name || ''}</div>
+      </div>
+    `).join('');
+
+    subheadingEl.style.display = rest.length ? '' : 'none';
+    gridEl.innerHTML = rest.map(m => `
+      <div class="committee-card">
+        <div class="committee-avatar">${m.photoUrl ? `<img src="${m.photoUrl}" alt="${m.name}">` : avatarLetter(m.name)}</div>
+        <div class="committee-name">${m.role || ''}</div>
+        <div class="committee-role">${m.name || ''}</div>
+      </div>
+    `).join('');
+  }
+
+  async function loadAboutUsContent() {
+    try {
+      const doc = await db.collection('siteContent').doc('aboutUs').get();
+      if (doc.exists) {
+        const d = doc.data();
+        if (d.missionText) document.getElementById('missionTextEl').textContent = d.missionText;
+        if (d.whatWeDoText) document.getElementById('whatWeDoTextEl').textContent = d.whatWeDoText;
+        if (d.contactEmail) {
+          const emailLink = document.getElementById('contactEmailLink');
+          emailLink.textContent = d.contactEmail;
+          emailLink.href = 'mailto:' + d.contactEmail;
+        }
+        if (d.instagramUrl) {
+          document.getElementById('instagramLine').style.display = '';
+          document.getElementById('instagramLink').href = d.instagramUrl;
+          document.getElementById('instagramLink').textContent = '@' + d.instagramUrl.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/$/, '');
+        }
+        if (d.kclsuUrl) {
+          document.getElementById('kclsuLine').style.display = '';
+          document.getElementById('kclsuLink').href = d.kclsuUrl;
+        }
+      }
+    } catch (err) {
+      console.error('Could not load About Us content, showing defaults:', err);
+    }
+  }
+
+  async function loadCommitteeContent() {
+    try {
+      const snap = await db.collection('committee').get();
+      if (!snap.empty) {
+        renderCommittee(snap.docs.map(d => d.data()));
+      }
+    } catch (err) {
+      console.error('Could not load committee list, showing defaults:', err);
+    }
+  }
+
+  loadAboutUsContent();
+  loadCommitteeContent();
+</script>
 
 </body>
 </html>

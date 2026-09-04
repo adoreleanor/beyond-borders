@@ -1,0 +1,141 @@
+# Beyond Borders — Sign-In & Admin Setup Guide
+
+This site's "Sign In" (KCL email → BB Passport number) and admin dashboard need a free Firebase project behind them. A static site alone can't verify emails or store data safely, so this guide walks you through the one-time setup. It takes about 15 minutes and costs nothing on Firebase's free (Spark) plan for a society-sized amount of traffic.
+
+## What you're setting up
+
+- **Firebase Authentication** — sends KCL members a passwordless sign-in link and confirms it's really their inbox.
+- **Firestore** — a small database that stores each member's passport number and any feedback they submit.
+- **Security rules** — the *real* gatekeeper. Even if someone tampers with the website's code in their browser, these rules (which live on Firebase's servers) are what actually stop non-KCL emails from getting a passport number or seeing other members' data.
+
+## Step 1 — Create the Firebase project
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com) and sign in with a Google account (create one for the society if you don't want to use a personal one).
+2. Click **Add project**, name it something like `bbsoc-beyond-borders`, and finish the wizard (Google Analytics is optional, you can turn it off).
+
+## Step 2 — Register a web app
+
+1. On the project's home screen, click the **`</>`** (web) icon to add a web app.
+2. Give it a nickname (e.g. "Beyond Borders site"). You don't need Firebase Hosting — you're already hosting on GitHub Pages.
+3. Firebase will show you a `firebaseConfig` object with keys like `apiKey`, `authDomain`, `projectId`, etc. **Copy this whole block** — you'll paste it into `firebase-config.js` in Step 6.
+
+## Step 3 — Turn on Email Link sign-in
+
+1. In the left sidebar: **Build → Authentication → Get started**.
+2. Under **Sign-in method**, click **Email/Password**.
+3. Turn on the **Email/Password** toggle, then also turn on **Email link (passwordless sign-in)** below it. Save.
+4. Still in Authentication, go to **Settings → Authorized domains** and add the domain your site is actually hosted on (e.g. `adoreleanor.github.io`, or your custom domain if you set one up). `localhost` is already there by default, which is handy for testing.
+
+## Step 4 — Create the Firestore database
+
+1. Left sidebar: **Build → Firestore Database → Create database**.
+2. Choose a location close to your users (e.g. `eur3 (europe-west)`).
+3. Start in **production mode** (we're supplying our own rules below, not the wide-open test-mode ones).
+
+## Step 5 — Paste in the security rules
+
+In Firestore, go to the **Rules** tab and replace everything with this, then click **Publish**:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isKclEmail() {
+      return request.auth != null &&
+        request.auth.token.email.matches(
+          '^[a-zA-Z]+([-][a-zA-Z]+)*[.][a-zA-Z]+([-][a-zA-Z]+)*@kcl[.]ac[.]uk$'
+        );
+    }
+
+    function isAdmin() {
+      return request.auth != null &&
+        request.auth.token.email in [
+          'eleanor.wang@kcl.ac.uk',
+          'fatima.rajani@kcl.ac.uk',
+          'yuejia.chen@kcl.ac.uk'
+        ];
+    }
+
+    // Each member can read/write only their own profile; admins can read everyone's.
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && request.auth.uid == userId && isKclEmail();
+    }
+
+    // Shared counter used to hand out sequential BB-#### numbers.
+    match /meta/passportCounter {
+      allow read, write: if isKclEmail();
+    }
+
+    // Members can submit feedback (once written, it can't be edited or deleted from the client).
+    // Only admins can read the feedback list.
+    match /feedback/{feedbackId} {
+      allow create: if isKclEmail() && request.resource.data.uid == request.auth.uid;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Editable site content (About Us text, committee list, events calendar).
+    // Anyone can read it (it's what the public pages display), but only
+    // admins can change it — via the new editor panels in admin.html.
+    match /siteContent/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /committee/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /events/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
+```
+
+The admin list above is already set to `eleanor.wang@kcl.ac.uk`, `fatima.rajani@kcl.ac.uk`, and `yuejia.chen@kcl.ac.uk` — paste the rules block as-is unless that list changes later (e.g. a new committee each year).
+
+## Step 6 — Drop your config into the site files
+
+`firebase-config.js` has already been filled in with the real `firebaseConfig` values and the same three `ADMIN_EMAILS` as above, so there's nothing left to edit here — just make sure the file is uploaded alongside the others (see Step 7).
+
+## Step 7 — Upload everything to your site
+
+Make sure these files all sit in the same folder as `index.html` when you publish (e.g. commit them to the same GitHub Pages repo):
+
+- `firebase-config.js` (with your real values now)
+- `auth.js`
+- `admin.html`
+- `about.html`
+
+## How it works, in short
+
+- A member clicks **Sign In**, types `firstname.surname@kcl.ac.uk`, and gets an emailed link (no password to manage).
+- Opening that link on the same device signs them in via Firebase Auth.
+- The site then checks Firestore for an existing passport number for that account; if there isn't one, it atomically hands out the next `BB-####` and saves it.
+- Signed-in members can submit feedback from the nav bar; it's saved with their email and passport number attached.
+- `admin.html` is a normal page — anyone can open it — but it only shows real data to accounts whose email is in `ADMIN_EMAILS` **and** matches the security rules. Everyone else sees "Access restricted."
+
+## A note on security
+
+The `firstname.surname@kcl.ac.uk` format check happens both in the browser (for a friendly error message) and in the Firestore rules (the part that can't be bypassed). Firebase's free tier doesn't let us block *sending the sign-in email itself* to a non-KCL address without a paid Cloud Functions plan — but that's fine, because even if someone signed in with a non-KCL email, the rules above stop them from ever getting a passport number, submitting feedback, or reading anyone else's data. Functionally, they're locked out.
+
+## Testing it
+
+Once Steps 1–7 are done, open `index.html` (locally via `localhost`, or on your published GitHub Pages URL), click **Sign In**, and use your own KCL email as a first test. Check the Firestore console (**Build → Firestore Database → Data**) — you should see a new document appear under `users` with your passport number.
+
+## Editing site content without touching code
+
+`admin.html` now doubles as a content editor, not just a viewer. Any of the three admin emails can sign in there and:
+
+- Edit the **About Us** mission/what-we-do text and contact links
+- Add, edit, or remove **committee members** (name, role, optional photo link, and whether they show as a featured "lead" card)
+- Add, edit, or remove **events** on the calendar (which automatically updates both the Events page and the Passport's Upcoming Trips calendar, since they now share the same live data)
+
+**One-time setup:** the very first time anyone opens the updated `admin.html`, click **"Import current site content"** near the top of the dashboard. This copies whatever's currently on the live site into the editable database, so nothing is lost — it only fills in collections that are still empty, so it's safe even if someone clicks it twice.
+
+After that, all edits happen in the browser via forms — no GitHub, no HTML, no re-uploading files. Changes save straight to Firestore and show up on the live site within a few seconds of refreshing.
+
+**Note on committee photos:** the "Photo URL" field expects a link to an already-hosted image (e.g. uploaded to the GitHub repo, or any image host) — it doesn't handle file uploads directly. Leaving it blank keeps the colored initial-letter avatar.
