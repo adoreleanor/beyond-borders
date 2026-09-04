@@ -605,6 +605,12 @@
     font-weight:700;
     margin-bottom:6px;
     color:#3A0810;
+    transition:color .3s ease;
+  }
+
+  #events-view .event-card.highlighted .event-body h2{
+    font-weight:900;
+    color:#8B6914;
   }
 
   #events-view .event-meta{
@@ -2084,7 +2090,7 @@ function openEventDetailModal(ev) {
     <div class="ed-title">${ev.title}</div>
     <div class="ed-meta">${ev.meta.map(m => `<span>${m}</span>`).join('')}</div>
     <p class="ed-desc">${ev.desc}</p>
-    <a class="ed-viewall" href="#events">View all events →</a>
+    <a class="ed-viewall" href="#ev-${ev.id}">View all events →</a>
   `;
   document.getElementById('eventDetailModal').classList.add('open');
 }
@@ -2199,10 +2205,14 @@ function buildEventsListCards() {
 }
 
 function scrollToEventCard(hash) {
+  // clear any previous highlight so only one event is bolded at a time
+  document.querySelectorAll('#events-view .event-card.highlighted').forEach(el => el.classList.remove('highlighted'));
+
   const target = document.getElementById(hash);
   if (target) {
     setTimeout(() => {
       target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('highlighted');
       target.style.transition = 'box-shadow .3s ease';
       target.style.boxShadow = '0 0 0 3px rgba(212,160,23,0.6), 0 6px 24px rgba(0,0,0,0.25)';
       setTimeout(() => { target.style.boxShadow = ''; }, 2200);
