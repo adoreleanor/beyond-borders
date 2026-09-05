@@ -655,6 +655,36 @@
     color:#4a3d34;
   }
 
+  #events-view .rsvp-widget{
+    margin-top:14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  #events-view .rsvp-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--maroon-mid);
+    color:var(--cream);
+    border:none;
+    border-radius:20px;
+    padding:8px 18px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .2s;
+    font-family:'Inter',sans-serif;
+  }
+  #events-view .rsvp-btn:hover{ background:var(--maroon); }
+  #events-view .rsvp-btn.going{ background:#3A6B4A; }
+  #events-view .rsvp-btn.going:hover{ background:#2E5539; }
+  #events-view .rsvp-count{
+    font-size:12.5px;
+    color:#6b5a4e;
+  }
+
   /* ============ PASSPORT VIEW ============ */
   #passport-view{
     --pp-cream:#F5F0E8;
@@ -1700,6 +1730,21 @@
   </div>
 </div>
 
+<!-- ===== EVENT REFLECTION MODAL (for past events) ===== -->
+<div class="modal-overlay" id="eventReflectionModal">
+  <div class="modal-box">
+    <button class="modal-close" id="eventReflectionClose">&times;</button>
+    <h3>Leave a reflection</h3>
+    <p class="modal-sub" id="eventReflectionEventTitle"></p>
+    <label for="eventReflectionText">How did it go?</label>
+    <textarea id="eventReflectionText" placeholder="What stood out, what could be better, anything the committee should know..."></textarea>
+    <p class="modal-hint">This goes straight to the committee, not posted publicly.</p>
+    <p class="modal-error" id="eventReflectionError"></p>
+    <p class="modal-success" id="eventReflectionSuccess">Thanks! Your reflection has been sent to the committee.</p>
+    <button class="modal-btn" id="eventReflectionSubmitBtn">Submit reflection</button>
+  </div>
+</div>
+
 <!-- Shared event data (used by both Passport trips calendar and Events view) -->
 <script src="events-data.js"></script>
 
@@ -2269,11 +2314,152 @@ function buildEventsListCards() {
         <h2>${ev.title}</h2>
         <div class="event-meta">${ev.meta.map(m => `<span>${m}</span>`).join('')}</div>
         <p class="desc">${ev.desc}</p>
+        <div class="rsvp-widget" id="rsvp-${ev.id}"></div>
       </div>
     `;
     list.appendChild(card);
   });
+  loadEventCardWidgets();
 }
+
+// ── RSVP + reflection widgets on each event card ──
+function loadEventCardWidgets() {
+  EVENTS.forEach(ev => renderRsvpWidget(ev));
+}
+
+function isPastEvent(ev) {
+  const evDate = new Date(ev.year, ev.month - 1, ev.day);
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  return evDate < todayStart;
+}
+
+async function renderRsvpWidget(ev) {
+  const el = document.getElementById('rsvp-' + ev.id);
+  if (!el) return;
+
+  if (isPastEvent(ev)) {
+    el.innerHTML = `<button class="rsvp-btn" onclick="openReflectionModal('${ev.id}')">📝 Leave a reflection</button>`;
+    return;
+  }
+
+  el.innerHTML = `<span class="rsvp-count">Loading…</span>`;
+  try {
+    const [statsSnap, rsvpSnap] = await Promise.all([
+      db.collection('eventStats').doc(ev.id).get(),
+      currentPassportUser
+        ? db.collection('rsvps').doc(`${ev.id}_${currentPassportUser.uid}`).get()
+        : Promise.resolve(null),
+    ]);
+    const count = (statsSnap.exists && statsSnap.data().rsvpCount) || 0;
+    const going = !!(rsvpSnap && rsvpSnap.exists);
+
+    if (!currentPassportUser) {
+      el.innerHTML = `
+        <button class="rsvp-btn" onclick="document.getElementById('signInNavBtn').click()">🎟️ Sign in to RSVP</button>
+        <span class="rsvp-count">${count} going</span>
+      `;
+    } else {
+      el.innerHTML = `
+        <button class="rsvp-btn${going ? ' going' : ''}" onclick="toggleRsvp('${ev.id}')">${going ? "✓ You're going" : '🎟️ RSVP'}</button>
+        <span class="rsvp-count">${count}${going ? ' others' : ''} going</span>
+      `;
+    }
+  } catch (err) {
+    console.error('Could not load RSVP status:', err);
+    el.innerHTML = '';
+  }
+}
+
+async function toggleRsvp(eventId) {
+  if (!currentPassportUser) { document.getElementById('signInNavBtn').click(); return; }
+  const ev = EVENTS.find(e => e.id === eventId);
+  if (!ev) return;
+
+  const uid = currentPassportUser.uid;
+  const rsvpRef = db.collection('rsvps').doc(`${eventId}_${uid}`);
+  const statsRef = db.collection('eventStats').doc(eventId);
+
+  try {
+    const snap = await rsvpRef.get();
+    if (snap.exists) {
+      await rsvpRef.delete();
+      await statsRef.set({ rsvpCount: firebase.firestore.FieldValue.increment(-1) }, { merge: true });
+    } else {
+      const { first, last } = splitName(currentPassportUser.email);
+      await rsvpRef.set({
+        eventId,
+        uid,
+        email: currentPassportUser.email,
+        name: `${first} ${last}`.trim(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      await statsRef.set({ rsvpCount: firebase.firestore.FieldValue.increment(1) }, { merge: true });
+    }
+    renderRsvpWidget(ev);
+  } catch (err) {
+    console.error('Could not update RSVP:', err);
+    alert('Could not update your RSVP: ' + err.message);
+  }
+}
+
+// ── Event reflection modal (shown for past events) ──
+let _reflectionEventId = null;
+
+function openReflectionModal(eventId) {
+  if (!currentPassportUser) { document.getElementById('signInNavBtn').click(); return; }
+  _reflectionEventId = eventId;
+  const ev = EVENTS.find(e => e.id === eventId);
+  document.getElementById('eventReflectionEventTitle').textContent = ev ? ev.title : '';
+  document.getElementById('eventReflectionText').value = '';
+  document.getElementById('eventReflectionError').classList.remove('show');
+  document.getElementById('eventReflectionSuccess').classList.remove('show');
+  document.getElementById('eventReflectionModal').classList.add('open');
+}
+
+document.getElementById('eventReflectionClose').addEventListener('click', () => {
+  document.getElementById('eventReflectionModal').classList.remove('open');
+});
+document.getElementById('eventReflectionModal').addEventListener('click', (e) => {
+  if (e.target.id === 'eventReflectionModal') document.getElementById('eventReflectionModal').classList.remove('open');
+});
+
+document.getElementById('eventReflectionSubmitBtn').addEventListener('click', async () => {
+  const text = document.getElementById('eventReflectionText').value.trim();
+  const errEl = document.getElementById('eventReflectionError');
+  const okEl = document.getElementById('eventReflectionSuccess');
+  errEl.classList.remove('show');
+  okEl.classList.remove('show');
+
+  if (!currentPassportUser) { document.getElementById('signInNavBtn').click(); return; }
+  if (!text) {
+    errEl.textContent = 'Please write something first.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const btn = document.getElementById('eventReflectionSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    const ev = EVENTS.find(e => e.id === _reflectionEventId);
+    await db.collection('eventReflections').add({
+      eventId: _reflectionEventId,
+      eventTitle: ev ? ev.title : '',
+      uid: currentPassportUser.uid,
+      email: currentPassportUser.email,
+      text,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    document.getElementById('eventReflectionText').value = '';
+    okEl.classList.add('show');
+  } catch (err) {
+    errEl.textContent = 'Could not submit: ' + err.message;
+    errEl.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit reflection';
+  }
+});
 
 function scrollToEventCard(hash) {
   // clear any previous highlight so only one event is bolded at a time
@@ -2411,6 +2597,7 @@ async function refreshSocietyStatsFromFirestore() {
       avatarEl.textContent = '?';
       nameEl.textContent = 'Not signed in';
       sinceEl.innerHTML = '<a href="#" onclick="document.getElementById(\'signInNavBtn\').click(); return false;" style="color:var(--pp-gold-light);text-decoration:underline;">Sign in</a> to get your passport number';
+      if (typeof loadEventCardWidgets === 'function') loadEventCardWidgets();
       return;
     }
 
@@ -2424,6 +2611,7 @@ async function refreshSocietyStatsFromFirestore() {
     await loadSavedStamps(user.uid);
     buildCategories();
     updateBanner();
+    if (typeof loadEventCardWidgets === 'function') loadEventCardWidgets();
   });
 </script>
 

@@ -129,8 +129,8 @@
 
   <!-- Sign-in (shown when logged out) -->
   <div class="auth-box" id="authBox">
-    <label for="adminEmail">Admin KCL Email</label>
-    <input type="email" id="adminEmail" placeholder="firstname.surname@kcl.ac.uk">
+    <label for="adminEmail">Admin Email</label>
+    <input type="email" id="adminEmail" placeholder="the email on the admin list">
     <button class="auth-btn" id="adminSendLinkBtn">Send sign-in link</button>
     <p class="auth-error" id="adminAuthError"></p>
     <p class="auth-msg" id="adminAuthMsg"></p>
@@ -252,8 +252,8 @@
     <div class="panel">
       <h2>Events</h2>
       <table>
-        <thead><tr><th>Date</th><th>Title</th><th>Tag</th><th></th></tr></thead>
-        <tbody id="eventsBody"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+        <thead><tr><th>Date</th><th>Title</th><th>Tag</th><th>RSVPs</th><th></th></tr></thead>
+        <tbody id="eventsBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
       </table>
       <div class="divider-sm"></div>
       <p class="form-title" id="eventFormTitle">Add event</p>
@@ -428,6 +428,15 @@
     </div>
 
     <div class="panel">
+      <h2>Event Reflections</h2>
+      <p class="seed-note">Private to admins, like the general feedback form above, but tied to a specific event. Members can leave one from the "Leave a reflection" button that appears on past events.</p>
+      <table>
+        <thead><tr><th>Event</th><th>From</th><th>Reflection</th><th>Submitted</th><th></th></tr></thead>
+        <tbody id="reflectionsBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
       <h2>Wellbeing Board Moderation</h2>
       <p class="seed-note">Posts with 3 or more flags are automatically hidden from members on the board. Deleting a post also removes its replies. This connects to the same Wellbeing Board database as <code>wellbeing.html</code> (a separate database from the rest of this dashboard).</p>
       <table>
@@ -448,7 +457,11 @@
 <script src="events-data.js"></script>
 
 <script>
-  const KCL_EMAIL_RE = /^[a-z]+(?:-[a-z]+)*\.[a-z]+(?:-[a-z]+)*@kcl\.ac\.uk$/i;
+  // Admins don't need a KCL email (committee members keep access after
+  // graduating), so this only checks it looks like a real email address,
+  // not that it ends in @kcl.ac.uk. Whether it's actually allowed in is
+  // decided by ADMIN_EMAILS + the Firestore security rules, not this regex.
+  const ADMIN_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const authBox = document.getElementById('authBox');
   const deniedBox = document.getElementById('deniedBox');
@@ -466,8 +479,8 @@
   adminSendLinkBtn.addEventListener('click', async () => {
     const email = adminEmailInput.value.trim().toLowerCase();
     adminAuthError.classList.remove('show');
-    if (!KCL_EMAIL_RE.test(email)) {
-      adminAuthError.textContent = 'Please use your KCL email in the form firstname.surname@kcl.ac.uk';
+    if (!ADMIN_EMAIL_RE.test(email)) {
+      adminAuthError.textContent = 'Please enter a valid email address.';
       adminAuthError.classList.add('show');
       return;
     }
@@ -576,6 +589,7 @@
     loadLevelsList();
     loadMonthsList();
     loadSocietyStats();
+    loadReflectionsList();
     loadWellbeingBoard();
   });
 
@@ -847,11 +861,17 @@
   async function loadEventsList() {
     const body = document.getElementById('eventsBody');
     try {
-      const snap = await db.collection('events').orderBy('month').orderBy('day').get();
+      const [snap, statsSnap] = await Promise.all([
+        db.collection('events').orderBy('month').orderBy('day').get(),
+        db.collection('eventStats').get(),
+      ]);
       if (snap.empty) {
-        body.innerHTML = '<tr class="empty-row"><td colspan="4">No events yet. Use Import above or add one below.</td></tr>';
+        body.innerHTML = '<tr class="empty-row"><td colspan="5">No events yet. Use Import above or add one below.</td></tr>';
         return;
       }
+      const statsMap = {};
+      statsSnap.docs.forEach(d => { statsMap[d.id] = d.data().rsvpCount || 0; });
+
       body.innerHTML = snap.docs.map(d => {
         const e = d.data();
         return `<tr>
@@ -859,13 +879,18 @@
           <td>${e.title || ''}</td>
           <td>${e.tag || ''}</td>
           <td>
+            ${statsMap[d.id] || 0} going
+            <button class="mini-btn" onclick="toggleRsvpList('${d.id}')">View</button>
+            <div id="rsvpList-${d.id}" style="display:none;margin-top:6px;font-size:12px;color:rgba(245,237,227,0.65);"></div>
+          </td>
+          <td>
             <button class="mini-btn" onclick="editEvent('${d.id}')">Edit</button>
             <button class="mini-btn danger" onclick="deleteEvent('${d.id}')">Delete</button>
           </td>
         </tr>`;
       }).join('');
     } catch (err) {
-      body.innerHTML = `<tr class="empty-row"><td colspan="4">Could not load: ${err.message}</td></tr>`;
+      body.innerHTML = `<tr class="empty-row"><td colspan="5">Could not load: ${err.message}</td></tr>`;
     }
   }
 
@@ -890,6 +915,24 @@
     if (!confirm('Remove this event from the calendar?')) return;
     await db.collection('events').doc(id).delete();
     loadEventsList();
+  };
+
+  window.toggleRsvpList = async function(eventId) {
+    const listEl = document.getElementById('rsvpList-' + eventId);
+    if (!listEl) return;
+    if (listEl.style.display !== 'none') { listEl.style.display = 'none'; return; }
+    listEl.style.display = 'block';
+    listEl.textContent = 'Loading…';
+    try {
+      const snap = await db.collection('rsvps').where('eventId', '==', eventId).get();
+      if (snap.empty) { listEl.textContent = 'No one has RSVP\'d yet.'; return; }
+      listEl.innerHTML = snap.docs.map(d => {
+        const r = d.data();
+        return `<div>${r.name || ''} &middot; ${r.email || ''}</div>`;
+      }).join('');
+    } catch (err) {
+      listEl.textContent = 'Could not load: ' + err.message;
+    }
   };
 
   function resetEventForm() {
@@ -1230,6 +1273,38 @@
       alert('Could not save: ' + err.message);
     }
   });
+
+  // ============================================================
+  // EVENT REFLECTIONS (read-only, admin can delete for moderation)
+  // ============================================================
+  async function loadReflectionsList() {
+    const body = document.getElementById('reflectionsBody');
+    try {
+      const snap = await db.collection('eventReflections').orderBy('createdAt', 'desc').get();
+      if (snap.empty) {
+        body.innerHTML = '<tr class="empty-row"><td colspan="5">No reflections yet.</td></tr>';
+        return;
+      }
+      body.innerHTML = snap.docs.map(d => {
+        const r = d.data();
+        return `<tr>
+          <td>${r.eventTitle || ''}</td>
+          <td>${r.email || ''}</td>
+          <td>${(r.text || '').replace(/</g, '&lt;')}</td>
+          <td>${fmtDate(r.createdAt)}</td>
+          <td><button class="mini-btn danger" onclick="deleteReflection('${d.id}')">Delete</button></td>
+        </tr>`;
+      }).join('');
+    } catch (err) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="5">Could not load: ${err.message}</td></tr>`;
+    }
+  }
+
+  window.deleteReflection = async function(id) {
+    if (!confirm('Delete this reflection?')) return;
+    await db.collection('eventReflections').doc(id).delete();
+    loadReflectionsList();
+  };
 
   // ============================================================
   // WELLBEING BOARD MODERATION

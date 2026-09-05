@@ -52,6 +52,7 @@ service cloud.firestore {
       return request.auth != null &&
         request.auth.token.email in [
           'eleanor.wang@kcl.ac.uk',
+          'eleanorlinw@gmail.com',
           'fatima.rajani@kcl.ac.uk',
           'yuejia.chen@kcl.ac.uk'
         ];
@@ -86,6 +87,31 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Event RSVPs. Each doc is keyed "<eventId>_<uid>" so a member can only
+    // ever have one RSVP per event. A member can read/delete their own RSVP,
+    // and admins can read all of them (to see attendee lists in admin.html).
+    match /rsvps/{rsvpId} {
+      allow read: if request.auth != null && (request.auth.uid == resource.data.uid || isAdmin());
+      allow create: if isKclEmail() && request.resource.data.uid == request.auth.uid;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow update: if false;
+    }
+
+    // Publicly-readable RSVP headcount per event (no names/emails in here,
+    // just a number), so anyone browsing Events can see "X going" without
+    // needing to be signed in.
+    match /eventStats/{eventId} {
+      allow read: if true;
+      allow write: if isKclEmail();
+    }
+
+    // Post-event reflections, private to admins, same pattern as feedback.
+    match /eventReflections/{reflectionId} {
+      allow create: if isKclEmail() && request.resource.data.uid == request.auth.uid;
+      allow read: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
     // Editable site content (About Us text, committee list, events calendar).
     // Anyone can read it (it's what the public pages display), but only
     // admins can change it — via the new editor panels in admin.html.
@@ -117,7 +143,9 @@ service cloud.firestore {
 }
 ```
 
-The admin list above is already set to `eleanor.wang@kcl.ac.uk`, `fatima.rajani@kcl.ac.uk`, and `yuejia.chen@kcl.ac.uk` — paste the rules block as-is unless that list changes later (e.g. a new committee each year).
+The admin list above is already set to `eleanor.wang@kcl.ac.uk`, `eleanorlinw@gmail.com`, `fatima.rajani@kcl.ac.uk`, and `yuejia.chen@kcl.ac.uk` — paste the rules block as-is unless that list changes later (e.g. a new committee each year).
+
+**Admins don't need a KCL email.** Only the regular member sign-in (on the main site, for Passport tracking) requires `@kcl.ac.uk`. Signing into `admin.html` just checks the email against `ADMIN_EMAILS` / the `isAdmin()` rule above — any email address works there, so a committee member who's graduated or left KCL can keep admin access by adding their personal email to both `ADMIN_EMAILS` in `firebase-config.js` and the `isAdmin()` list in the Firestore rules (Step 5). Their old `@kcl.ac.uk` Passport account (stamps, passport number) stays in the database either way, but they won't be able to sign back into that specific member account once they lose access to that inbox, since Firebase's email-link sign-in needs a working inbox at that address each time.
 
 ## Step 6 — Drop your config into the site files
 
@@ -139,6 +167,7 @@ Make sure these files all sit in the same folder as `index.html` when you publis
 - The site then checks Firestore for an existing passport number for that account; if there isn't one, it atomically hands out the next `BB-####` and saves it.
 - Signed-in members can submit feedback from the nav bar; it's saved with their email and passport number attached.
 - `admin.html` is a normal page — anyone can open it — but it only shows real data to accounts whose email is in `ADMIN_EMAILS` **and** matches the security rules. Everyone else sees "Access restricted."
+- On the Events page, upcoming events show an RSVP button (signed-in members only) and a live "X going" headcount visible to everyone. Past events show a "Leave a reflection" button instead, which sends a private note straight to admin.html.
 
 ## A note on security
 
@@ -160,6 +189,7 @@ Once Steps 1–7 are done, open `index.html` (locally via `localhost`, or on you
 - Add, edit, or remove **Passport monthly challenges** (the Oct–Mar theme cards). Which one shows as "current" on the live site is worked out automatically from today's date (matched against each card's Month field), so there's nothing to toggle manually
 - Edit the two manual **Society Collective** numbers (networking attendees, volunteers) on the home page. The other two numbers in that section (total members, total experiences completed) update themselves automatically as people sign up and earn stamps; they're shown read-only for reference
 - **Moderate the Wellbeing Board** (delete any post or reply, see flag counts) without needing the old `?admin=` link
+- **See RSVP headcounts and attendee lists per event**, and **read (and delete) members' private post-event reflections**
 
 **One-time setup:** the very first time anyone opens the updated `admin.html`, click **"Import current site content"** near the top of the dashboard. This copies whatever's currently on the live site into the editable database, so nothing is lost — it only fills in collections that are still empty, so it's safe even if someone clicks it twice.
 
