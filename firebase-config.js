@@ -25,6 +25,7 @@ const firebaseConfig = {
 // to show, it does not by itself grant access. See FIREBASE_SETUP.md.
 const ADMIN_EMAILS = [
   "eleanor.wang@kcl.ac.uk",
+  "eleanorlinw@gmail.com",
   "fatima.rajani@kcl.ac.uk",
   "yuejia.chen@kcl.ac.uk"
 ];
