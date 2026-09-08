@@ -396,6 +396,7 @@
     margin-bottom:6px;
   }
   .modal-box textarea{ min-height:100px; resize:vertical; }
+  #eventReflectionQuestions .reflection-answer-input{ margin-bottom:16px; }
   .modal-box input::placeholder, .modal-box textarea::placeholder{ color:rgba(245,237,227,0.35); }
   .modal-box input:focus, .modal-box textarea:focus{ outline:none; border-color:var(--gold); }
 
@@ -684,6 +685,29 @@
     font-size:12.5px;
     color:#6b5a4e;
   }
+
+  #events-view .event-photo-gallery{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:14px;
+  }
+  #events-view .event-photo-thumb{
+    display:block;
+    width:84px;
+    height:84px;
+    border-radius:8px;
+    overflow:hidden;
+    border:1px solid rgba(0,0,0,0.08);
+  }
+  #events-view .event-photo-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    transition:transform .2s;
+  }
+  #events-view .event-photo-thumb:hover img{ transform:scale(1.08); }
 
   /* ============ PASSPORT VIEW ============ */
   #passport-view{
@@ -1736,8 +1760,7 @@
     <button class="modal-close" id="eventReflectionClose">&times;</button>
     <h3>Leave a reflection</h3>
     <p class="modal-sub" id="eventReflectionEventTitle"></p>
-    <label for="eventReflectionText">How did it go?</label>
-    <textarea id="eventReflectionText" placeholder="What stood out, what could be better, anything the committee should know..."></textarea>
+    <div id="eventReflectionQuestions"></div>
     <p class="modal-hint">This goes straight to the committee, not posted publicly.</p>
     <p class="modal-error" id="eventReflectionError"></p>
     <p class="modal-success" id="eventReflectionSuccess">Thanks! Your reflection has been sent to the committee.</p>
@@ -2314,12 +2337,24 @@ function buildEventsListCards() {
         <h2>${ev.title}</h2>
         <div class="event-meta">${ev.meta.map(m => `<span>${m}</span>`).join('')}</div>
         <p class="desc">${ev.desc}</p>
+        ${photoGalleryHtml(ev)}
         <div class="rsvp-widget" id="rsvp-${ev.id}"></div>
       </div>
     `;
     list.appendChild(card);
   });
   loadEventCardWidgets();
+}
+
+// ── Photo gallery for past events (admin-pasted image URLs) ──
+function photoGalleryHtml(ev) {
+  if (!ev.photos || !ev.photos.length) return '';
+  const thumbs = ev.photos.map(url => `
+    <a href="${url}" target="_blank" rel="noopener" class="event-photo-thumb">
+      <img src="${url}" alt="Photo from ${ev.title}" loading="lazy">
+    </a>
+  `).join('');
+  return `<div class="event-photo-gallery">${thumbs}</div>`;
 }
 
 // ── RSVP + reflection widgets on each event card ──
@@ -2404,15 +2439,43 @@ async function toggleRsvp(eventId) {
 
 // ── Event reflection modal (shown for past events) ──
 let _reflectionEventId = null;
+let _reflectionQuestionsCache = null;
 
-function openReflectionModal(eventId) {
+// Shared question bank, picked per event in admin.html. Fetched once and cached.
+async function getReflectionQuestions() {
+  if (_reflectionQuestionsCache) return _reflectionQuestionsCache;
+  try {
+    const snap = await db.collection('reflectionQuestions').orderBy('order').get();
+    _reflectionQuestionsCache = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+  } catch (err) {
+    console.error('Could not load reflection questions:', err);
+    _reflectionQuestionsCache = [];
+  }
+  return _reflectionQuestionsCache;
+}
+
+async function openReflectionModal(eventId) {
   if (!currentPassportUser) { document.getElementById('signInNavBtn').click(); return; }
   _reflectionEventId = eventId;
   const ev = EVENTS.find(e => e.id === eventId);
   document.getElementById('eventReflectionEventTitle').textContent = ev ? ev.title : '';
-  document.getElementById('eventReflectionText').value = '';
   document.getElementById('eventReflectionError').classList.remove('show');
   document.getElementById('eventReflectionSuccess').classList.remove('show');
+
+  const allQuestions = await getReflectionQuestions();
+  const ids = (ev && ev.reflectionQuestionIds) || [];
+  let questions = allQuestions.filter(q => ids.includes(q.id));
+  if (!questions.length) {
+    // Fall back to a single general question if this event has none assigned yet.
+    questions = [{ id: '_general', text: 'How did it go? What stood out, what could be better, anything the committee should know...' }];
+  }
+
+  const container = document.getElementById('eventReflectionQuestions');
+  container.innerHTML = questions.map((q, i) => `
+    <label for="reflectionAnswer-${i}">${q.text}</label>
+    <textarea id="reflectionAnswer-${i}" class="reflection-answer-input" data-question="${q.text.replace(/"/g, '&quot;')}" placeholder="Your answer..."></textarea>
+  `).join('');
+
   document.getElementById('eventReflectionModal').classList.add('open');
 }
 
@@ -2424,14 +2487,19 @@ document.getElementById('eventReflectionModal').addEventListener('click', (e) =>
 });
 
 document.getElementById('eventReflectionSubmitBtn').addEventListener('click', async () => {
-  const text = document.getElementById('eventReflectionText').value.trim();
   const errEl = document.getElementById('eventReflectionError');
   const okEl = document.getElementById('eventReflectionSuccess');
   errEl.classList.remove('show');
   okEl.classList.remove('show');
 
   if (!currentPassportUser) { document.getElementById('signInNavBtn').click(); return; }
-  if (!text) {
+
+  const inputs = Array.from(document.querySelectorAll('#eventReflectionQuestions .reflection-answer-input'));
+  const answers = inputs
+    .map(el => ({ question: el.dataset.question, answer: el.value.trim() }))
+    .filter(a => a.answer);
+
+  if (!answers.length) {
     errEl.textContent = 'Please write something first.';
     errEl.classList.add('show');
     return;
@@ -2447,10 +2515,10 @@ document.getElementById('eventReflectionSubmitBtn').addEventListener('click', as
       eventTitle: ev ? ev.title : '',
       uid: currentPassportUser.uid,
       email: currentPassportUser.email,
-      text,
+      answers,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
-    document.getElementById('eventReflectionText').value = '';
+    inputs.forEach(el => { el.value = ''; });
     okEl.classList.add('show');
   } catch (err) {
     errEl.textContent = 'Could not submit: ' + err.message;

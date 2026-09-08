@@ -250,6 +250,29 @@
     </div>
 
     <div class="panel">
+      <h2>Reflection Question Bank</h2>
+      <p class="seed-note">Build a reusable list of questions here, then tick which ones apply when you create or edit each event below. Answers are free text.</p>
+      <table>
+        <thead><tr><th>Order</th><th>Question</th><th></th></tr></thead>
+        <tbody id="reflectionQuestionsBody"><tr class="empty-row"><td colspan="3">Loading…</td></tr></tbody>
+      </table>
+      <div class="divider-sm"></div>
+      <p class="form-title" id="reflectionQuestionFormTitle">Add question</p>
+      <div class="field-row">
+        <div class="field" style="flex:3;">
+          <label for="reflectionQuestionTextInput">Question</label>
+          <input type="text" id="reflectionQuestionTextInput" placeholder="e.g. What went well?">
+        </div>
+        <div class="field">
+          <label for="reflectionQuestionOrderInput">Display order</label>
+          <input type="number" id="reflectionQuestionOrderInput" placeholder="1, 2, 3...">
+        </div>
+      </div>
+      <button class="save-btn" id="reflectionQuestionSaveBtn">Save question</button>
+      <button class="cancel-btn" id="reflectionQuestionCancelBtn">Cancel / clear form</button>
+    </div>
+
+    <div class="panel">
       <h2>Events</h2>
       <table>
         <thead><tr><th>Date</th><th>Title</th><th>Tag</th><th>RSVPs</th><th></th></tr></thead>
@@ -292,6 +315,16 @@
       <div class="field">
         <label for="eventDescInput">Description</label>
         <textarea id="eventDescInput" placeholder="Full event description..."></textarea>
+      </div>
+      <div class="field">
+        <label for="eventPhotosInput">Photos (one image URL per line, e.g. from Google Photos/Drive)</label>
+        <textarea id="eventPhotosInput" placeholder="https://..."></textarea>
+      </div>
+      <div class="field">
+        <label>Reflection questions to ask for this event</label>
+        <div id="eventReflectionQuestionsChecklist" style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:rgba(245,237,227,0.8);">
+          <span style="color:rgba(245,237,227,0.45);">Add questions to the Reflection Question Bank above first.</span>
+        </div>
       </div>
       <button class="save-btn" id="eventSaveBtn">Save event</button>
       <button class="cancel-btn" id="eventCancelBtn">Cancel / clear form</button>
@@ -584,6 +617,7 @@
     loadDashboard();
     loadAboutUsEditor();
     loadCommitteeList();
+    loadReflectionQuestionsList();
     loadEventsList();
     loadCategoriesList();
     loadLevelsList();
@@ -644,6 +678,11 @@
     { month: 'January',  name: 'Challenge', action: 'Apply for one opportunity', order: 4 },
     { month: 'February', name: 'Give Back', action: 'Volunteer or help a member', order: 5 },
     { month: 'March',    name: 'Grow',      action: 'Learn a new skill', order: 6 },
+  ];
+  const CURRENT_REFLECTION_QUESTIONS = [
+    { text: 'What went well about this event?', order: 1 },
+    { text: 'What could we improve for next time?', order: 2 },
+    { text: 'Anything else the committee should know?', order: 3 },
   ];
 
   document.getElementById('seedContentBtn').addEventListener('click', async () => {
@@ -718,6 +757,17 @@
         await batch.commit();
       }
 
+      // Reflection questions: only seed if the collection is empty
+      const reflectionQuestionsSnap = await db.collection('reflectionQuestions').limit(1).get();
+      if (reflectionQuestionsSnap.empty) {
+        const batch = db.batch();
+        CURRENT_REFLECTION_QUESTIONS.forEach(q => {
+          const ref = db.collection('reflectionQuestions').doc();
+          batch.set(ref, q);
+        });
+        await batch.commit();
+      }
+
       status.textContent = 'Done. Your current content is now in the editable database below.';
       loadAboutUsEditor();
       loadCommitteeList();
@@ -725,6 +775,7 @@
       loadCategoriesList();
       loadLevelsList();
       loadMonthsList();
+      loadReflectionQuestionsList();
     } catch (err) {
       status.textContent = 'Import failed: ' + err.message;
     }
@@ -854,6 +905,97 @@
   });
 
   // ============================================================
+  // REFLECTION QUESTION BANK
+  // ============================================================
+  let editingReflectionQuestionId = null;
+  let REFLECTION_QUESTIONS = [];
+
+  function renderReflectionQuestionsChecklist(selectedIds) {
+    const container = document.getElementById('eventReflectionQuestionsChecklist');
+    if (!container) return;
+    if (REFLECTION_QUESTIONS.length === 0) {
+      container.innerHTML = '<span style="color:rgba(245,237,227,0.45);">Add questions to the Reflection Question Bank above first.</span>';
+      return;
+    }
+    const selected = new Set(selectedIds || []);
+    container.innerHTML = REFLECTION_QUESTIONS.map(q => `
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <input type="checkbox" class="reflection-question-checkbox" value="${q.id}" ${selected.has(q.id) ? 'checked' : ''}>
+        ${q.text}
+      </label>
+    `).join('');
+  }
+
+  async function loadReflectionQuestionsList() {
+    const body = document.getElementById('reflectionQuestionsBody');
+    try {
+      const snap = await db.collection('reflectionQuestions').orderBy('order').get();
+      REFLECTION_QUESTIONS = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+      if (snap.empty) {
+        body.innerHTML = '<tr class="empty-row"><td colspan="3">No questions yet. Add one below.</td></tr>';
+      } else {
+        body.innerHTML = REFLECTION_QUESTIONS.map(q => `<tr>
+          <td>${q.order ?? ''}</td>
+          <td>${q.text || ''}</td>
+          <td>
+            <button class="mini-btn" onclick="editReflectionQuestion('${q.id}')">Edit</button>
+            <button class="mini-btn danger" onclick="deleteReflectionQuestion('${q.id}')">Delete</button>
+          </td>
+        </tr>`).join('');
+      }
+      // keep whatever's currently ticked in the Events form when the bank refreshes
+      const currentlyChecked = Array.from(document.querySelectorAll('.reflection-question-checkbox:checked')).map(el => el.value);
+      renderReflectionQuestionsChecklist(currentlyChecked);
+    } catch (err) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="3">Could not load: ${err.message}</td></tr>`;
+    }
+  }
+
+  window.editReflectionQuestion = async function(id) {
+    const doc = await db.collection('reflectionQuestions').doc(id).get();
+    if (!doc.exists) return;
+    const q = doc.data();
+    editingReflectionQuestionId = id;
+    document.getElementById('reflectionQuestionTextInput').value = q.text || '';
+    document.getElementById('reflectionQuestionOrderInput').value = q.order ?? '';
+    document.getElementById('reflectionQuestionFormTitle').textContent = 'Edit question';
+    document.getElementById('reflectionQuestionFormTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.deleteReflectionQuestion = async function(id) {
+    if (!confirm('Delete this question? It will stop being offered on future reflections (answers already submitted keep their original question text).')) return;
+    await db.collection('reflectionQuestions').doc(id).delete();
+    loadReflectionQuestionsList();
+  };
+
+  function resetReflectionQuestionForm() {
+    editingReflectionQuestionId = null;
+    document.getElementById('reflectionQuestionTextInput').value = '';
+    document.getElementById('reflectionQuestionOrderInput').value = '';
+    document.getElementById('reflectionQuestionFormTitle').textContent = 'Add question';
+  }
+
+  document.getElementById('reflectionQuestionCancelBtn').addEventListener('click', resetReflectionQuestionForm);
+
+  document.getElementById('reflectionQuestionSaveBtn').addEventListener('click', async () => {
+    const text = document.getElementById('reflectionQuestionTextInput').value.trim();
+    const order = Number(document.getElementById('reflectionQuestionOrderInput').value) || 0;
+    if (!text) { alert('Question text is required.'); return; }
+    const data = { text, order };
+    try {
+      if (editingReflectionQuestionId) {
+        await db.collection('reflectionQuestions').doc(editingReflectionQuestionId).update(data);
+      } else {
+        await db.collection('reflectionQuestions').add(data);
+      }
+      resetReflectionQuestionForm();
+      loadReflectionQuestionsList();
+    } catch (err) {
+      alert('Could not save: ' + err.message);
+    }
+  });
+
+  // ============================================================
   // EVENTS EDITOR
   // ============================================================
   let editingEventId = null;
@@ -907,6 +1049,8 @@
     document.getElementById('eventMonthLabelInput').value = e.monthLabel || '';
     document.getElementById('eventMetaInput').value = (e.meta || []).join('\n');
     document.getElementById('eventDescInput').value = e.desc || '';
+    document.getElementById('eventPhotosInput').value = (e.photos || []).join('\n');
+    renderReflectionQuestionsChecklist(e.reflectionQuestionIds || []);
     document.getElementById('eventFormTitle').textContent = 'Edit event';
     document.getElementById('eventFormTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
@@ -937,9 +1081,10 @@
 
   function resetEventForm() {
     editingEventId = null;
-    ['eventTitleInput','eventTagInput','eventYearInput','eventMonthInput','eventDayInput','eventMonthLabelInput','eventMetaInput','eventDescInput'].forEach(id => {
+    ['eventTitleInput','eventTagInput','eventYearInput','eventMonthInput','eventDayInput','eventMonthLabelInput','eventMetaInput','eventDescInput','eventPhotosInput'].forEach(id => {
       document.getElementById(id).value = '';
     });
+    renderReflectionQuestionsChecklist([]);
     document.getElementById('eventFormTitle').textContent = 'Add event';
   }
 
@@ -954,12 +1099,14 @@
     const monthLabel = document.getElementById('eventMonthLabelInput').value.trim();
     const meta = document.getElementById('eventMetaInput').value.split('\n').map(s => s.trim()).filter(Boolean);
     const desc = document.getElementById('eventDescInput').value.trim();
+    const photos = document.getElementById('eventPhotosInput').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const reflectionQuestionIds = Array.from(document.querySelectorAll('.reflection-question-checkbox:checked')).map(el => el.value);
 
     if (!title || !tag || !year || !month || !day || !monthLabel) {
       alert('Title, tag, year, month, day and month label are all required.');
       return;
     }
-    const data = { title, tag, year, month, day, monthLabel, meta, desc };
+    const data = { title, tag, year, month, day, monthLabel, meta, desc, photos, reflectionQuestionIds };
 
     try {
       if (editingEventId) {
@@ -1287,10 +1434,13 @@
       }
       body.innerHTML = snap.docs.map(d => {
         const r = d.data();
+        const answersHtml = (r.answers && r.answers.length)
+          ? r.answers.map(a => `<div style="margin-bottom:6px;"><strong style="color:var(--gold-light);font-size:11.5px;">${(a.question || '').replace(/</g, '&lt;')}</strong><br>${(a.answer || '').replace(/</g, '&lt;')}</div>`).join('')
+          : (r.text || '').replace(/</g, '&lt;'); // older reflections saved before questions existed
         return `<tr>
           <td>${r.eventTitle || ''}</td>
           <td>${r.email || ''}</td>
-          <td>${(r.text || '').replace(/</g, '&lt;')}</td>
+          <td>${answersHtml}</td>
           <td>${fmtDate(r.createdAt)}</td>
           <td><button class="mini-btn danger" onclick="deleteReflection('${d.id}')">Delete</button></td>
         </tr>`;
