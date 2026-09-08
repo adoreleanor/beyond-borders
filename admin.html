@@ -243,7 +243,7 @@
         </div>
       </div>
       <div class="field-check">
-        <input type="checkbox" id="committeeLeadInput"> <label for="committeeLeadInput" style="margin:0;text-transform:none;letter-spacing:0;font-size:13px;color:rgba(245,237,227,0.8);">Show as a featured lead (Co-President style card)</label>
+        <input type="checkbox" id="committeeLeadInput"> <label for="committeeLeadInput" style="margin:0;text-transform:none;letter-spacing:0;font-size:13px;color:rgba(245,237,227,0.8);">Show under Executive Committee (Co-Presidents get the strongest highlight, everyone else ticked here shows a lighter exec style)</label>
       </div>
       <button class="save-btn" id="committeeSaveBtn">Save committee member</button>
       <button class="cancel-btn" id="committeeCancelBtn">Cancel / clear form</button>
@@ -317,8 +317,12 @@
         <textarea id="eventDescInput" placeholder="Full event description..."></textarea>
       </div>
       <div class="field">
-        <label for="eventPhotosInput">Photos (one image URL per line, e.g. from Google Photos/Drive)</label>
-        <textarea id="eventPhotosInput" placeholder="https://..."></textarea>
+        <label for="eventPhotosInput">Photos (one direct image URL per line)</label>
+        <textarea id="eventPhotosInput" placeholder="https://... (must end in .jpg, .png etc, or be a direct-view link)"></textarea>
+        <span style="display:block;margin-top:6px;font-size:11.5px;color:rgba(245,237,227,0.45);line-height:1.5;">
+          Needs a direct link to the image file itself, not a page that shows it. A Google Photos share link (photos.app.goo.gl/...) will not work and the photo will not appear.
+          Easiest options: upload the photo to the GitHub repo and use its raw file link, or use a Google Drive link in the form https://drive.google.com/uc?export=view&amp;id=FILE_ID (right-click the file in Drive, Share, copy the ID from the link, set access to "Anyone with the link").
+        </span>
       </div>
       <div class="field">
         <label>Reflection questions to ask for this event</label>
@@ -644,8 +648,8 @@
   const CURRENT_COMMITTEE = [
     { name: 'Layla Chen',        role: 'Co-President',            isLead: true,  order: 1 },
     { name: 'Fatima Rajani',     role: 'Co-President',            isLead: true,  order: 2 },
-    { name: 'Minnah Khan',       role: 'Treasurer',                isLead: false, order: 3 },
-    { name: 'Hassan Imtiaz',     role: 'Secretary',                isLead: false, order: 4 },
+    { name: 'Minnah Khan',       role: 'Treasurer',                isLead: true,  order: 3 },
+    { name: 'Hassan Imtiaz',     role: 'Secretary',                isLead: true,  order: 4 },
     { name: 'Fiona Chiu',        role: 'Head of Events',           isLead: false, order: 5 },
     { name: 'Jennifer Qiu',      role: 'Events Officer',           isLead: false, order: 6 },
     { name: 'Eleanor Wang',      role: 'Events Officer',           isLead: false, order: 7 },
