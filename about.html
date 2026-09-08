@@ -123,90 +123,113 @@
     margin-bottom:10px;
   }
 
-  .committee-leads{
+  .committee-list{
     display:flex;
-    justify-content:center;
-    flex-wrap:wrap;
-    gap:20px;
-    margin-top:10px;
-    margin-bottom:26px;
-    padding-bottom:26px;
-    border-bottom:1px solid rgba(110,15,30,0.15);
+    flex-direction:column;
+    margin-top:6px;
   }
-  .committee-lead-card{
-    text-align:center;
-    padding:22px 26px;
-    background:linear-gradient(160deg, rgba(212,160,23,0.1), rgba(110,15,30,0.05));
-    border-radius:14px;
-    border:1px solid rgba(212,160,23,0.4);
-    min-width:150px;
-  }
-  .committee-lead-avatar{
-    width:76px; height:76px;
-    border-radius:50%;
-    margin:0 auto 12px;
-    background:linear-gradient(135deg, var(--gold), var(--maroon-mid));
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Cormorant Garamond',serif;
-    font-weight:700;
-    font-size:28px;
-    color:var(--cream);
-    box-shadow:0 4px 14px rgba(212,160,23,0.35);
-    overflow:hidden;
-  }
-  .committee-lead-role{
-    font-size:11px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    color:#B8860B;
-    font-weight:700;
-    margin-bottom:4px;
-  }
-  .committee-lead-name{
-    font-family:'Cormorant Garamond',serif;
-    font-size:19px;
-    font-weight:700;
-    color:#3A0810;
-  }
-
-  .committee-subheading{
+  .committee-list-label{
     font-size:11px;
     letter-spacing:1.5px;
     text-transform:uppercase;
     color:#8a7a6c;
-    margin-bottom:12px;
+    margin:22px 0 10px;
+  }
+  .committee-list-label:first-child{ margin-top:2px; }
+
+  .committee-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:12px 6px;
+    border-bottom:1px solid rgba(110,15,30,0.1);
+  }
+  .committee-row:last-child{ border-bottom:none; }
+
+  /* Tier 1: Co-Presidents, the strongest highlight */
+  .committee-row.tier-president{
+    background:linear-gradient(160deg, rgba(212,160,23,0.16), rgba(110,15,30,0.06));
+    border:1px solid rgba(212,160,23,0.5);
+    border-radius:12px;
+    padding:16px 16px;
+    margin-bottom:10px;
   }
 
-  .committee-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(140px,1fr));
-    gap:16px;
-    margin-top:8px;
+  /* Tier 2: Treasurer & Secretary, exec but a lighter touch than the Presidents */
+  .committee-row.tier-exec{
+    background:rgba(212,160,23,0.06);
+    border:1px solid rgba(212,160,23,0.22);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:8px;
   }
-  .committee-card{
-    text-align:center;
-    padding:16px 10px;
-    background:rgba(110,15,30,0.05);
-    border-radius:12px;
-    border:1px solid rgba(110,15,30,0.12);
+
+  /* Tier 3: "Head of..." roles within the main committee list, a mild highlight */
+  .committee-row.tier-head{
+    border-left:3px solid rgba(212,160,23,0.5);
+    padding-left:10px;
+    background:rgba(212,160,23,0.045);
   }
-  .committee-avatar{
-    width:56px; height:56px;
+
+  .committee-row-avatar{
+    width:48px; height:48px;
     border-radius:50%;
-    margin:0 auto 10px;
+    flex-shrink:0;
     background:linear-gradient(135deg, var(--gold), var(--maroon-mid));
     display:flex; align-items:center; justify-content:center;
     font-family:'Cormorant Garamond',serif;
     font-weight:700;
-    font-size:20px;
+    font-size:18px;
     color:var(--cream);
     overflow:hidden;
   }
-  .committee-lead-avatar img, .committee-avatar img{
+  .committee-row.tier-president .committee-row-avatar{
+    width:60px; height:60px;
+    font-size:22px;
+    box-shadow:0 4px 16px rgba(212,160,23,0.4);
+  }
+  .committee-row.tier-exec .committee-row-avatar{
+    width:52px; height:52px;
+    font-size:19px;
+    box-shadow:0 2px 10px rgba(212,160,23,0.2);
+  }
+  .committee-row-avatar img{
     width:100%; height:100%; object-fit:cover; border-radius:50%;
   }
-  .committee-name{ font-size:13px; font-weight:600; color:#3A0810; }
-  .committee-role{ font-size:11.5px; color:#7a6a5c; margin-top:2px; }
+
+  .committee-row-info{ display:flex; flex-direction:column; }
+  .committee-row-name{
+    font-family:'Cormorant Garamond',serif;
+    font-size:15.5px;
+    font-weight:700;
+    color:#3A0810;
+  }
+  .committee-row.tier-president .committee-row-name{ font-size:19px; }
+  .committee-row.tier-exec .committee-row-name{ font-size:16px; }
+  .committee-row.tier-head .committee-row-name{ font-weight:800; }
+  .committee-row-role{
+    font-size:11.5px;
+    color:#7a6a5c;
+    margin-top:2px;
+  }
+  .committee-row.tier-president .committee-row-role{
+    font-size:11px;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+    color:#B8860B;
+    font-weight:800;
+  }
+  .committee-row.tier-exec .committee-row-role{
+    font-size:11px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#a5824a;
+    font-weight:600;
+  }
+  .committee-row.tier-head .committee-row-role{
+    color:#B8860B;
+    font-weight:700;
+  }
 
   .contact-list{ list-style:none; margin-top:8px; }
   .contact-list li{ font-size:14px; color:#4a3d34; margin-bottom:6px; }
@@ -246,60 +269,79 @@
   <div class="section">
     <h2>Committee</h2>
 
-    <div class="committee-leads" id="committeeLeadsEl">
-      <div class="committee-lead-card">
-        <div class="committee-lead-avatar">L</div>
-        <div class="committee-lead-role">Co-President</div>
-        <div class="committee-lead-name">Layla Chen</div>
+    <div class="committee-list" id="committeeListEl">
+      <div class="committee-list-label">Executive Committee</div>
+      <div class="committee-row tier-president">
+        <div class="committee-row-avatar">L</div>
+        <div class="committee-row-info">
+          <div class="committee-row-name">Layla Chen</div>
+          <div class="committee-row-role">Co-President</div>
+        </div>
       </div>
-      <div class="committee-lead-card">
-        <div class="committee-lead-avatar">F</div>
-        <div class="committee-lead-role">Co-President</div>
-        <div class="committee-lead-name">Fatima Rajani</div>
+      <div class="committee-row tier-president">
+        <div class="committee-row-avatar">F</div>
+        <div class="committee-row-info">
+          <div class="committee-row-name">Fatima Rajani</div>
+          <div class="committee-row-role">Co-President</div>
+        </div>
       </div>
-    </div>
+      <div class="committee-row tier-exec">
+        <div class="committee-row-avatar">M</div>
+        <div class="committee-row-info">
+          <div class="committee-row-name">Minnah Khan</div>
+          <div class="committee-row-role">Treasurer</div>
+        </div>
+      </div>
+      <div class="committee-row tier-exec">
+        <div class="committee-row-avatar">H</div>
+        <div class="committee-row-info">
+          <div class="committee-row-name">Hassan Imtiaz</div>
+          <div class="committee-row-role">Secretary</div>
+        </div>
+      </div>
 
-    <div class="committee-subheading" id="committeeSubheadingEl">Rest of the committee</div>
-    <div class="committee-grid" id="committeeGridEl">
-      <div class="committee-card">
-        <div class="committee-avatar">M</div>
-        <div class="committee-name">Treasurer</div>
-        <div class="committee-role">Minnah Khan</div>
+      <div class="committee-list-label">Committee</div>
+      <div class="committee-row tier-head">
+        <div class="committee-row-avatar">F</div>
+        <div class="committee-row-info">
+          <div class="committee-row-name">Fiona Chiu</div>
+          <div class="committee-row-role">Head of Events</div>
+        </div>
       </div>
-      <div class="committee-card">
-        <div class="committee-avatar">H</div>
-        <div class="committee-name">Secretary</div>
-        <div class="committee-role">Hassan Imtiaz</div>
+      <div class="committee-row">
+        <div class="committee-row-avatar">J</div>
+        <div class="committee-row-info">
+          <div class="committee-row-name">Jennifer Qiu</div>
+          <div class="committee-row-role">Events Officer</div>
+        </div>
       </div>
-      <div class="committee-card">
-        <div class="committee-avatar">F</div>
-        <div class="committee-name">Head of Events</div>
-        <div class="committee-role">Fiona Chiu</div>
+      <div class="committee-row">
+        <div class="committee-row-avatar">E</div>
+        <div class="committee-row-info">
+          <div class="committee-row-name">Eleanor Wang</div>
+          <div class="committee-row-role">Events Officer</div>
+        </div>
       </div>
-      <div class="committee-card">
-        <div class="committee-avatar">J</div>
-        <div class="committee-name">Events Officer</div>
-        <div class="committee-role">Jennifer Qiu</div>
+      <div class="committee-row tier-head">
+        <div class="committee-row-avatar">Z</div>
+        <div class="committee-row-info">
+          <div class="committee-row-name">Zhenya Kunytsyna</div>
+          <div class="committee-row-role">Head of Social Media</div>
+        </div>
       </div>
-      <div class="committee-card">
-        <div class="committee-avatar">E</div>
-        <div class="committee-name">Events Officer</div>
-        <div class="committee-role">Eleanor Wang</div>
+      <div class="committee-row">
+        <div class="committee-row-avatar">S</div>
+        <div class="committee-row-info">
+          <div class="committee-row-name">Sawani Vaidya</div>
+          <div class="committee-row-role">Social Media Officer</div>
+        </div>
       </div>
-      <div class="committee-card">
-        <div class="committee-avatar">Z</div>
-        <div class="committee-name">Head of Social Media</div>
-        <div class="committee-role">Zhenya Kunytsyna</div>
-      </div>
-      <div class="committee-card">
-        <div class="committee-avatar">S</div>
-        <div class="committee-name">Social Media Officer</div>
-        <div class="committee-role">Sawani Vaidya</div>
-      </div>
-      <div class="committee-card">
-        <div class="committee-avatar">E</div>
-        <div class="committee-name">Head of Wellbeing</div>
-        <div class="committee-role">Eleanor Wang</div>
+      <div class="committee-row tier-head">
+        <div class="committee-row-avatar">E</div>
+        <div class="committee-row-info">
+          <div class="committee-row-name">Eleanor Wang</div>
+          <div class="committee-row-role">Head of Wellbeing</div>
+        </div>
       </div>
     </div>
   </div>
@@ -333,31 +375,48 @@
     return (name || '?').trim().charAt(0).toUpperCase();
   }
 
+  // Works out how much visual emphasis a committee member's row should get:
+  // Co-Presidents stand out most, Treasurer/Secretary a little less (still
+  // exec), "Head of..." roles get a mild highlight within the main list,
+  // and everyone else is plain.
+  function committeeTier(m) {
+    const role = (m.role || '').toLowerCase();
+    if (m.isLead && role.includes('president')) return 'tier-president';
+    if (m.isLead) return 'tier-exec';
+    if (role.includes('head')) return 'tier-head';
+    return '';
+  }
+
   function renderCommittee(members) {
-    const leadsEl = document.getElementById('committeeLeadsEl');
-    const gridEl = document.getElementById('committeeGridEl');
-    const subheadingEl = document.getElementById('committeeSubheadingEl');
+    const listEl = document.getElementById('committeeListEl');
 
     const sorted = members.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
     const leads = sorted.filter(m => m.isLead);
     const rest = sorted.filter(m => !m.isLead);
 
-    leadsEl.innerHTML = leads.map(m => `
-      <div class="committee-lead-card">
-        <div class="committee-lead-avatar">${m.photoUrl ? `<img src="${m.photoUrl}" alt="${m.name}">` : avatarLetter(m.name)}</div>
-        <div class="committee-lead-role">${m.role || ''}</div>
-        <div class="committee-lead-name">${m.name || ''}</div>
+    const row = (m) => {
+      const tier = committeeTier(m);
+      return `
+      <div class="committee-row${tier ? ' ' + tier : ''}">
+        <div class="committee-row-avatar">${m.photoUrl ? `<img src="${m.photoUrl}" alt="${m.name}">` : avatarLetter(m.name)}</div>
+        <div class="committee-row-info">
+          <div class="committee-row-name">${m.name || ''}</div>
+          <div class="committee-row-role">${m.role || ''}</div>
+        </div>
       </div>
-    `).join('');
+    `;
+    };
 
-    subheadingEl.style.display = rest.length ? '' : 'none';
-    gridEl.innerHTML = rest.map(m => `
-      <div class="committee-card">
-        <div class="committee-avatar">${m.photoUrl ? `<img src="${m.photoUrl}" alt="${m.name}">` : avatarLetter(m.name)}</div>
-        <div class="committee-name">${m.role || ''}</div>
-        <div class="committee-role">${m.name || ''}</div>
-      </div>
-    `).join('');
+    let html = '';
+    if (leads.length) {
+      html += `<div class="committee-list-label">Executive Committee</div>`;
+      html += leads.map(row).join('');
+    }
+    if (rest.length) {
+      html += `<div class="committee-list-label">Committee</div>`;
+      html += rest.map(row).join('');
+    }
+    listEl.innerHTML = html;
   }
 
   async function loadAboutUsContent() {
