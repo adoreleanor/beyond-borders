@@ -692,60 +692,40 @@
     color:#6b5a4e;
   }
 
-  /* ── Event photo filmstrip ── */
-  #events-view .event-photo-filmstrip{
-    position:relative;
-    margin-top:16px;
-    background:#1c1a1a;
-    border-radius:8px;
-    padding:14px 12px;
-    overflow-x:auto;
-    overflow-y:hidden;
-    white-space:nowrap;
-    -webkit-overflow-scrolling:touch;
+  /* ── Event photo scatter (polaroid-style snapshots) ── */
+  #events-view .event-photo-scatter{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    margin-top:22px;
+    padding:14px 22px 8px 8px;
   }
-  #events-view .event-photo-filmstrip::before,
-  #events-view .event-photo-filmstrip::after{
-    content:'';
-    position:absolute;
-    left:0; right:0;
-    height:8px;
-    background-image:radial-gradient(circle, #F5EDE3 2.6px, transparent 3px);
-    background-size:16px 8px;
-    background-repeat:repeat-x;
-    background-position:6px center;
-    opacity:0.55;
-  }
-  #events-view .event-photo-filmstrip::before{ top:3px; }
-  #events-view .event-photo-filmstrip::after{ bottom:3px; }
-  #events-view .event-photo-filmstrip::-webkit-scrollbar{ height:6px; }
-  #events-view .event-photo-filmstrip::-webkit-scrollbar-track{ background:rgba(255,255,255,0.06); border-radius:3px; }
-  #events-view .event-photo-filmstrip::-webkit-scrollbar-thumb{ background:rgba(212,160,23,0.5); border-radius:3px; }
 
-  #events-view .event-photo-frame{
-    display:inline-block;
-    vertical-align:middle;
-    width:130px;
-    height:130px;
-    margin:6px 5px;
-    padding:0;
-    border:3px solid #F5EDE3;
+  #events-view .event-photo-polaroid{
+    display:block;
+    width:106px;
+    background:#fdfaf3;
+    padding:7px 7px 20px 7px;
+    border:none;
     border-radius:2px;
-    overflow:hidden;
+    box-shadow:0 6px 14px rgba(0,0,0,0.28);
     cursor:pointer;
-    background:#000;
-    box-shadow:0 4px 10px rgba(0,0,0,0.4);
-    transition:transform .2s, box-shadow .2s;
+    margin:0 -16px 16px 0;
+    transition:transform .25s ease, box-shadow .25s ease;
+    position:relative;
+    font:inherit;
   }
-  #events-view .event-photo-frame:hover{
-    transform:scale(1.06) rotate(-1deg);
-    box-shadow:0 6px 16px rgba(0,0,0,0.5);
+  #events-view .event-photo-polaroid:hover{
+    transform:rotate(0deg) translateY(-10px) scale(1.12) !important;
+    box-shadow:0 16px 28px rgba(0,0,0,0.4);
+    z-index:100 !important;
   }
-  #events-view .event-photo-frame img{
+  #events-view .event-photo-polaroid img{
     width:100%;
-    height:100%;
+    height:98px;
     object-fit:cover;
     display:block;
+    background:#000;
   }
 
   /* ── Photo lightbox (enlarges a clicked event photo) ── */
@@ -2426,14 +2406,28 @@ function buildEventsListCards() {
 }
 
 // ── Photo gallery for past events (admin-pasted image URLs) ──
+// Turns a string into a small deterministic number, used to give each photo
+// a consistent (but scattered-looking) tilt and vertical offset that doesn't
+// change every time the page reloads.
+function hashString(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) | 0; }
+  return Math.abs(h);
+}
+
 function photoGalleryHtml(ev) {
   if (!ev.photos || !ev.photos.length) return '';
-  const frames = ev.photos.map(url => `
-    <button type="button" class="event-photo-frame" onclick="openPhotoLightbox('${url.replace(/'/g, "\\'")}')">
+  const polaroids = ev.photos.map((url, i) => {
+    const h = hashString(url + i);
+    const tilt = (h % 17) - 8;              // -8deg .. 8deg
+    const lift = ((h >> 4) % 13) - 6;       // -6px .. 6px
+    return `
+    <button type="button" class="event-photo-polaroid" style="transform:rotate(${tilt}deg) translateY(${lift}px); z-index:${i + 1};" onclick="openPhotoLightbox('${url.replace(/'/g, "\\'")}')">
       <img src="${url}" alt="Photo from ${ev.title}" loading="lazy">
     </button>
-  `).join('');
-  return `<div class="event-photo-filmstrip">${frames}</div>`;
+  `;
+  }).join('');
+  return `<div class="event-photo-scatter">${polaroids}</div>`;
 }
 
 // ── Photo lightbox: enlarges a clicked event photo instead of opening a link ──
