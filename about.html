@@ -146,15 +146,6 @@
   }
   .committee-row:last-child{ border-bottom:none; }
 
-  /* Tier 1: Co-Presidents, the strongest highlight */
-  .committee-row.tier-president{
-    background:linear-gradient(160deg, rgba(212,160,23,0.16), rgba(110,15,30,0.06));
-    border:1px solid rgba(212,160,23,0.5);
-    border-radius:12px;
-    padding:16px 16px;
-    margin-bottom:10px;
-  }
-
   /* Tier 2: Treasurer & Secretary, exec but a lighter touch than the Presidents */
   .committee-row.tier-exec{
     background:rgba(212,160,23,0.06);
@@ -162,13 +153,6 @@
     border-radius:10px;
     padding:12px 14px;
     margin-bottom:8px;
-  }
-
-  /* Tier 3: "Head of..." roles within the main committee list, a mild highlight */
-  .committee-row.tier-head{
-    border-left:3px solid rgba(212,160,23,0.5);
-    padding-left:10px;
-    background:rgba(212,160,23,0.045);
   }
 
   .committee-row-avatar{
@@ -183,10 +167,11 @@
     color:var(--cream);
     overflow:hidden;
   }
+  /* Tier 1: Co-Presidents stand out with a noticeably bigger avatar, row otherwise plain */
   .committee-row.tier-president .committee-row-avatar{
-    width:60px; height:60px;
-    font-size:22px;
-    box-shadow:0 4px 16px rgba(212,160,23,0.4);
+    width:76px; height:76px;
+    font-size:27px;
+    box-shadow:0 4px 16px rgba(212,160,23,0.35);
   }
   .committee-row.tier-exec .committee-row-avatar{
     width:52px; height:52px;
@@ -204,20 +189,11 @@
     font-weight:700;
     color:#3A0810;
   }
-  .committee-row.tier-president .committee-row-name{ font-size:19px; }
   .committee-row.tier-exec .committee-row-name{ font-size:16px; }
-  .committee-row.tier-head .committee-row-name{ font-weight:800; }
   .committee-row-role{
     font-size:11.5px;
     color:#7a6a5c;
     margin-top:2px;
-  }
-  .committee-row.tier-president .committee-row-role{
-    font-size:11px;
-    letter-spacing:1.4px;
-    text-transform:uppercase;
-    color:#B8860B;
-    font-weight:800;
   }
   .committee-row.tier-exec .committee-row-role{
     font-size:11px;
@@ -225,10 +201,6 @@
     text-transform:uppercase;
     color:#a5824a;
     font-weight:600;
-  }
-  .committee-row.tier-head .committee-row-role{
-    color:#B8860B;
-    font-weight:700;
   }
 
   .contact-list{ list-style:none; margin-top:8px; }
@@ -301,7 +273,7 @@
       </div>
 
       <div class="committee-list-label">Committee</div>
-      <div class="committee-row tier-head">
+      <div class="committee-row">
         <div class="committee-row-avatar">F</div>
         <div class="committee-row-info">
           <div class="committee-row-name">Fiona Chiu</div>
@@ -322,7 +294,7 @@
           <div class="committee-row-role">Events Officer</div>
         </div>
       </div>
-      <div class="committee-row tier-head">
+      <div class="committee-row">
         <div class="committee-row-avatar">Z</div>
         <div class="committee-row-info">
           <div class="committee-row-name">Zhenya Kunytsyna</div>
@@ -336,7 +308,7 @@
           <div class="committee-row-role">Social Media Officer</div>
         </div>
       </div>
-      <div class="committee-row tier-head">
+      <div class="committee-row">
         <div class="committee-row-avatar">E</div>
         <div class="committee-row-info">
           <div class="committee-row-name">Eleanor Wang</div>
@@ -383,7 +355,6 @@
     const role = (m.role || '').toLowerCase();
     if (m.isLead && role.includes('president')) return 'tier-president';
     if (m.isLead) return 'tier-exec';
-    if (role.includes('head')) return 'tier-head';
     return '';
   }
 
