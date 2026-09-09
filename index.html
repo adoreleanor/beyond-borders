@@ -555,6 +555,29 @@
     gap:20px;
   }
 
+  #events-view #eventsList{ padding-bottom:20px; }
+
+  #events-view .past-events-heading{
+    max-width:820px;
+    margin:6px auto 4px;
+    padding:0 24px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  #events-view .past-events-heading-line{
+    flex:1;
+    height:1px;
+    background:rgba(245,237,227,0.15);
+  }
+  #events-view .past-events-heading-text{
+    font-size:12.5px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:rgba(245,237,227,0.5);
+    white-space:nowrap;
+  }
+
   #events-view .placeholder-note{
     max-width:820px;
     margin:0 auto 8px;
@@ -1748,6 +1771,15 @@
 
   <div class="events-list" id="eventsList"></div>
 
+  <div id="pastEventsSection" style="display:none;">
+    <div class="past-events-heading">
+      <span class="past-events-heading-line"></span>
+      <span class="past-events-heading-text">🗂️ Past Events</span>
+      <span class="past-events-heading-line"></span>
+    </div>
+    <div class="events-list" id="pastEventsList"></div>
+  </div>
+
   <footer>KCL Beyond Borders Society<span class="site-credit">Site by Eleanor Wang</span></footer>
 </div>
 
@@ -2382,26 +2414,53 @@ function maybePlayPassportIntro() {
 
 <!-- ===== EVENTS VIEW LOGIC ===== -->
 <script>
+function eventCardHtml(ev) {
+  return `
+    <div class="event-date"><span class="month">${ev.monthLabel}</span><span class="day">${String(ev.day).padStart(2,'0')}</span></div>
+    <div class="event-body">
+      <span class="event-tag">${ev.tag}</span>
+      <h2>${ev.title}</h2>
+      <div class="event-meta">${ev.meta.map(m => `<span>${m}</span>`).join('')}</div>
+      <p class="desc">${ev.desc}</p>
+      ${photoGalleryHtml(ev)}
+      <div class="rsvp-widget" id="rsvp-${ev.id}"></div>
+    </div>
+  `;
+}
+
 function buildEventsListCards() {
   const list = document.getElementById('eventsList');
+  const pastSection = document.getElementById('pastEventsSection');
+  const pastList = document.getElementById('pastEventsList');
   list.innerHTML = '';
-  EVENTS.forEach(ev => {
+  pastList.innerHTML = '';
+
+  // An event moves into the Past Events section once it's more than 7 days
+  // old, so recently-finished events still show up front for RSVPs/photos
+  // to settle before they get archived out of the main list.
+  const upcoming = EVENTS.filter(ev => !isArchivedPast(ev));
+  const archived = EVENTS.filter(ev => isArchivedPast(ev))
+    .slice()
+    .sort((a, b) => new Date(b.year, b.month - 1, b.day) - new Date(a.year, a.month - 1, a.day));
+
+  upcoming.forEach(ev => {
     const card = document.createElement('div');
     card.className = 'event-card';
     card.id = 'ev-' + ev.id;
-    card.innerHTML = `
-      <div class="event-date"><span class="month">${ev.monthLabel}</span><span class="day">${String(ev.day).padStart(2,'0')}</span></div>
-      <div class="event-body">
-        <span class="event-tag">${ev.tag}</span>
-        <h2>${ev.title}</h2>
-        <div class="event-meta">${ev.meta.map(m => `<span>${m}</span>`).join('')}</div>
-        <p class="desc">${ev.desc}</p>
-        ${photoGalleryHtml(ev)}
-        <div class="rsvp-widget" id="rsvp-${ev.id}"></div>
-      </div>
-    `;
+    card.innerHTML = eventCardHtml(ev);
     list.appendChild(card);
   });
+
+  archived.forEach(ev => {
+    const card = document.createElement('div');
+    card.className = 'event-card';
+    card.id = 'ev-' + ev.id;
+    card.innerHTML = eventCardHtml(ev);
+    pastList.appendChild(card);
+  });
+
+  pastSection.style.display = archived.length ? '' : 'none';
+
   loadEventCardWidgets();
 }
 
@@ -2453,6 +2512,16 @@ function isPastEvent(ev) {
   const evDate = new Date(ev.year, ev.month - 1, ev.day);
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
   return evDate < todayStart;
+}
+
+// An event graduates into the Past Events section once more than 7 days
+// have passed since it happened (kept separate from isPastEvent, which
+// just governs RSVP vs reflection and switches the moment the date passes).
+function isArchivedPast(ev) {
+  const evDate = new Date(ev.year, ev.month - 1, ev.day);
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  const daysSince = (todayStart - evDate) / (1000 * 60 * 60 * 24);
+  return daysSince > 7;
 }
 
 async function renderRsvpWidget(ev) {
