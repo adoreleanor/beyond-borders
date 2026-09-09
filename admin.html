@@ -86,6 +86,10 @@
   tr:last-child td{ border-bottom:none; }
   .pill{ background:rgba(212,160,23,0.16); color:var(--gold-light); border-radius:10px; padding:2px 8px; font-size:11.5px; font-weight:600; white-space:nowrap; }
   .empty-row td{ text-align:center; color:rgba(245,237,227,0.4); padding:20px; }
+  tr[draggable="true"]{ cursor:default; }
+  .drag-handle{ cursor:grab; color:rgba(245,237,227,0.35); text-align:center; width:22px; user-select:none; }
+  .drag-handle:active{ cursor:grabbing; }
+  tr.dragging{ opacity:0.4; background:rgba(212,160,23,0.08); }
   .top-bar{ display:flex; justify-content:flex-end; margin-bottom:16px; }
   .signout-link{ background:none; border:1px solid rgba(212,160,23,0.35); color:var(--gold-light); border-radius:18px; padding:7px 16px; font-size:12.5px; cursor:pointer; }
 
@@ -217,8 +221,8 @@
     <div class="panel">
       <h2>Committee Members</h2>
       <table>
-        <thead><tr><th>Order</th><th>Name</th><th>Role</th><th>Featured lead?</th><th></th></tr></thead>
-        <tbody id="committeeBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
+        <thead><tr><th></th><th>Order</th><th>Name</th><th>Role</th><th>Team</th><th>Featured lead?</th><th></th></tr></thead>
+        <tbody id="committeeBody"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
       </table>
       <div class="divider-sm"></div>
       <p class="form-title" id="committeeFormTitle">Add committee member</p>
@@ -242,6 +246,17 @@
           <input type="number" id="committeeOrderInput" placeholder="1, 2, 3...">
         </div>
       </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="committeeTeamInput">Team (for a subheading in the Committee list)</label>
+          <select id="committeeTeamInput">
+            <option value="">No subheading</option>
+            <option value="Events">Events Team</option>
+            <option value="Social Media">Social Media Team</option>
+            <option value="Wellbeing">Wellbeing Team</option>
+          </select>
+        </div>
+      </div>
       <div class="field-check">
         <input type="checkbox" id="committeeLeadInput"> <label for="committeeLeadInput" style="margin:0;text-transform:none;letter-spacing:0;font-size:13px;color:rgba(245,237,227,0.8);">Show under Executive Committee (Co-Presidents get the strongest highlight, everyone else ticked here shows a lighter exec style)</label>
       </div>
@@ -253,8 +268,8 @@
       <h2>Reflection Question Bank</h2>
       <p class="seed-note">Build a reusable list of questions here, then tick which ones apply when you create or edit each event below. Answers are free text.</p>
       <table>
-        <thead><tr><th>Order</th><th>Question</th><th></th></tr></thead>
-        <tbody id="reflectionQuestionsBody"><tr class="empty-row"><td colspan="3">Loading…</td></tr></tbody>
+        <thead><tr><th></th><th>Order</th><th>Question</th><th></th></tr></thead>
+        <tbody id="reflectionQuestionsBody"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
       </table>
       <div class="divider-sm"></div>
       <p class="form-title" id="reflectionQuestionFormTitle">Add question</p>
@@ -342,8 +357,8 @@
     <div class="panel">
       <h2>Passport Categories &amp; Tasks</h2>
       <table>
-        <thead><tr><th>Order</th><th>Icon</th><th>Title</th><th>Subtitle</th><th>Tasks</th><th></th></tr></thead>
-        <tbody id="categoriesBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+        <thead><tr><th></th><th>Order</th><th>Icon</th><th>Title</th><th>Subtitle</th><th>Tasks</th><th></th></tr></thead>
+        <tbody id="categoriesBody"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
       </table>
       <div class="divider-sm"></div>
       <p class="form-title" id="categoryFormTitle">Add category</p>
@@ -389,8 +404,8 @@
     <div class="panel">
       <h2>Passport Levels &amp; Rewards</h2>
       <table>
-        <thead><tr><th>Order</th><th>Emoji</th><th>Name</th><th>Stamps required</th><th>Reward</th><th></th></tr></thead>
-        <tbody id="levelsBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+        <thead><tr><th></th><th>Order</th><th>Emoji</th><th>Name</th><th>Stamps required</th><th>Reward</th><th></th></tr></thead>
+        <tbody id="levelsBody"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
       </table>
       <div class="divider-sm"></div>
       <p class="form-title" id="levelFormTitle">Add level</p>
@@ -424,8 +439,8 @@
       <h2>Passport Monthly Challenges</h2>
       <p class="seed-note">The "current" highlight on the live site is worked out automatically from today's date. It matches whichever card's Month field equals the real current month, no need to mark one manually.</p>
       <table>
-        <thead><tr><th>Order</th><th>Month</th><th>Theme</th><th>Action</th><th></th></tr></thead>
-        <tbody id="monthsBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
+        <thead><tr><th></th><th>Order</th><th>Month</th><th>Theme</th><th>Action</th><th></th></tr></thead>
+        <tbody id="monthsBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
       </table>
       <div class="divider-sm"></div>
       <p class="form-title" id="monthFormTitle">Add monthly challenge</p>
@@ -651,16 +666,16 @@
   const CURRENT_MISSION_TEXT = "Beyond Borders (BBSOC) is a King's College London society dedicated to helping students step outside their comfort zone: professionally, personally, and creatively. We bring together career development, wellbeing, culture, and community into one place, so members can grow in every direction, not just academically.";
   const CURRENT_WHAT_WE_DO_TEXT = "From careers fairs and networking nights to wellbeing walks, volunteering days, and skills workshops, BBSOC runs events across five pillars: Career Explorer, Personal Growth, Skill Builder, Community, and Comfort Zone. Members track their journey through the Beyond Borders Passport and unlock rewards as they go.";
   const CURRENT_COMMITTEE = [
-    { name: 'Layla Chen',        role: 'Co-President',            isLead: true,  order: 1 },
-    { name: 'Fatima Rajani',     role: 'Co-President',            isLead: true,  order: 2 },
-    { name: 'Minnah Khan',       role: 'Treasurer',                isLead: true,  order: 3 },
-    { name: 'Hassan Imtiaz',     role: 'Secretary',                isLead: true,  order: 4 },
-    { name: 'Fiona Chiu',        role: 'Head of Events',           isLead: false, order: 5 },
-    { name: 'Jennifer Qiu',      role: 'Events Officer',           isLead: false, order: 6 },
-    { name: 'Eleanor Wang',      role: 'Events Officer',           isLead: false, order: 7 },
-    { name: 'Zhenya Kunytsyna',  role: 'Head of Social Media',     isLead: false, order: 8 },
-    { name: 'Sawani Vaidya',     role: 'Social Media Officer',     isLead: false, order: 9 },
-    { name: 'Eleanor Wang',      role: 'Head of Wellbeing',        isLead: false, order: 10 },
+    { name: 'Layla Chen',        role: 'Co-President',            isLead: true,  order: 1,  team: '' },
+    { name: 'Fatima Rajani',     role: 'Co-President',            isLead: true,  order: 2,  team: '' },
+    { name: 'Minnah Khan',       role: 'Treasurer',                isLead: true,  order: 3,  team: '' },
+    { name: 'Hassan Imtiaz',     role: 'Secretary',                isLead: true,  order: 4,  team: '' },
+    { name: 'Fiona Chiu',        role: 'Head of Events',           isLead: false, order: 5,  team: 'Events' },
+    { name: 'Jennifer Qiu',      role: 'Events Officer',           isLead: false, order: 6,  team: 'Events' },
+    { name: 'Eleanor Wang',      role: 'Events Officer',           isLead: false, order: 7,  team: 'Events' },
+    { name: 'Zhenya Kunytsyna',  role: 'Head of Social Media',     isLead: false, order: 8,  team: 'Social Media' },
+    { name: 'Sawani Vaidya',     role: 'Social Media Officer',     isLead: false, order: 9,  team: 'Social Media' },
+    { name: 'Eleanor Wang',      role: 'Head of Wellbeing',        isLead: false, order: 10, team: 'Wellbeing' },
   ];
   const CURRENT_CATEGORIES = [
     { id: 'career', cls: 'cat-career', icon: '💼', title: 'Career Explorer', sub: 'Professional development', order: 1,
@@ -833,20 +848,64 @@
   // ============================================================
   let editingCommitteeId = null;
 
+  // ============================================================
+  // DRAG-TO-REORDER (shared by any table with a numbered "order" field)
+  // ============================================================
+  // Makes the rows of a freshly-rendered <tbody> draggable. Dropping a row
+  // in a new spot renumbers everyone's "order" field to match the new
+  // position and saves it, on top of the existing numbered order input,
+  // so either way of reordering keeps working.
+  function attachRowDragReorder(tbody, collectionName, reloadFn) {
+    let dragEl = null;
+
+    Array.from(tbody.querySelectorAll('tr[draggable="true"]')).forEach(row => {
+      row.addEventListener('dragstart', () => {
+        dragEl = row;
+        row.classList.add('dragging');
+      });
+      row.addEventListener('dragend', () => {
+        row.classList.remove('dragging');
+      });
+      row.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (!dragEl || dragEl === row) return;
+        const rect = row.getBoundingClientRect();
+        const before = (e.clientY - rect.top) < rect.height / 2;
+        row.parentNode.insertBefore(dragEl, before ? row : row.nextSibling);
+      });
+      row.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        const ids = Array.from(tbody.querySelectorAll('tr[data-id]')).map(r => r.dataset.id);
+        try {
+          const batch = db.batch();
+          ids.forEach((id, i) => {
+            batch.update(db.collection(collectionName).doc(id), { order: i + 1 });
+          });
+          await batch.commit();
+        } catch (err) {
+          alert('Could not save the new order: ' + err.message);
+        }
+        reloadFn();
+      });
+    });
+  }
+
   async function loadCommitteeList() {
     const body = document.getElementById('committeeBody');
     try {
       const snap = await db.collection('committee').orderBy('order').get();
       if (snap.empty) {
-        body.innerHTML = '<tr class="empty-row"><td colspan="5">No committee members yet. Use Import above or add one below.</td></tr>';
+        body.innerHTML = '<tr class="empty-row"><td colspan="7">No committee members yet. Use Import above or add one below.</td></tr>';
         return;
       }
       body.innerHTML = snap.docs.map(d => {
         const c = d.data();
-        return `<tr>
+        return `<tr draggable="true" data-id="${d.id}">
+          <td class="drag-handle">&#8942;&#8942;</td>
           <td>${c.order ?? ''}</td>
           <td>${c.name || ''}</td>
           <td>${c.role || ''}</td>
+          <td>${c.team || ''}</td>
           <td>${c.isLead ? 'Yes' : ''}</td>
           <td>
             <button class="mini-btn" onclick="editCommitteeMember('${d.id}')">Edit</button>
@@ -854,8 +913,9 @@
           </td>
         </tr>`;
       }).join('');
+      attachRowDragReorder(body, 'committee', loadCommitteeList);
     } catch (err) {
-      body.innerHTML = `<tr class="empty-row"><td colspan="5">Could not load: ${err.message}</td></tr>`;
+      body.innerHTML = `<tr class="empty-row"><td colspan="7">Could not load: ${err.message}</td></tr>`;
     }
   }
 
@@ -868,6 +928,7 @@
     document.getElementById('committeeRoleInput').value = c.role || '';
     document.getElementById('committeePhotoInput').value = c.photoUrl || '';
     document.getElementById('committeeOrderInput').value = c.order ?? '';
+    document.getElementById('committeeTeamInput').value = c.team || '';
     document.getElementById('committeeLeadInput').checked = !!c.isLead;
     document.getElementById('committeeFormTitle').textContent = 'Edit committee member';
     document.getElementById('committeeFormTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -885,6 +946,7 @@
     document.getElementById('committeeRoleInput').value = '';
     document.getElementById('committeePhotoInput').value = '';
     document.getElementById('committeeOrderInput').value = '';
+    document.getElementById('committeeTeamInput').value = '';
     document.getElementById('committeeLeadInput').checked = false;
     document.getElementById('committeeFormTitle').textContent = 'Add committee member';
   }
@@ -897,6 +959,7 @@
       role: document.getElementById('committeeRoleInput').value.trim(),
       photoUrl: document.getElementById('committeePhotoInput').value.trim(),
       order: Number(document.getElementById('committeeOrderInput').value) || 0,
+      team: document.getElementById('committeeTeamInput').value,
       isLead: document.getElementById('committeeLeadInput').checked,
     };
     if (!data.name || !data.role) { alert('Name and role are required.'); return; }
@@ -973,9 +1036,10 @@
       const snap = await db.collection('reflectionQuestions').orderBy('order').get();
       REFLECTION_QUESTIONS = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
       if (snap.empty) {
-        body.innerHTML = '<tr class="empty-row"><td colspan="3">No questions yet. Add one below.</td></tr>';
+        body.innerHTML = '<tr class="empty-row"><td colspan="4">No questions yet. Add one below.</td></tr>';
       } else {
-        body.innerHTML = REFLECTION_QUESTIONS.map(q => `<tr>
+        body.innerHTML = REFLECTION_QUESTIONS.map(q => `<tr draggable="true" data-id="${q.id}">
+          <td class="drag-handle">&#8942;&#8942;</td>
           <td>${q.order ?? ''}</td>
           <td>${q.text || ''}</td>
           <td>
@@ -983,12 +1047,13 @@
             <button class="mini-btn danger" onclick="deleteReflectionQuestion('${q.id}')">Delete</button>
           </td>
         </tr>`).join('');
+        attachRowDragReorder(body, 'reflectionQuestions', loadReflectionQuestionsList);
       }
       // keep whatever's currently ticked in the Events form when the bank refreshes
       const currentlyChecked = Array.from(document.querySelectorAll('.reflection-question-checkbox:checked')).map(el => el.value);
       renderReflectionQuestionsChecklist(currentlyChecked);
     } catch (err) {
-      body.innerHTML = `<tr class="empty-row"><td colspan="3">Could not load: ${err.message}</td></tr>`;
+      body.innerHTML = `<tr class="empty-row"><td colspan="4">Could not load: ${err.message}</td></tr>`;
     }
   }
 
@@ -1174,12 +1239,13 @@
     try {
       const snap = await db.collection('passportCategories').orderBy('order').get();
       if (snap.empty) {
-        body.innerHTML = '<tr class="empty-row"><td colspan="6">No categories yet. Use Import above or add one below.</td></tr>';
+        body.innerHTML = '<tr class="empty-row"><td colspan="7">No categories yet. Use Import above or add one below.</td></tr>';
         return;
       }
       body.innerHTML = snap.docs.map(d => {
         const c = d.data();
-        return `<tr>
+        return `<tr draggable="true" data-id="${d.id}">
+          <td class="drag-handle">&#8942;&#8942;</td>
           <td>${c.order ?? ''}</td>
           <td>${c.icon || ''}</td>
           <td>${c.title || ''}</td>
@@ -1191,8 +1257,9 @@
           </td>
         </tr>`;
       }).join('');
+      attachRowDragReorder(body, 'passportCategories', loadCategoriesList);
     } catch (err) {
-      body.innerHTML = `<tr class="empty-row"><td colspan="6">Could not load: ${err.message}</td></tr>`;
+      body.innerHTML = `<tr class="empty-row"><td colspan="7">Could not load: ${err.message}</td></tr>`;
     }
   }
 
@@ -1263,12 +1330,13 @@
     try {
       const snap = await db.collection('passportLevels').orderBy('order').get();
       if (snap.empty) {
-        body.innerHTML = '<tr class="empty-row"><td colspan="6">No levels yet. Use Import above or add one below.</td></tr>';
+        body.innerHTML = '<tr class="empty-row"><td colspan="7">No levels yet. Use Import above or add one below.</td></tr>';
         return;
       }
       body.innerHTML = snap.docs.map(d => {
         const l = d.data();
-        return `<tr>
+        return `<tr draggable="true" data-id="${d.id}">
+          <td class="drag-handle">&#8942;&#8942;</td>
           <td>${l.order ?? ''}</td>
           <td>${l.emoji || ''}</td>
           <td>${l.name || ''}</td>
@@ -1280,8 +1348,9 @@
           </td>
         </tr>`;
       }).join('');
+      attachRowDragReorder(body, 'passportLevels', loadLevelsList);
     } catch (err) {
-      body.innerHTML = `<tr class="empty-row"><td colspan="6">Could not load: ${err.message}</td></tr>`;
+      body.innerHTML = `<tr class="empty-row"><td colspan="7">Could not load: ${err.message}</td></tr>`;
     }
   }
 
@@ -1349,12 +1418,13 @@
     try {
       const snap = await db.collection('passportMonths').orderBy('order').get();
       if (snap.empty) {
-        body.innerHTML = '<tr class="empty-row"><td colspan="5">No monthly challenges yet. Use Import above or add one below.</td></tr>';
+        body.innerHTML = '<tr class="empty-row"><td colspan="6">No monthly challenges yet. Use Import above or add one below.</td></tr>';
         return;
       }
       body.innerHTML = snap.docs.map(d => {
         const m = d.data();
-        return `<tr>
+        return `<tr draggable="true" data-id="${d.id}">
+          <td class="drag-handle">&#8942;&#8942;</td>
           <td>${m.order ?? ''}</td>
           <td>${m.month || ''}</td>
           <td>${m.name || ''}</td>
@@ -1365,8 +1435,9 @@
           </td>
         </tr>`;
       }).join('');
+      attachRowDragReorder(body, 'passportMonths', loadMonthsList);
     } catch (err) {
-      body.innerHTML = `<tr class="empty-row"><td colspan="5">Could not load: ${err.message}</td></tr>`;
+      body.innerHTML = `<tr class="empty-row"><td colspan="6">Could not load: ${err.message}</td></tr>`;
     }
   }
 

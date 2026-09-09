@@ -256,7 +256,7 @@
         </div>
       </div>
 
-      <div class="committee-list-label">Committee</div>
+      <div class="committee-list-label">Events Team</div>
       <div class="committee-row">
         <div class="committee-row-avatar">F</div>
         <div class="committee-row-info">
@@ -278,6 +278,8 @@
           <div class="committee-row-role">Events Officer</div>
         </div>
       </div>
+
+      <div class="committee-list-label">Social Media Team</div>
       <div class="committee-row">
         <div class="committee-row-avatar">Z</div>
         <div class="committee-row-info">
@@ -292,6 +294,8 @@
           <div class="committee-row-role">Social Media Officer</div>
         </div>
       </div>
+
+      <div class="committee-list-label">Wellbeing Team</div>
       <div class="committee-row">
         <div class="committee-row-avatar">E</div>
         <div class="committee-row-info">
@@ -367,8 +371,28 @@
       html += leads.map(row).join('');
     }
     if (rest.length) {
-      html += `<div class="committee-list-label">Committee</div>`;
-      html += rest.map(row).join('');
+      // Group the rest of the committee into team subheadings (Events,
+      // Social Media, Wellbeing, in that order), with anyone who doesn't
+      // have a team set falling into a plain "Committee" group at the end.
+      const TEAM_ORDER = ['Events', 'Social Media', 'Wellbeing'];
+      const grouped = {};
+      const noTeam = [];
+      rest.forEach(m => {
+        const team = (m.team || '').trim();
+        if (team) { (grouped[team] = grouped[team] || []).push(m); }
+        else { noTeam.push(m); }
+      });
+      const teamNames = [...TEAM_ORDER, ...Object.keys(grouped).filter(t => !TEAM_ORDER.includes(t))];
+      teamNames.forEach(team => {
+        if (grouped[team] && grouped[team].length) {
+          html += `<div class="committee-list-label">${team} Team</div>`;
+          html += grouped[team].map(row).join('');
+        }
+      });
+      if (noTeam.length) {
+        html += `<div class="committee-list-label">Committee</div>`;
+        html += noTeam.map(row).join('');
+      }
     }
     listEl.innerHTML = html;
   }
