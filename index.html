@@ -686,31 +686,61 @@
     color:#6b5a4e;
   }
 
-  #events-view .event-photo-gallery{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    margin-top:14px;
-  }
-  #events-view .event-photo-thumb{
-    display:block;
-    width:84px;
-    height:84px;
+  /* ── Event photo filmstrip ── */
+  #events-view .event-photo-filmstrip{
+    position:relative;
+    margin-top:16px;
+    background:#1c1a1a;
     border-radius:8px;
-    overflow:hidden;
-    border:1px solid rgba(0,0,0,0.08);
-    padding:0;
-    background:none;
-    cursor:pointer;
+    padding:14px 12px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    white-space:nowrap;
+    -webkit-overflow-scrolling:touch;
   }
-  #events-view .event-photo-thumb img{
+  #events-view .event-photo-filmstrip::before,
+  #events-view .event-photo-filmstrip::after{
+    content:'';
+    position:absolute;
+    left:0; right:0;
+    height:8px;
+    background-image:radial-gradient(circle, #F5EDE3 2.6px, transparent 3px);
+    background-size:16px 8px;
+    background-repeat:repeat-x;
+    background-position:6px center;
+    opacity:0.55;
+  }
+  #events-view .event-photo-filmstrip::before{ top:3px; }
+  #events-view .event-photo-filmstrip::after{ bottom:3px; }
+  #events-view .event-photo-filmstrip::-webkit-scrollbar{ height:6px; }
+  #events-view .event-photo-filmstrip::-webkit-scrollbar-track{ background:rgba(255,255,255,0.06); border-radius:3px; }
+  #events-view .event-photo-filmstrip::-webkit-scrollbar-thumb{ background:rgba(212,160,23,0.5); border-radius:3px; }
+
+  #events-view .event-photo-frame{
+    display:inline-block;
+    vertical-align:middle;
+    width:130px;
+    height:130px;
+    margin:6px 5px;
+    padding:0;
+    border:3px solid #F5EDE3;
+    border-radius:2px;
+    overflow:hidden;
+    cursor:pointer;
+    background:#000;
+    box-shadow:0 4px 10px rgba(0,0,0,0.4);
+    transition:transform .2s, box-shadow .2s;
+  }
+  #events-view .event-photo-frame:hover{
+    transform:scale(1.06) rotate(-1deg);
+    box-shadow:0 6px 16px rgba(0,0,0,0.5);
+  }
+  #events-view .event-photo-frame img{
     width:100%;
     height:100%;
     object-fit:cover;
     display:block;
-    transition:transform .2s;
   }
-  #events-view .event-photo-thumb:hover img{ transform:scale(1.08); }
 
   /* ── Photo lightbox (enlarges a clicked event photo) ── */
   .photo-lightbox-overlay{
@@ -2391,12 +2421,12 @@ function buildEventsListCards() {
 // ── Photo gallery for past events (admin-pasted image URLs) ──
 function photoGalleryHtml(ev) {
   if (!ev.photos || !ev.photos.length) return '';
-  const thumbs = ev.photos.map(url => `
-    <button type="button" class="event-photo-thumb" onclick="openPhotoLightbox('${url.replace(/'/g, "\\'")}')">
+  const frames = ev.photos.map(url => `
+    <button type="button" class="event-photo-frame" onclick="openPhotoLightbox('${url.replace(/'/g, "\\'")}')">
       <img src="${url}" alt="Photo from ${ev.title}" loading="lazy">
     </button>
   `).join('');
-  return `<div class="event-photo-gallery">${thumbs}</div>`;
+  return `<div class="event-photo-filmstrip">${frames}</div>`;
 }
 
 // ── Photo lightbox: enlarges a clicked event photo instead of opening a link ──
