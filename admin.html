@@ -329,6 +329,11 @@
         <div id="eventReflectionQuestionsChecklist" style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:rgba(245,237,227,0.8);">
           <span style="color:rgba(245,237,227,0.45);">Add questions to the Reflection Question Bank above first.</span>
         </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <input type="text" id="quickReflectionQuestionInput" placeholder="Write your own question and add it..." style="flex:1;">
+          <button type="button" class="mini-btn" id="quickReflectionQuestionAddBtn" style="white-space:nowrap;">+ Add question</button>
+        </div>
+        <span style="display:block;margin-top:4px;font-size:11.5px;color:rgba(245,237,227,0.45);">This adds it to the shared Reflection Question Bank above and ticks it for this event.</span>
       </div>
       <button class="save-btn" id="eventSaveBtn">Save event</button>
       <button class="cancel-btn" id="eventCancelBtn">Cancel / clear form</button>
@@ -930,6 +935,38 @@
     `).join('');
   }
 
+  // Lets whoever is editing an event write a brand new question on the spot,
+  // without needing to go up to the Reflection Question Bank panel first.
+  // It's saved into the shared bank (so it can be reused on other events
+  // later too) and automatically ticked for the event being edited now.
+  async function addQuickReflectionQuestion() {
+    const input = document.getElementById('quickReflectionQuestionInput');
+    const text = input.value.trim();
+    if (!text) { input.focus(); return; }
+
+    const btn = document.getElementById('quickReflectionQuestionAddBtn');
+    btn.disabled = true;
+    btn.textContent = 'Adding...';
+    try {
+      const nextOrder = REFLECTION_QUESTIONS.reduce((max, q) => Math.max(max, q.order || 0), 0) + 1;
+      const ref = await db.collection('reflectionQuestions').add({ text, order: nextOrder });
+      const currentlyChecked = Array.from(document.querySelectorAll('.reflection-question-checkbox:checked')).map(el => el.value);
+      await loadReflectionQuestionsList();
+      renderReflectionQuestionsChecklist([...currentlyChecked, ref.id]);
+      input.value = '';
+    } catch (err) {
+      alert('Could not add question: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '+ Add question';
+    }
+  }
+
+  document.getElementById('quickReflectionQuestionAddBtn').addEventListener('click', addQuickReflectionQuestion);
+  document.getElementById('quickReflectionQuestionInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addQuickReflectionQuestion(); }
+  });
+
   async function loadReflectionQuestionsList() {
     const body = document.getElementById('reflectionQuestionsBody');
     try {
@@ -1085,7 +1122,7 @@
 
   function resetEventForm() {
     editingEventId = null;
-    ['eventTitleInput','eventTagInput','eventYearInput','eventMonthInput','eventDayInput','eventMonthLabelInput','eventMetaInput','eventDescInput','eventPhotosInput'].forEach(id => {
+    ['eventTitleInput','eventTagInput','eventYearInput','eventMonthInput','eventDayInput','eventMonthLabelInput','eventMetaInput','eventDescInput','eventPhotosInput','quickReflectionQuestionInput'].forEach(id => {
       document.getElementById(id).value = '';
     });
     renderReflectionQuestionsChecklist([]);
