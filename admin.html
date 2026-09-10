@@ -258,6 +258,12 @@
           </select>
         </div>
         <div class="field">
+          <label for="committeePhotoZoomInput">Photo zoom % (100 = normal)</label>
+          <input type="number" id="committeePhotoZoomInput" min="100" max="250" step="5" placeholder="100">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
           <label for="committeeTeamInput">Team (for a subheading in the Committee list)</label>
           <select id="committeeTeamInput">
             <option value="">No subheading</option>
@@ -939,6 +945,7 @@
     document.getElementById('committeePhotoInput').value = c.photoUrl || '';
     document.getElementById('committeeOrderInput').value = c.order ?? '';
     document.getElementById('committeePhotoPositionInput').value = c.photoPosition || 'center';
+    document.getElementById('committeePhotoZoomInput').value = c.photoZoom || 100;
     document.getElementById('committeeTeamInput').value = c.team || '';
     document.getElementById('committeeLeadInput').checked = !!c.isLead;
     document.getElementById('committeeFormTitle').textContent = 'Edit committee member';
@@ -958,6 +965,7 @@
     document.getElementById('committeePhotoInput').value = '';
     document.getElementById('committeeOrderInput').value = '';
     document.getElementById('committeePhotoPositionInput').value = 'center';
+    document.getElementById('committeePhotoZoomInput').value = '';
     document.getElementById('committeeTeamInput').value = '';
     document.getElementById('committeeLeadInput').checked = false;
     document.getElementById('committeeFormTitle').textContent = 'Add committee member';
@@ -972,6 +980,7 @@
       photoUrl: document.getElementById('committeePhotoInput').value.trim(),
       order: Number(document.getElementById('committeeOrderInput').value) || 0,
       photoPosition: document.getElementById('committeePhotoPositionInput').value,
+      photoZoom: Number(document.getElementById('committeePhotoZoomInput').value) || 100,
       team: document.getElementById('committeeTeamInput').value,
       isLead: document.getElementById('committeeLeadInput').checked,
     };

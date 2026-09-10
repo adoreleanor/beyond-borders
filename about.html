@@ -360,9 +360,11 @@
     const row = (m) => {
       const tier = committeeTier(m);
       const objectPosition = PHOTO_POSITIONS[m.photoPosition] || 'center';
+      const zoom = (m.photoZoom || 100) / 100;
+      const imgStyle = `object-position:${objectPosition};${zoom !== 1 ? ` transform:scale(${zoom});` : ''}`;
       return `
       <div class="committee-row${tier ? ' ' + tier : ''}">
-        <div class="committee-row-avatar">${m.photoUrl ? `<img src="${m.photoUrl}" alt="${m.name}" style="object-position:${objectPosition};">` : avatarLetter(m.name)}</div>
+        <div class="committee-row-avatar">${m.photoUrl ? `<img src="${m.photoUrl}" alt="${m.name}" style="${imgStyle}">` : avatarLetter(m.name)}</div>
         <div class="committee-row-info">
           <div class="committee-row-name">${m.name || ''}</div>
           <div class="committee-row-role">${m.role || ''}</div>
