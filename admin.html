@@ -906,6 +906,27 @@
     });
   }
 
+  // Keeps the "order" field a clean 1..N sequence with no gaps or duplicates.
+  // Runs every time a list loads, whether the numbers drifted from a manual
+  // edit, an import, or just never got tidied up in the first place.
+  async function normalizeOrder(snap, collectionName) {
+    const docs = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    const needsFix = docs.some((d, i) => d.order !== i + 1);
+    if (needsFix) {
+      try {
+        const batch = db.batch();
+        docs.forEach((d, i) => {
+          d.order = i + 1;
+          batch.update(db.collection(collectionName).doc(d.id), { order: i + 1 });
+        });
+        await batch.commit();
+      } catch (err) {
+        console.error('Could not renumber ' + collectionName + ':', err);
+      }
+    }
+    return docs;
+  }
+
   async function loadCommitteeList() {
     const body = document.getElementById('committeeBody');
     try {
@@ -914,9 +935,9 @@
         body.innerHTML = '<tr class="empty-row"><td colspan="7">No committee members yet. Use Import above or add one below.</td></tr>';
         return;
       }
-      body.innerHTML = snap.docs.map(d => {
-        const c = d.data();
-        return `<tr draggable="true" data-id="${d.id}">
+      const docs = await normalizeOrder(snap, 'committee');
+      body.innerHTML = docs.map(c => {
+        return `<tr draggable="true" data-id="${c.id}">
           <td class="drag-handle">&#8942;&#8942;</td>
           <td>${c.order ?? ''}</td>
           <td>${c.name || ''}</td>
@@ -924,8 +945,8 @@
           <td>${c.team || ''}</td>
           <td>${c.isLead ? 'Yes' : ''}</td>
           <td>
-            <button class="mini-btn" onclick="editCommitteeMember('${d.id}')">Edit</button>
-            <button class="mini-btn danger" onclick="deleteCommitteeMember('${d.id}')">Delete</button>
+            <button class="mini-btn" onclick="editCommitteeMember('${c.id}')">Edit</button>
+            <button class="mini-btn danger" onclick="deleteCommitteeMember('${c.id}')">Delete</button>
           </td>
         </tr>`;
       }).join('');
@@ -1056,7 +1077,7 @@
     const body = document.getElementById('reflectionQuestionsBody');
     try {
       const snap = await db.collection('reflectionQuestions').orderBy('order').get();
-      REFLECTION_QUESTIONS = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+      REFLECTION_QUESTIONS = snap.empty ? [] : await normalizeOrder(snap, 'reflectionQuestions');
       if (snap.empty) {
         body.innerHTML = '<tr class="empty-row"><td colspan="4">No questions yet. Add one below.</td></tr>';
       } else {
@@ -1264,9 +1285,9 @@
         body.innerHTML = '<tr class="empty-row"><td colspan="7">No categories yet. Use Import above or add one below.</td></tr>';
         return;
       }
-      body.innerHTML = snap.docs.map(d => {
-        const c = d.data();
-        return `<tr draggable="true" data-id="${d.id}">
+      const docs = await normalizeOrder(snap, 'passportCategories');
+      body.innerHTML = docs.map(c => {
+        return `<tr draggable="true" data-id="${c.id}">
           <td class="drag-handle">&#8942;&#8942;</td>
           <td>${c.order ?? ''}</td>
           <td>${c.icon || ''}</td>
@@ -1274,8 +1295,8 @@
           <td>${c.sub || ''}</td>
           <td>${(c.stamps || []).length}</td>
           <td>
-            <button class="mini-btn" onclick="editCategory('${d.id}')">Edit</button>
-            <button class="mini-btn danger" onclick="deleteCategory('${d.id}')">Delete</button>
+            <button class="mini-btn" onclick="editCategory('${c.id}')">Edit</button>
+            <button class="mini-btn danger" onclick="deleteCategory('${c.id}')">Delete</button>
           </td>
         </tr>`;
       }).join('');
@@ -1355,9 +1376,9 @@
         body.innerHTML = '<tr class="empty-row"><td colspan="7">No levels yet. Use Import above or add one below.</td></tr>';
         return;
       }
-      body.innerHTML = snap.docs.map(d => {
-        const l = d.data();
-        return `<tr draggable="true" data-id="${d.id}">
+      const docs = await normalizeOrder(snap, 'passportLevels');
+      body.innerHTML = docs.map(l => {
+        return `<tr draggable="true" data-id="${l.id}">
           <td class="drag-handle">&#8942;&#8942;</td>
           <td>${l.order ?? ''}</td>
           <td>${l.emoji || ''}</td>
@@ -1365,8 +1386,8 @@
           <td>${l.req ?? ''}</td>
           <td>${l.reward || ''}</td>
           <td>
-            <button class="mini-btn" onclick="editLevel('${d.id}')">Edit</button>
-            <button class="mini-btn danger" onclick="deleteLevel('${d.id}')">Delete</button>
+            <button class="mini-btn" onclick="editLevel('${l.id}')">Edit</button>
+            <button class="mini-btn danger" onclick="deleteLevel('${l.id}')">Delete</button>
           </td>
         </tr>`;
       }).join('');
@@ -1443,17 +1464,17 @@
         body.innerHTML = '<tr class="empty-row"><td colspan="6">No monthly challenges yet. Use Import above or add one below.</td></tr>';
         return;
       }
-      body.innerHTML = snap.docs.map(d => {
-        const m = d.data();
-        return `<tr draggable="true" data-id="${d.id}">
+      const docs = await normalizeOrder(snap, 'passportMonths');
+      body.innerHTML = docs.map(m => {
+        return `<tr draggable="true" data-id="${m.id}">
           <td class="drag-handle">&#8942;&#8942;</td>
           <td>${m.order ?? ''}</td>
           <td>${m.month || ''}</td>
           <td>${m.name || ''}</td>
           <td>${m.action || ''}</td>
           <td>
-            <button class="mini-btn" onclick="editMonth('${d.id}')">Edit</button>
-            <button class="mini-btn danger" onclick="deleteMonth('${d.id}')">Delete</button>
+            <button class="mini-btn" onclick="editMonth('${m.id}')">Edit</button>
+            <button class="mini-btn danger" onclick="deleteMonth('${m.id}')">Delete</button>
           </td>
         </tr>`;
       }).join('');

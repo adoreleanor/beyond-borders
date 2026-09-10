@@ -139,6 +139,12 @@
   }
   .committee-list-label:first-child{ margin-top:4px; }
 
+  .committee-loading-note{
+    color:#8a7a6c;
+    font-size:15px;
+    padding:12px 0;
+  }
+
   .committee-row{
     display:flex;
     align-items:center;
@@ -263,83 +269,7 @@
     <h2>Committee</h2>
 
     <div class="committee-list" id="committeeListEl">
-      <div class="committee-list-label">Executive Committee</div>
-      <div class="committee-row tier-president">
-        <div class="committee-row-avatar">L</div>
-        <div class="committee-row-info">
-          <div class="committee-row-name">Layla Chen</div>
-          <div class="committee-row-role">Co-President</div>
-        </div>
-      </div>
-      <div class="committee-row tier-president">
-        <div class="committee-row-avatar">F</div>
-        <div class="committee-row-info">
-          <div class="committee-row-name">Fatima Rajani</div>
-          <div class="committee-row-role">Co-President</div>
-        </div>
-      </div>
-      <div class="committee-row">
-        <div class="committee-row-avatar">M</div>
-        <div class="committee-row-info">
-          <div class="committee-row-name">Minnah Khan</div>
-          <div class="committee-row-role">Treasurer</div>
-        </div>
-      </div>
-      <div class="committee-row">
-        <div class="committee-row-avatar">H</div>
-        <div class="committee-row-info">
-          <div class="committee-row-name">Hassan Imtiaz</div>
-          <div class="committee-row-role">Secretary</div>
-        </div>
-      </div>
-
-      <div class="committee-list-label">Events Team</div>
-      <div class="committee-row">
-        <div class="committee-row-avatar">F</div>
-        <div class="committee-row-info">
-          <div class="committee-row-name">Fiona Chiu</div>
-          <div class="committee-row-role">Head of Events</div>
-        </div>
-      </div>
-      <div class="committee-row">
-        <div class="committee-row-avatar">J</div>
-        <div class="committee-row-info">
-          <div class="committee-row-name">Jennifer Qiu</div>
-          <div class="committee-row-role">Events Officer</div>
-        </div>
-      </div>
-      <div class="committee-row">
-        <div class="committee-row-avatar">E</div>
-        <div class="committee-row-info">
-          <div class="committee-row-name">Eleanor Wang</div>
-          <div class="committee-row-role">Events Officer</div>
-        </div>
-      </div>
-
-      <div class="committee-list-label">Social Media Team</div>
-      <div class="committee-row">
-        <div class="committee-row-avatar">Z</div>
-        <div class="committee-row-info">
-          <div class="committee-row-name">Zhenya Kunytsyna</div>
-          <div class="committee-row-role">Head of Social Media</div>
-        </div>
-      </div>
-      <div class="committee-row">
-        <div class="committee-row-avatar">S</div>
-        <div class="committee-row-info">
-          <div class="committee-row-name">Sawani Vaidya</div>
-          <div class="committee-row-role">Social Media Officer</div>
-        </div>
-      </div>
-
-      <div class="committee-list-label">Wellbeing Team</div>
-      <div class="committee-row">
-        <div class="committee-row-avatar">E</div>
-        <div class="committee-row-info">
-          <div class="committee-row-name">Eleanor Wang</div>
-          <div class="committee-row-role">Head of Wellbeing</div>
-        </div>
-      </div>
+      <p class="committee-loading-note">Loading committee...</p>
     </div>
   </div>
 
@@ -499,13 +429,19 @@
   }
 
   async function loadCommitteeContent() {
+    const listEl = document.getElementById('committeeListEl');
     try {
       const snap = await db.collection('committee').get();
       if (!snap.empty) {
         renderCommittee(snap.docs.map(d => d.data()));
+      } else if (listEl) {
+        listEl.innerHTML = '<p class="committee-loading-note">Committee list is not available right now. Please check back soon.</p>';
       }
     } catch (err) {
-      console.error('Could not load committee list, showing defaults:', err);
+      console.error('Could not load committee list:', err);
+      if (listEl) {
+        listEl.innerHTML = '<p class="committee-loading-note">Could not load the committee list. Please refresh the page.</p>';
+      }
     }
   }
 
