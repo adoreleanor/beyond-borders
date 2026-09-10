@@ -352,11 +352,17 @@
     const leads = sorted.filter(m => m.isLead);
     const rest = sorted.filter(m => !m.isLead);
 
+    // Lets an off-centre photo be nudged so the person's face actually
+    // ends up inside the circular avatar, instead of always cropping dead
+    // centre.
+    const PHOTO_POSITIONS = { center: 'center', top: 'center top', bottom: 'center bottom', left: 'left center', right: 'right center' };
+
     const row = (m) => {
       const tier = committeeTier(m);
+      const objectPosition = PHOTO_POSITIONS[m.photoPosition] || 'center';
       return `
       <div class="committee-row${tier ? ' ' + tier : ''}">
-        <div class="committee-row-avatar">${m.photoUrl ? `<img src="${m.photoUrl}" alt="${m.name}">` : avatarLetter(m.name)}</div>
+        <div class="committee-row-avatar">${m.photoUrl ? `<img src="${m.photoUrl}" alt="${m.name}" style="object-position:${objectPosition};">` : avatarLetter(m.name)}</div>
         <div class="committee-row-info">
           <div class="committee-row-name">${m.name || ''}</div>
           <div class="committee-row-role">${m.role || ''}</div>

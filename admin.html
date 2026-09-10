@@ -248,6 +248,16 @@
       </div>
       <div class="field-row">
         <div class="field">
+          <label for="committeePhotoPositionInput">Photo framing (if the photo looks off-centre in the circle)</label>
+          <select id="committeePhotoPositionInput">
+            <option value="center">Centre (default)</option>
+            <option value="top">Shift up</option>
+            <option value="bottom">Shift down</option>
+            <option value="left">Shift left</option>
+            <option value="right">Shift right</option>
+          </select>
+        </div>
+        <div class="field">
           <label for="committeeTeamInput">Team (for a subheading in the Committee list)</label>
           <select id="committeeTeamInput">
             <option value="">No subheading</option>
@@ -928,6 +938,7 @@
     document.getElementById('committeeRoleInput').value = c.role || '';
     document.getElementById('committeePhotoInput').value = c.photoUrl || '';
     document.getElementById('committeeOrderInput').value = c.order ?? '';
+    document.getElementById('committeePhotoPositionInput').value = c.photoPosition || 'center';
     document.getElementById('committeeTeamInput').value = c.team || '';
     document.getElementById('committeeLeadInput').checked = !!c.isLead;
     document.getElementById('committeeFormTitle').textContent = 'Edit committee member';
@@ -946,6 +957,7 @@
     document.getElementById('committeeRoleInput').value = '';
     document.getElementById('committeePhotoInput').value = '';
     document.getElementById('committeeOrderInput').value = '';
+    document.getElementById('committeePhotoPositionInput').value = 'center';
     document.getElementById('committeeTeamInput').value = '';
     document.getElementById('committeeLeadInput').checked = false;
     document.getElementById('committeeFormTitle').textContent = 'Add committee member';
@@ -959,6 +971,7 @@
       role: document.getElementById('committeeRoleInput').value.trim(),
       photoUrl: document.getElementById('committeePhotoInput').value.trim(),
       order: Number(document.getElementById('committeeOrderInput').value) || 0,
+      photoPosition: document.getElementById('committeePhotoPositionInput').value,
       team: document.getElementById('committeeTeamInput').value,
       isLead: document.getElementById('committeeLeadInput').checked,
     };
