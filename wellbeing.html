@@ -7,7 +7,6 @@
   <meta http-equiv="Expires" content="0" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wellbeing Board · Beyond Borders</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Satisfy&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -442,6 +441,12 @@
 
   <div id="toast"></div>
 
+  <!-- Firebase (compat SDK), the Wellbeing Board's own posts/replies live here -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
   <!-- Templates -->
   <template id="post-template">
     <div class="post-note">
@@ -493,9 +498,33 @@
       try { sessionStorage.setItem('bbsoc_replies', JSON.stringify([...myReplyIds])); } catch(e) {}
     }
 
-    const SUPABASE_URL  = 'https://xjjldspygsxzqxkflvfz.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqamxkc3B5Z3N4enF4a2ZsdmZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNjQyMDMsImV4cCI6MjA5NzY0MDIwM30.Tjs3Mx9i6O2e1r9_86eQ3nSR_-99UKiLTh8LKa3vRvk';
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    // Posts and replies are anonymous to other members, but each write is
+    // still tagged with a private Firebase "anonymous auth" ID behind the
+    // scenes, purely so someone can delete their own post/reply later and
+    // so a stranger can't mass-delete other people's notes. No name, email
+    // or account is ever created or shown.
+    let currentUid = null;
+    let anonAuthPromise = null;
+    function ensureAnonAuth() {
+      if (currentUid) return Promise.resolve(currentUid);
+      if (!anonAuthPromise) {
+        anonAuthPromise = auth.signInAnonymously().then(cred => {
+          currentUid = cred.user.uid;
+          return currentUid;
+        });
+      }
+      return anonAuthPromise;
+    }
+    ensureAnonAuth();
+
+    async function deletePostAndReplies(postId) {
+      const postRef = db.collection('wellbeingPosts').doc(postId);
+      const repliesSnap = await postRef.collection('replies').get();
+      const batch = db.batch();
+      repliesSnap.docs.forEach(d => batch.delete(d.ref));
+      batch.delete(postRef);
+      await batch.commit();
+    }
 
     const NOTE_COLOURS = ['#FFF9B0','#FFD6D6','#D4E8FF','#EAD4FF','#D4F5D4','#FFE5C0','#C8F0F0','#F5D4E8','#E8F5C8','#FFD6F0'];
 
@@ -547,15 +576,19 @@
       const freshHeartBtn = document.getElementById('modal-heart-btn');
       const freshHeartCount = document.getElementById('modal-heart-count');
       freshHeartBtn.addEventListener('click', async()=>{
+        await ensureAnonAuth();
         const hearts2 = JSON.parse(sessionStorage.getItem('bbsoc_reply_hearts')||'{}');
-        if(hearts2[reply.id]){
-          await db.from('reply_reactions').delete().eq('id', hearts2[reply.id]);
-          delete hearts2[reply.id]; replyHearts = Math.max(0,replyHearts-1);
-          freshHeartBtn.classList.remove('hearted');
-        } else {
-          const {data} = await db.from('reply_reactions').insert({reply_id:reply.id}).select().single();
-          if(data){ hearts2[reply.id]=data.id; replyHearts++; freshHeartBtn.classList.add('hearted'); }
-        }
+        const replyRef = db.collection('wellbeingPosts').doc(reply.postId).collection('replies').doc(reply.id);
+        try {
+          if(hearts2[reply.id]){
+            await replyRef.update({ heartCount: firebase.firestore.FieldValue.increment(-1) });
+            delete hearts2[reply.id]; replyHearts = Math.max(0,replyHearts-1);
+            freshHeartBtn.classList.remove('hearted');
+          } else {
+            await replyRef.update({ heartCount: firebase.firestore.FieldValue.increment(1) });
+            hearts2[reply.id]=true; replyHearts++; freshHeartBtn.classList.add('hearted');
+          }
+        } catch(err) { toast('Could not react.', true); console.error(err); return; }
         freshHeartCount.textContent = replyHearts;
         sessionStorage.setItem('bbsoc_reply_hearts', JSON.stringify(hearts2));
       });
@@ -591,13 +624,25 @@
       const author = composeAuthor.value.trim() || null;
       if(!content){toast('Write something first 💛');return;}
       composeSendBtn.disabled=true; composeSendBtn.textContent='Sending…';
-      const {data,error} = await db.from('replies').insert({post_id:_composePostId,content,author_name:author}).select().single();
-      composeSendBtn.disabled=false; composeSendBtn.textContent='Send 💛';
-      if(error){toast('Error: '+(error.message||error.code||'unknown'),true);console.error(error);return;}
-      if(data) saveMyReply(data.id);
-      _composeMiniReplies.appendChild(renderMiniNote(data, _composeColour));
-      closeComposeModal();
-      toast('Reply pinned! 💛');
+      try {
+        await ensureAnonAuth();
+        const ref = await db.collection('wellbeingPosts').doc(_composePostId).collection('replies').add({
+          content,
+          authorName: author,
+          uid: currentUid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          heartCount: 0,
+        });
+        const data = { id: ref.id, postId: _composePostId, content, author_name: author, created_at: new Date().toISOString(), _heartCount: 0 };
+        saveMyReply(data.id);
+        _composeMiniReplies.appendChild(renderMiniNote(data, _composeColour));
+        closeComposeModal();
+        toast('Reply pinned! 💛');
+      } catch(err) {
+        toast('Error: '+(err.message||'unknown'),true);console.error(err);
+      } finally {
+        composeSendBtn.disabled=false; composeSendBtn.textContent='Send 💛';
+      }
     });
 
     // ── Render mini reply note ──
@@ -625,8 +670,9 @@
         delBtn.addEventListener('click', async(e)=>{
           e.stopPropagation();
           if(!confirm('Delete this reply?')) return;
-          const {error} = await db.from('replies').delete().eq('id', reply.id);
-          if(error){toast('Could not delete.',true);return;}
+          try {
+            await db.collection('wellbeingPosts').doc(reply.postId).collection('replies').doc(reply.id).delete();
+          } catch(err) { toast('Could not delete.',true); return; }
           wrapper.remove();
         });
         wrapper.appendChild(delBtn);
@@ -665,15 +711,19 @@
       heartCountEl.textContent = currentHearts;
       if(myHearts[post.id]) heartBtn.classList.add('hearted');
       heartBtn.addEventListener('click', async()=>{
-        if(myHearts[post.id]){
-          await db.from('reactions').delete().eq('id', myHearts[post.id]);
-          delete myHearts[post.id];
-          currentHearts = Math.max(0, currentHearts-1);
-          heartBtn.classList.remove('hearted');
-        } else {
-          const {data} = await db.from('reactions').insert({post_id:post.id}).select().single();
-          if(data){ myHearts[post.id]=data.id; currentHearts++; heartBtn.classList.add('hearted'); }
-        }
+        await ensureAnonAuth();
+        const postRef = db.collection('wellbeingPosts').doc(post.id);
+        try {
+          if(myHearts[post.id]){
+            await postRef.update({ heartCount: firebase.firestore.FieldValue.increment(-1) });
+            delete myHearts[post.id];
+            currentHearts = Math.max(0, currentHearts-1);
+            heartBtn.classList.remove('hearted');
+          } else {
+            await postRef.update({ heartCount: firebase.firestore.FieldValue.increment(1) });
+            myHearts[post.id]=true; currentHearts++; heartBtn.classList.add('hearted');
+          }
+        } catch(err) { toast('Could not react.', true); console.error(err); return; }
         heartCountEl.textContent = currentHearts;
         sessionStorage.setItem('bbsoc_hearts', JSON.stringify(myHearts));
       });
@@ -685,7 +735,10 @@
       if(isAdmin && flagCount > 0) flagBtn.title = `🚩 ${flagCount} flag${flagCount!==1?'s':''}`;
       flagBtn.addEventListener('click', async()=>{
         if(myFlags[post.id]){toast('Already flagged 🚩');return;}
-        await db.from('flags').insert({post_id:post.id});
+        await ensureAnonAuth();
+        try {
+          await db.collection('wellbeingPosts').doc(post.id).update({ flagCount: firebase.firestore.FieldValue.increment(1) });
+        } catch(err) { toast('Could not flag.', true); console.error(err); return; }
         myFlags[post.id]=true;
         sessionStorage.setItem('bbsoc_flags', JSON.stringify(myFlags));
         flagBtn.classList.add('flagged');
@@ -708,8 +761,9 @@
         deleteBtn.addEventListener('click', async(e)=>{
           e.stopPropagation();
           if(!confirm('Delete this post and all its replies?')) return;
-          const {error} = await db.from('posts').delete().eq('id', post.id);
-          if(error){toast('Could not delete.',true);return;}
+          try {
+            await deletePostAndReplies(post.id);
+          } catch(err) { toast('Could not delete.',true); return; }
           card.closest('.post-note') ? card.closest('.post-note').remove() : card.remove();
           loadFeed();
         });
@@ -724,28 +778,50 @@
       const scrollY = window.scrollY;
       if(!silent) feed.innerHTML='<div class="loader"><div class="loader-spinner"></div><div>Loading the board…</div></div>';
 
-      const [{data:posts,error},{data:replies},{data:reactionsData},{data:flagsData}] = await Promise.all([
-        db.from('posts').select('*').order('created_at',{ascending:false}),
-        db.from('replies').select('*').order('created_at',{ascending:true}),
-        db.from('reactions').select('post_id'),
-        db.from('flags').select('post_id'),
-      ]);
-      if(error){feed.innerHTML='<div class="empty-state"><div class="big-icon">⚠️</div><p>Could not load posts.</p></div>';return}
+      try {
+        const postsSnap = await db.collection('wellbeingPosts').orderBy('createdAt','desc').get();
+        const posts = postsSnap.docs.map(d => {
+          const data = d.data();
+          return {
+            id: d.id,
+            ref: d.ref,
+            content: data.content,
+            created_at: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+            heartCount: data.heartCount || 0,
+            flagCount: data.flagCount || 0,
+          };
+        });
 
-      const replyMap={};(replies||[]).forEach(r=>{if(!replyMap[r.post_id])replyMap[r.post_id]=[];replyMap[r.post_id].push(r)});
-      const heartMap={};(reactionsData||[]).forEach(r=>{heartMap[r.post_id]=(heartMap[r.post_id]||0)+1});
-      const flagMap={};(flagsData||[]).forEach(f=>{flagMap[f.post_id]=(flagMap[f.post_id]||0)+1});
+        const replyMap = {};
+        await Promise.all(posts.map(async p => {
+          const repliesSnap = await p.ref.collection('replies').orderBy('createdAt','asc').get();
+          replyMap[p.id] = repliesSnap.docs.map(rd => {
+            const data = rd.data();
+            return {
+              id: rd.id,
+              postId: p.id,
+              content: data.content,
+              author_name: data.authorName,
+              created_at: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+              _heartCount: data.heartCount || 0,
+            };
+          });
+        }));
 
-      feed.innerHTML='';
-      const countEl=document.getElementById('post-count');
-      countEl.textContent = posts.length===0?'':`${posts.length} note${posts.length!==1?'s':''}`;
+        feed.innerHTML='';
+        const countEl=document.getElementById('post-count');
+        countEl.textContent = posts.length===0?'':`${posts.length} note${posts.length!==1?'s':''}`;
 
-      if(posts.length===0){
-        feed.innerHTML='<div class="empty-state"><div class="big-icon">📌</div><p>The board is empty, pin the first note!</p></div>';
-        return;
+        if(posts.length===0){
+          feed.innerHTML='<div class="empty-state"><div class="big-icon">📌</div><p>The board is empty, pin the first note!</p></div>';
+          return;
+        }
+        posts.forEach(p=>feed.appendChild(renderPost(p,replyMap[p.id]||[],false,p.heartCount,p.flagCount)));
+        if(silent) window.scrollTo({top:scrollY,behavior:'instant'});
+      } catch(err) {
+        console.error(err);
+        feed.innerHTML='<div class="empty-state"><div class="big-icon">⚠️</div><p>Could not load posts.</p></div>';
       }
-      posts.forEach(p=>feed.appendChild(renderPost(p,replyMap[p.id]||[],false,heartMap[p.id]||0,flagMap[p.id]||0)));
-      if(silent) window.scrollTo({top:scrollY,behavior:'instant'});
     }
 
     // ── Submit post ──
@@ -762,13 +838,19 @@
       if(!content)return;
       const btn=document.getElementById('post-submit-btn');
       btn.disabled=true; btn.textContent='Pinning…';
-      const {data:newPost, error} = await db.from('posts').insert({content}).select().single();
-      btn.disabled=false; btn.textContent='Pin to board 📌';
-      if(error){toast('Error: ' + (error.message || error.code || 'unknown'), true);console.error(error);return}
-      if(newPost) saveMyPost(newPost.id);
-      contentEl.value='';
-      toast('Pinned to the board! 🔒');
-      if(newPost){
+      try {
+        await ensureAnonAuth();
+        const ref = await db.collection('wellbeingPosts').add({
+          content,
+          uid: currentUid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          heartCount: 0,
+          flagCount: 0,
+        });
+        const newPost = { id: ref.id, ref, content, created_at: new Date().toISOString(), heartCount: 0, flagCount: 0 };
+        saveMyPost(newPost.id);
+        contentEl.value='';
+        toast('Pinned to the board! 🔒');
         const feed = document.getElementById('feed');
         const emptyState = feed.querySelector('.empty-state');
         if(emptyState) feed.innerHTML='';
@@ -776,6 +858,10 @@
         const countEl = document.getElementById('post-count');
         const current = parseInt(countEl.textContent)||0;
         countEl.textContent = `${current+1} note${current+1!==1?'s':''}`;
+      } catch(err) {
+        toast('Error: ' + (err.message || 'unknown'), true);console.error(err);
+      } finally {
+        btn.disabled=false; btn.textContent='Pin to board 📌';
       }
     });
 
