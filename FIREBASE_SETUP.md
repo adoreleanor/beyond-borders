@@ -19,12 +19,13 @@ This site's "Sign In" (KCL email → BB Passport number) and admin dashboard nee
 2. Give it a nickname (e.g. "Beyond Borders site"). You don't need Firebase Hosting — you're already hosting on GitHub Pages.
 3. Firebase will show you a `firebaseConfig` object with keys like `apiKey`, `authDomain`, `projectId`, etc. **Copy this whole block** — you'll paste it into `firebase-config.js` in Step 6.
 
-## Step 3 — Turn on Email Link sign-in
+## Step 3 — Turn on Email Link sign-in (and Anonymous, for the Wellbeing Board)
 
 1. In the left sidebar: **Build → Authentication → Get started**.
 2. Under **Sign-in method**, click **Email/Password**.
 3. Turn on the **Email/Password** toggle, then also turn on **Email link (passwordless sign-in)** below it. Save.
-4. Still in Authentication, go to **Settings → Authorized domains** and add the domain your site is actually hosted on (e.g. `adoreleanor.github.io`, or your custom domain if you set one up). `localhost` is already there by default, which is handy for testing.
+4. Still on **Sign-in method**, also click **Anonymous** and turn it on, then Save. This one isn't for members signing in with an email — it's what quietly lets the Wellbeing Board (`wellbeing.html`) tell "delete your own post" apart from "delete someone else's post" without ever asking a visitor to create an account or give a name.
+5. Still in Authentication, go to **Settings → Authorized domains** and add the domain your site is actually hosted on (e.g. `adoreleanor.github.io`, or your custom domain if you set one up). `localhost` is already there by default, which is handy for testing.
 
 ## Step 4 — Create the Firestore database
 
@@ -112,6 +113,14 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Shared bank of reflection questions, picked per event in admin.html.
+    // Anyone can read them (needed to render the reflection form), only
+    // admins can add, edit, or remove questions.
+    match /reflectionQuestions/{questionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Editable site content (About Us text, committee list, events calendar).
     // Anyone can read it (it's what the public pages display), but only
     // admins can change it — via the new editor panels in admin.html.
@@ -139,11 +148,47 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // Wellbeing Board: fully anonymous to other members (no name, email or
+    // account shown), but each write carries a private anonymous-auth uid
+    // so people can only delete their own post/reply, and admins can always
+    // moderate. Hearts and flags are just a counter going up or down by one.
+    match /wellbeingPosts/{postId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.content.size() <= 2000
+        && request.resource.data.heartCount == 0
+        && request.resource.data.flagCount == 0;
+      allow update: if isAdmin()
+        || (request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['heartCount'])
+            && (request.resource.data.heartCount == resource.data.heartCount + 1 || request.resource.data.heartCount == resource.data.heartCount - 1))
+        || (request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['flagCount'])
+            && request.resource.data.flagCount == resource.data.flagCount + 1);
+      allow delete: if isAdmin() || (request.auth != null && request.auth.uid == resource.data.uid);
+
+      match /replies/{replyId} {
+        allow read: if true;
+        allow create: if request.auth != null
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.content is string
+          && request.resource.data.content.size() > 0
+          && request.resource.data.content.size() <= 2000
+          && request.resource.data.heartCount == 0;
+        allow update: if request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['heartCount'])
+          && (request.resource.data.heartCount == resource.data.heartCount + 1 || request.resource.data.heartCount == resource.data.heartCount - 1);
+        allow delete: if isAdmin() || (request.auth != null && request.auth.uid == resource.data.uid);
+      }
+    }
   }
 }
 ```
 
 The admin list above is already set to `eleanor.wang@kcl.ac.uk`, `eleanorlinw@gmail.com`, `fatima.rajani@kcl.ac.uk`, and `yuejia.chen@kcl.ac.uk` — paste the rules block as-is unless that list changes later (e.g. a new committee each year).
+
+**If your Firebase project already existed before the Wellbeing Board moved off Supabase:** you don't need to redo this whole guide — just go to **Firestore Database → Rules** in your existing project, replace whatever's there with the full rules block above (it includes everything you already had, plus the new `wellbeingPosts` section at the bottom), click **Publish**, and also do Step 3.4 above (turn on **Anonymous** sign-in) if you haven't already. Skipping either of those two will make the Wellbeing Board fail to load or fail to post.
 
 **Admins don't need a KCL email.** Only the regular member sign-in (on the main site, for Passport tracking) requires `@kcl.ac.uk`. Signing into `admin.html` just checks the email against `ADMIN_EMAILS` / the `isAdmin()` rule above — any email address works there, so a committee member who's graduated or left KCL can keep admin access by adding their personal email to both `ADMIN_EMAILS` in `firebase-config.js` and the `isAdmin()` list in the Firestore rules (Step 5). Their old `@kcl.ac.uk` Passport account (stamps, passport number) stays in the database either way, but they won't be able to sign back into that specific member account once they lose access to that inbox, since Firebase's email-link sign-in needs a working inbox at that address each time.
 
@@ -189,12 +234,17 @@ Once Steps 1–7 are done, open `index.html` (locally via `localhost`, or on you
 - Add, edit, or remove **Passport monthly challenges** (the Oct–Mar theme cards). Which one shows as "current" on the live site is worked out automatically from today's date (matched against each card's Month field), so there's nothing to toggle manually
 - Edit the two manual **Society Collective** numbers (networking attendees, volunteers) on the home page. The other two numbers in that section (total members, total experiences completed) update themselves automatically as people sign up and earn stamps; they're shown read-only for reference
 - **Moderate the Wellbeing Board** (delete any post or reply, see flag counts) without needing the old `?admin=` link
-- **See RSVP headcounts and attendee lists per event**, and **read (and delete) members' private post-event reflections**
+- **See RSVP headcounts and attendee lists per event**, and **read (and delete) members' private post-event reflections**, now shown as questions and answers rather than a single free-text block
+- **Maintain a shared Reflection Question Bank** (e.g. "What went well?", "What could we improve?") and choose which of those questions apply to each event. Members then answer just those questions when they leave a reflection, instead of one open text box
+- **Paste in photo links for an event** (one per line) so a small thumbnail gallery appears on that event's card, which visitors can click to enlarge. Each link must be a direct link to the image file itself, not a page that displays it. A Google Photos share link (photos.app.goo.gl/...) will not work; either upload the photo to the GitHub repo and use its raw file link, or use a Google Drive link in the form `https://drive.google.com/uc?export=view&id=FILE_ID`
+- **Events move themselves into a "Past Events" section automatically**, seven days after their date. Nothing to do here, an event still shows in the main upcoming list for a week after it happens (so RSVPs and reflections can settle), then it drops down into the Past Events section further down the page, photos and all
 
 **One-time setup:** the very first time anyone opens the updated `admin.html`, click **"Import current site content"** near the top of the dashboard. This copies whatever's currently on the live site into the editable database, so nothing is lost — it only fills in collections that are still empty, so it's safe even if someone clicks it twice.
 
 After that, all edits happen in the browser via forms — no GitHub, no HTML, no re-uploading files. Changes save straight to Firestore and show up on the live site within a few seconds of refreshing.
 
 **Note on committee photos:** the "Photo URL" field expects a link to an already-hosted image (e.g. uploaded to the GitHub repo, or any image host) — it doesn't handle file uploads directly. Leaving it blank keeps the colored initial-letter avatar.
+
+**Note on reflection questions:** if an event has no questions ticked in its "Reflection questions to ask for this event" list, members leaving a reflection on that event will see one general fallback question instead of a blank form. Tick at least one question per event to use the proper question bank.
 
 **Note on Passport tasks:** a small handful of the original tasks (e.g. "Attend a careers fair") prompt members to link the stamp to a specific event when they tick it. That linking is tied to a task's original position in its category, so reordering or deleting tasks in a category may cause that prompt to appear on a different task than before, or stop appearing. It's a minor cosmetic nicety, not something that affects stamps, levels, or progress tracking.
