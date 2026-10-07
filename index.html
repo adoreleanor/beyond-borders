@@ -2193,8 +2193,9 @@ function openEventPicker(catId, idx, li) {
         <span>${ev.title}</span>
       `;
       btn.addEventListener('click', () => {
+        const pick = pendingStampPick;
         closeEventPicker();
-        completeStampToggle(pendingStampPick.catId, pendingStampPick.idx, pendingStampPick.li, ev.id);
+        if (pick) completeStampToggle(pick.catId, pick.idx, pick.li, ev.id);
       });
       listEl.appendChild(btn);
     });
@@ -2210,10 +2211,9 @@ function closeEventPicker() {
 
 document.getElementById('eventPickClose').addEventListener('click', closeEventPicker);
 document.getElementById('eventPickSkip').addEventListener('click', () => {
-  if (pendingStampPick) {
-    completeStampToggle(pendingStampPick.catId, pendingStampPick.idx, pendingStampPick.li, null);
-  }
+  const pick = pendingStampPick;
   closeEventPicker();
+  if (pick) completeStampToggle(pick.catId, pick.idx, pick.li, null);
 });
 document.getElementById('eventPickOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'eventPickOverlay') closeEventPicker();
