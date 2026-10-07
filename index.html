@@ -2095,7 +2095,10 @@ function buildCategories() {
 function toggleStamp(catId, idx, li) {
   const key = `${catId}-${idx}`;
   const aboutToEarn = !earned[catId].has(idx);
-  if (aboutToEarn && key in EVENT_LINKABLE_STAMPS) {
+  const cat = CATEGORIES.find(c => c.id === catId);
+  const stampText = (cat && cat.stamps[idx]) || '';
+  const looksEventBased = /\b(attend|event|workshop|walk|trip|social|formal|networking|fair|talk)\b/i.test(stampText);
+  if (aboutToEarn && (key in EVENT_LINKABLE_STAMPS || looksEventBased)) {
     openEventPicker(catId, idx, li);
     return;
   }
@@ -2173,7 +2176,11 @@ function openEventPicker(catId, idx, li) {
   listEl.innerHTML = '';
 
   const events = typeof EVENTS !== 'undefined' ? EVENTS : [];
-  const matches = tagFilter ? events.filter(e => e.tag === tagFilter) : events;
+  // Show every event so something is always selectable, with the ones
+  // whose tag fits this task listed first.
+  const matches = tagFilter
+    ? [...events.filter(e => e.tag === tagFilter), ...events.filter(e => e.tag !== tagFilter)]
+    : events;
 
   if (!matches.length) {
     listEl.innerHTML = '<p class="event-pick-empty">No matching events on the calendar yet. You can still mark this earned below.</p>';
@@ -2182,7 +2189,7 @@ function openEventPicker(catId, idx, li) {
       const btn = document.createElement('button');
       btn.className = 'event-pick-item';
       btn.innerHTML = `
-        <span class="ev-date-chip" style="background:${TRIP_TAG_COLORS[ev.tag] || '#6E0F1E'}">${ev.monthLabel}<br>${String(ev.day).padStart(2,'0')}</span>
+        <span class="ev-date-chip" style="background:${TRIP_TAG_COLORS[ev.tag] || '#6E0F1E'}">${ev.monthLabel || (['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][(ev.month || 1) - 1])}<br>${String(ev.day || '').padStart(2,'0')}</span>
         <span>${ev.title}</span>
       `;
       btn.addEventListener('click', () => {
