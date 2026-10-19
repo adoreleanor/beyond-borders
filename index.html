@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Beyond Borders · KCL BBSOC</title>
 <style>
@@ -1546,34 +1547,34 @@
   <div class="home-header">
     <a href="#" title="Beyond Borders Home"><img src="logo.png" alt="KCL BBSOC logo" class="home-logo"></a>
     <h1>Beyond <span>Borders</span></h1>
-    <div class="home-tagline">KCL BBSOC</div>
-    <p class="home-quote">"Collect experiences, not expectations."</p>
+    <div class="home-tagline" data-text="homeSubtitle">KCL BBSOC</div>
+    <p class="home-quote" data-text="tagline">"Collect experiences, not expectations."</p>
   </div>
 
   <div class="tabs">
     <a class="tab-card" href="#passport">
       <div class="tab-icon">🌍</div>
-      <h2>Beyond Borders Passport</h2>
-      <p>Collect stamps across career, growth, skills, community and comfort-zone challenges, track your journey and unlock rewards.</p>
+      <h2 data-text="passportCardTitle">Beyond Borders Passport</h2>
+      <p data-text="passportCardDesc">Collect stamps across career, growth, skills, community and comfort-zone challenges, track your journey and unlock rewards.</p>
       <span class="tab-enter">Open Passport &rarr;</span>
     </a>
 
     <a class="tab-card" href="wellbeing.html">
       <div class="tab-icon">💛</div>
-      <h2>Wellbeing Board</h2>
-      <p>Resources, reflections and support for looking after yourself while you study. Visit the BBSOC Wellbeing space.</p>
+      <h2 data-text="wellbeingCardTitle">Wellbeing Board</h2>
+      <p data-text="wellbeingCardDesc">Resources, reflections and support for looking after yourself while you study. Visit the BBSOC Wellbeing space.</p>
       <span class="tab-enter">Open Wellbeing Board &rarr;</span>
     </a>
 
     <a class="tab-card" href="#events">
       <div class="tab-icon">📅</div>
-      <h2>Upcoming Events</h2>
-      <p>See what's next on the society calendar: socials, workshops, networking and more.</p>
+      <h2 data-text="eventsCardTitle">Upcoming Events</h2>
+      <p data-text="eventsCardDesc">See what's next on the society calendar: socials, workshops, networking and more.</p>
       <span class="tab-enter">View Events &rarr;</span>
     </a>
   </div>
 
-  <footer>KCL Beyond Borders Society<span class="site-credit">Site by Eleanor Wang</span></footer>
+  <footer><span data-text="footerHome">KCL Beyond Borders Society</span><span class="site-credit">Site by Eleanor Wang</span></footer>
 </div>
 
 <!-- ===== PASSPORT VIEW ===== -->
@@ -1611,7 +1612,7 @@
         <a href="#" title="Beyond Borders Home"><img src="logo.png" alt="KCL BBSOC Logo" style="width:90px;height:90px;object-fit:contain;flex-shrink:0;filter:brightness(1.08);cursor:pointer;"></a>
         <h1 style="text-align:left;">Beyond <span>Borders</span></h1>
       </div>
-      <p class="header-tagline">"Collect experiences, not expectations."</p>
+      <p class="header-tagline" data-text="tagline">"Collect experiences, not expectations."</p>
       <div class="member-card">
         <div class="avatar" id="avatarInitial">?</div>
         <div class="member-info">
@@ -1700,25 +1701,25 @@
     <!-- COLLECTIVE STATS -->
     <div class="stats-section">
       <div class="section-header">
-        <h2>Society Collective</h2>
-        <p>Celebrating what we've achieved together, not who's ahead</p>
+        <h2 data-text="collectiveHeading">Society Collective</h2>
+        <p data-text="collectiveSub">Celebrating what we've achieved together, not who's ahead</p>
       </div>
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-number" id="statExperiences">0</div>
-          <div class="stat-label">experiences completed this semester</div>
+          <div class="stat-label" data-text="statExperiencesLabel">experiences completed this semester</div>
         </div>
         <div class="stat-card">
           <div class="stat-number" id="statNetworking">0</div>
-          <div class="stat-label">members attended their first networking event</div>
+          <div class="stat-label" data-text="statNetworkingLabel">members attended their first networking event</div>
         </div>
         <div class="stat-card">
           <div class="stat-number" id="statVolunteers">0</div>
-          <div class="stat-label">members volunteered in the community</div>
+          <div class="stat-label" data-text="statVolunteersLabel">members volunteered in the community</div>
         </div>
         <div class="stat-card">
           <div class="stat-number" id="statMembers">0</div>
-          <div class="stat-label">total society members on their journey</div>
+          <div class="stat-label" data-text="statMembersLabel">total society members on their journey</div>
         </div>
       </div>
     </div>
@@ -1764,7 +1765,7 @@
   <div class="header">
     <div class="badge">🗓️ Society Calendar</div>
     <h1>Upcoming <span>Events</span></h1>
-    <p>"Collect experiences, not expectations."</p>
+    <p data-text="tagline">"Collect experiences, not expectations."</p>
   </div>
 
   <p class="placeholder-note">Semester 1 line-up below. Some times, rooms and speakers are still being finalised and will be updated closer to each event.</p>
@@ -1883,6 +1884,27 @@
       console.error('Could not load events from Firestore, using built-in defaults:', err);
     }
   }
+</script>
+
+
+<!-- Editable site text: any element with data-text="key" is replaced with the
+     matching value saved from admin.html (Site Text panel). Defaults stay in
+     the HTML if nothing is saved or the read fails. -->
+<script>
+  async function applySiteText() {
+    try {
+      const doc = await db.collection('siteContent').doc('homeText').get();
+      if (!doc.exists) return;
+      const t = doc.data() || {};
+      document.querySelectorAll('[data-text]').forEach(el => {
+        const v = t[el.getAttribute('data-text')];
+        if (typeof v === 'string' && v.trim()) el.textContent = v;
+      });
+    } catch (err) {
+      console.error('Could not load site text, using defaults:', err);
+    }
+  }
+  applySiteText();
 </script>
 
 <!-- ===== PASSPORT LOGIC ===== -->

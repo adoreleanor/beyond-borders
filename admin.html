@@ -483,6 +483,14 @@
     </div>
 
     <div class="panel">
+      <h2>Site Text</h2>
+      <p class="seed-note">Edit the main wording on the homepage, Passport and Events pages. Leave a box empty to use the original text. Changes go live as soon as you save.</p>
+      <div id="siteTextFields"></div>
+      <button class="save-btn" id="saveSiteTextBtn">Save site text</button>
+      <p class="save-status" id="siteTextSaveStatus">Saved, live on the site now.</p>
+    </div>
+
+    <div class="panel">
       <h2>Society Collective Stats</h2>
       <p class="seed-note" id="societyStatsAutoNote">Total society members and experiences completed are tracked automatically as members sign up and earn stamps. Loading current totals…</p>
       <div class="field-row">
@@ -660,6 +668,7 @@
     loadCategoriesList();
     loadLevelsList();
     loadMonthsList();
+    loadSiteText();
     loadSocietyStats();
     loadReflectionsList();
     loadWellbeingBoard();
@@ -1529,6 +1538,79 @@
       }
       resetMonthForm();
       loadMonthsList();
+    } catch (err) {
+      alert('Could not save: ' + err.message);
+    }
+  });
+
+
+  // ============================================================
+  // SITE TEXT
+  // One list drives both the form and the save, so adding a field
+  // later is a one-line change here plus a data-text="key" attribute
+  // on the matching element in index.html. Saved to siteContent/homeText.
+  // ============================================================
+  const SITE_TEXT_FIELDS = [
+    { group: 'Tagline and homepage', items: [
+      { key: 'tagline', label: 'Tagline (shown on the homepage, Passport and Events)', def: '"Collect experiences, not expectations."' },
+      { key: 'homeSubtitle', label: 'Homepage subtitle under the name', def: 'KCL BBSOC' },
+      { key: 'footerHome', label: 'Homepage footer line', def: 'KCL Beyond Borders Society' },
+    ]},
+    { group: 'Homepage cards', items: [
+      { key: 'passportCardTitle', label: 'Passport card title', def: 'Beyond Borders Passport' },
+      { key: 'passportCardDesc', label: 'Passport card description', long: true, def: 'Collect stamps across career, growth, skills, community and comfort-zone challenges, track your journey and unlock rewards.' },
+      { key: 'wellbeingCardTitle', label: 'Wellbeing card title', def: 'Wellbeing Board' },
+      { key: 'wellbeingCardDesc', label: 'Wellbeing card description', long: true, def: 'Resources, reflections and support for looking after yourself while you study. Visit the BBSOC Wellbeing space.' },
+      { key: 'eventsCardTitle', label: 'Events card title', def: 'Upcoming Events' },
+      { key: 'eventsCardDesc', label: 'Events card description', long: true, def: "See what's next on the society calendar: socials, workshops, networking and more." },
+    ]},
+    { group: 'Society Collective (Passport page)', items: [
+      { key: 'collectiveHeading', label: 'Section heading', def: 'Society Collective' },
+      { key: 'collectiveSub', label: 'Section subheading', def: "Celebrating what we've achieved together, not who's ahead" },
+      { key: 'statExperiencesLabel', label: 'Label: experiences', def: 'experiences completed this semester' },
+      { key: 'statNetworkingLabel', label: 'Label: networking', def: 'members attended their first networking event' },
+      { key: 'statVolunteersLabel', label: 'Label: volunteers', def: 'members volunteered in the community' },
+      { key: 'statMembersLabel', label: 'Label: members', def: 'total society members on their journey' },
+    ]},
+  ];
+
+  function renderSiteTextFields() {
+    const box = document.getElementById('siteTextFields');
+    box.innerHTML = SITE_TEXT_FIELDS.map(g => `
+      <h3 style="margin:18px 0 8px;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:rgba(245,237,227,0.6);">${g.group}</h3>
+      ${g.items.map(f => `
+        <div class="field">
+          <label for="st_${f.key}">${f.label}</label>
+          ${f.long
+            ? `<textarea id="st_${f.key}" rows="2" placeholder="${f.def.replace(/"/g, '&quot;')}"></textarea>`
+            : `<input type="text" id="st_${f.key}" placeholder="${f.def.replace(/"/g, '&quot;')}">`}
+        </div>`).join('')}
+    `).join('');
+  }
+
+  async function loadSiteText() {
+    renderSiteTextFields();
+    try {
+      const doc = await db.collection('siteContent').doc('homeText').get();
+      const t = doc.exists ? doc.data() : {};
+      SITE_TEXT_FIELDS.forEach(g => g.items.forEach(f => {
+        document.getElementById('st_' + f.key).value = t[f.key] || '';
+      }));
+    } catch (err) {
+      console.error('Could not load site text:', err);
+    }
+  }
+
+  document.getElementById('saveSiteTextBtn').addEventListener('click', async () => {
+    const status = document.getElementById('siteTextSaveStatus');
+    const data = {};
+    SITE_TEXT_FIELDS.forEach(g => g.items.forEach(f => {
+      data[f.key] = document.getElementById('st_' + f.key).value.trim();
+    }));
+    try {
+      await db.collection('siteContent').doc('homeText').set(data);
+      status.classList.add('show');
+      setTimeout(() => status.classList.remove('show'), 3000);
     } catch (err) {
       alert('Could not save: ' + err.message);
     }
